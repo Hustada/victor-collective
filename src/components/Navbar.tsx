@@ -109,9 +109,15 @@ const Navbar = () => {
               variant="h6"
               component={motion.div}
               whileHover={{ scale: 1.05 }}
-              sx={{ flexGrow: 1, color: isScrolled ? 'text.primary' : 'white' }}
+              sx={{ 
+                flexGrow: 1, 
+                color: isScrolled ? 'text.primary' : 'white',
+                fontFamily: "'Playfair Display', serif",
+                fontSize: { xs: '1.2rem', md: '1.5rem' },
+                letterSpacing: '0.02em'
+              }}
             >
-              Portfolio
+              The Victor Collective
             </Typography>
             
             {isMobile ? (
