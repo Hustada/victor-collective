@@ -24,10 +24,32 @@ const StarfieldBackground = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'linear-gradient(45deg, #000000 30%, #D35400 90%)',
         overflow: 'hidden',
       }}
     >
+      <motion.div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(45deg, #000000 30%, #D35400 90%)',
+        }}
+        animate={{
+          background: [
+            'linear-gradient(45deg, #000000 30%, #D35400 90%)',
+            'linear-gradient(45deg, #000000 35%, #D35400 95%)',
+            'linear-gradient(45deg, #000000 30%, #D35400 90%)',
+          ]
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: [0.4, 0, 0.6, 1], // This is a smoother ease curve
+        }}
+      />
+
       {stars.map((star) => (
         <motion.div
           key={star.id}
