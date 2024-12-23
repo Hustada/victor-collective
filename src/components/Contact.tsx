@@ -11,8 +11,9 @@ import {
   Alert,
   Snackbar
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const Contact: React.FC = () => {
   const theme = useTheme();
@@ -24,11 +25,8 @@ const Contact: React.FC = () => {
     message: ''
   });
 
-  const [status, setStatus] = useState({
-    open: false,
-    message: '',
-    severity: 'success' as 'success' | 'error'
-  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     emailjs.init("LOfBCNYKVmwoQ10nV");
@@ -44,6 +42,7 @@ const Contact: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     try {
       await emailjs.send(
@@ -52,32 +51,100 @@ const Contact: React.FC = () => {
         formData
       );
 
-      setStatus({
-        open: true,
-        message: 'Message sent successfully!',
-        severity: 'success'
-      });
-
-      // Clear form
-      setFormData({
-        from_name: '',
-        from_email: '',
-        message: ''
-      });
+      setIsSubmitted(true);
 
     } catch (error) {
       console.error('Error sending email:', error);
-      setStatus({
-        open: true,
-        message: 'Failed to send message. Please try again.',
-        severity: 'error'
-      });
+      setError('Failed to send message. Please try again.');
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setStatus(prev => ({ ...prev, open: false }));
+  const handleReset = () => {
+    setIsSubmitted(false);
+    setFormData({
+      from_name: '',
+      from_email: '',
+      message: ''
+    });
   };
+
+  const SuccessMessage = () => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.8,
+        delay: 0.2,
+        ease: [0, 0.71, 0.2, 1.01]
+      }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        textAlign: 'center'
+      }}
+    >
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{
+          duration: 0.5,
+          delay: 0.5,
+          type: "spring",
+          stiffness: 200
+        }}
+      >
+        <CheckCircleOutlineIcon 
+          sx={{ 
+            fontSize: '5rem', 
+            color: 'secondary.main',
+            mb: 3
+          }} 
+        />
+      </motion.div>
+      
+      <Typography 
+        variant="h4" 
+        sx={{ 
+          fontWeight: 700,
+          mb: 2,
+          color: 'text.primary'
+        }}
+      >
+        Message Sent Successfully!
+      </Typography>
+      
+      <Typography 
+        variant="body1" 
+        sx={{ 
+          color: 'text.secondary',
+          mb: 4
+        }}
+      >
+        Thank you for reaching out! I'll get back to you as soon as possible.
+      </Typography>
+      
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={handleReset}
+        sx={{
+          mt: 2,
+          px: 4,
+          py: 1.5,
+          borderRadius: 2,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'scale(1.05)'
+          }
+        }}
+      >
+        Send Another Message
+      </Button>
+    </motion.div>
+  );
 
   return (
     <Container 
@@ -133,96 +200,90 @@ const Contact: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ 
-              opacity: 1, 
-              x: 0,
-              transition: { 
-                duration: 0.8,
-                ease: "easeInOut"
-              }
-            }}
-            viewport={{ once: true }}
-          >
-            <Box 
-              component="form" 
-              onSubmit={handleSubmit}
-              sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: 3 
-              }}
-            >
-              <TextField
-                fullWidth
-                label="Name"
-                name="from_name"
-                value={formData.from_name}
-                onChange={handleChange}
-                variant="outlined"
-                required
-              />
-              
-              <TextField
-                fullWidth
-                label="Email"
-                name="from_email"
-                type="email"
-                value={formData.from_email}
-                onChange={handleChange}
-                variant="outlined"
-                required
-              />
-              
-              <TextField
-                fullWidth
-                label="Message"
-                name="message"
-                multiline
-                rows={4}
-                value={formData.message}
-                onChange={handleChange}
-                variant="outlined"
-                required
-              />
-              
-              <Button
-                type="submit"
-                variant="contained"
-                color="secondary"
-                size="large"
-                sx={{ 
-                  mt: 2,
-                  py: 1.5,
-                  fontWeight: 'bold',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
+          <AnimatePresence mode="wait">
+            {isSubmitted ? (
+              <SuccessMessage />
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ 
+                  duration: 0.8,
+                  ease: "easeInOut"
                 }}
               >
-                Send Message
-              </Button>
-            </Box>
-          </motion.div>
+                <Box 
+                  component="form" 
+                  onSubmit={handleSubmit}
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 3 
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    label="Name"
+                    name="from_name"
+                    value={formData.from_name}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                  />
+                  
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="from_email"
+                    type="email"
+                    value={formData.from_email}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                  />
+                  
+                  <TextField
+                    fullWidth
+                    label="Message"
+                    name="message"
+                    multiline
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                  />
+                  
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="secondary"
+                    size="large"
+                    sx={{ 
+                      mt: 2,
+                      py: 1.5,
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'scale(1.05)'
+                      }
+                    }}
+                  >
+                    Send Message
+                  </Button>
+
+                  {error && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                      {error}
+                    </Alert>
+                  )}
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Grid>
       </Grid>
-
-      <Snackbar 
-        open={status.open} 
-        autoHideDuration={6000} 
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={status.severity}
-          sx={{ width: '100%' }}
-        >
-          {status.message}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };
