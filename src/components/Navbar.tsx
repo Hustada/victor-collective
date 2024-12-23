@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandSymbol from './BrandSymbol';
 
 interface Props {
   window?: () => Window;
@@ -36,12 +37,12 @@ const HideOnScroll = ({ children, window }: Props) => {
 };
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -105,28 +106,38 @@ const Navbar = () => {
           }}
         >
           <Toolbar>
-            <Typography
-              variant="h6"
-              component={motion.div}
-              whileHover={{ scale: 1.05 }}
-              sx={{ 
-                flexGrow: 1, 
-                color: isScrolled ? 'text.primary' : 'white',
-                fontFamily: "'Playfair Display', serif",
-                fontSize: { xs: '1.2rem', md: '1.5rem' },
-                letterSpacing: '0.02em'
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
               }}
             >
-              The Victor Collective
-            </Typography>
-            
+              <BrandSymbol size={50} />
+              <Typography
+                variant="h6"
+                component={motion.div}
+                whileHover={{ scale: 1.05 }}
+                sx={{
+                  flexGrow: 1,
+                  color: isScrolled ? 'text.primary' : 'white',
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: { xs: '1.2rem', md: '1.5rem' },
+                  letterSpacing: '0.02em',
+                  ml: 1,
+                }}
+              >
+                The Victor Collective
+              </Typography>
+            </Box>
+
             {isMobile ? (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="start"
                 onClick={() => setMobileOpen(!mobileOpen)}
-                sx={{ 
+                sx={{
                   color: isScrolled ? 'text.primary' : 'white',
                   '&:hover': {
                     color: 'secondary.main',
@@ -136,24 +147,27 @@ const Navbar = () => {
                 <MenuIcon />
               </IconButton>
             ) : (
-              <Box>
+              <Box sx={{ display: 'flex', gap: 2 }}>
                 {menuItems.map((item) => (
-                  <Button
+                  <motion.div
                     key={item}
-                    component={motion.button}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => scrollTo(item)}
-                    sx={{
-                      color: isScrolled ? 'text.primary' : 'white',
-                      mx: 1,
-                      '&:hover': {
-                        color: 'secondary.main',
-                      },
-                    }}
                   >
-                    {item.charAt(0).toUpperCase() + item.slice(1)}
-                  </Button>
+                    <Button
+                      variant="text"
+                      color="secondary"
+                      onClick={() => scrollTo(item)}
+                      sx={{
+                        color: isScrolled ? 'text.primary' : 'white',
+                        '&:hover': {
+                          color: 'secondary.main',
+                        },
+                      }}
+                    >
+                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                    </Button>
+                  </motion.div>
                 ))}
               </Box>
             )}

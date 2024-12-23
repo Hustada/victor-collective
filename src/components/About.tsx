@@ -1,12 +1,18 @@
 import React from 'react';
-import { Box, Typography, Container, Grid, Paper } from '@mui/material';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { 
+  Container, 
+  Typography, 
+  Grid, 
+  Box, 
+  Paper,
+  useMediaQuery, 
+  useTheme 
+} from '@mui/material';
+import { motion } from 'framer-motion';
 
-const About = () => {
-  const { scrollYProgress } = useScroll();
-  
-  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
+const About: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Skill items with icons
   const skills = [
@@ -18,140 +24,205 @@ const About = () => {
 
   return (
     <Box 
-      id="about"
-      component={motion.section}
-      style={{ scale, opacity }}
       sx={{ 
-        py: 12,
         backgroundColor: 'background.paper',
         position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Background Pattern */}
-      <Box
-        sx={{
+        '&::before': {
+          content: '""',
           position: 'absolute',
           top: 0,
           left: 0,
-          right: 0,
-          bottom: 0,
-          opacity: 0.03,
-          background: `
-            linear-gradient(45deg, #D35400 25%, transparent 25%) -50px 0,
-            linear-gradient(-45deg, #D35400 25%, transparent 25%) -50px 0,
-            linear-gradient(45deg, transparent 75%, #D35400 75%) -50px 0,
-            linear-gradient(-45deg, transparent 75%, #D35400 75%) -50px 0
-          `,
-          backgroundSize: '100px 100px',
+          width: '100%',
+          height: '2px',
+          backgroundColor: 'secondary.main',
+        }
+      }}
+    >
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          py: 10, 
+          minHeight: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}
-      />
-
-      <Container maxWidth="md">
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+      >
+        <Grid 
+          container 
+          spacing={4} 
+          alignItems="center"
         >
-          <Typography 
-            variant="h2" 
-            align="center"
+          {/* Profile Image Column */}
+          <Grid 
+            item 
+            xs={12} 
+            md={5} 
             sx={{ 
-              mb: 6,
-              color: 'text.primary',
-              position: 'relative',
-              '&:after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-10px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '60px',
-                height: '4px',
-                backgroundColor: 'secondary.main',
-              }
+              display: 'flex', 
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
           >
-            About Me
-          </Typography>
-        </motion.div>
-
-        <Grid container spacing={6}>
-          <Grid item xs={12} md={6}>
             <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ 
+                opacity: 1, 
+                scale: 1,
+                transition: { 
+                  duration: 0.8,
+                  ease: "easeInOut"
+                }
+              }}
               viewport={{ once: true }}
             >
-              <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}>
-                I'm a developer focused on the convergence of artificial intelligence and web development. 
-                My portfolio showcases AI-driven projects that push the boundaries of what's possible on the web, 
-                from natural language processing to computer vision applications.
-              </Typography>
-              <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}>
-                With expertise in both modern web frameworks and machine learning technologies, 
-                I create innovative solutions that bridge the gap between cutting-edge AI and 
-                practical web applications. My work demonstrates how AI can enhance user experiences 
-                and solve real-world problems.
-              </Typography>
+              <Box
+                sx={{
+                  width: { xs: 250, md: 280 },
+                  height: { xs: 250, md: 280 },
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                  border: '4px solid',
+                  borderColor: 'secondary.main',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)'
+                  }
+                }}
+              >
+                <img 
+                  src="/assets/brand/profile.jpg" 
+                  alt="Victor Profile" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              </Box>
             </motion.div>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mt: { xs: 4, md: 0 } }}>
-              {skills.map((skill, index) => (
-                <motion.div
-                  key={skill.name}
-                  initial={{ x: 50, opacity: 0 }}
-                  whileInView={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      backgroundColor: 'background.default',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="h6" sx={{ mr: 1 }}>
-                        {skill.icon}
-                      </Typography>
-                      <Typography variant="h6">
-                        {skill.name}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        height: '4px',
-                        backgroundColor: 'background.paper',
-                        borderRadius: 1,
-                        position: 'relative',
-                      }}
-                    >
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.level}%` }}
-                        transition={{ duration: 1, delay: index * 0.1 }}
-                        style={{
-                          height: '100%',
-                          backgroundColor: '#D35400',
-                          borderRadius: 4,
-                        }}
-                      />
-                    </Box>
-                  </Paper>
-                </motion.div>
-              ))}
-            </Box>
+          {/* About Text Column */}
+          <Grid 
+            item 
+            xs={12} 
+            md={7}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              height: '100%',
+              pl: { md: 4 }
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ 
+                opacity: 1, 
+                y: 0,
+                transition: { 
+                  duration: 0.8,
+                  ease: "easeInOut"
+                }
+              }}
+              viewport={{ once: true }}
+            >
+              <Typography 
+                variant="h3" 
+                gutterBottom 
+                sx={{ 
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  mb: 3 
+                }}
+              >
+                About Me
+              </Typography>
+
+              <Typography 
+                variant="body1" 
+                paragraph 
+                sx={{ 
+                  color: 'text.secondary', 
+                  lineHeight: 1.6,
+                  mb: 2 
+                }}
+              >
+                I'm a passionate AI and web development professional dedicated to creating innovative digital solutions. 
+                With a deep understanding of cutting-edge technologies, I transform complex ideas into elegant, functional experiences.
+              </Typography>
+
+              <Typography 
+                variant="body1" 
+                paragraph 
+                sx={{ 
+                  color: 'text.secondary', 
+                  lineHeight: 1.6 
+                }}
+              >
+                My approach combines technical expertise with creative problem-solving, 
+                ensuring that every project not only meets but exceeds expectations.
+              </Typography>
+            </motion.div>
           </Grid>
         </Grid>
+
+        {/* Section Separator */}
+        <Box sx={{ height: '2px', backgroundColor: 'secondary.main', my: 6 }} />
+
+        {/* Skills Section */}
+        <Box sx={{ mt: 6 }}>
+          {skills.map((skill, index) => (
+            <motion.div
+              key={skill.name}
+              initial={{ x: 50, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  backgroundColor: 'background.default',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="h6" sx={{ mr: 1 }}>
+                    {skill.icon}
+                  </Typography>
+                  <Typography variant="h6">
+                    {skill.name}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    height: '4px',
+                    backgroundColor: 'background.paper',
+                    borderRadius: 1,
+                    position: 'relative',
+                  }}
+                >
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${skill.level}%` }}
+                    transition={{ duration: 1, delay: index * 0.1 }}
+                    style={{
+                      height: '100%',
+                      backgroundColor: '#D35400',
+                      borderRadius: 4,
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </motion.div>
+          ))}
+        </Box>
       </Container>
     </Box>
   );
