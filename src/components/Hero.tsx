@@ -35,15 +35,33 @@ const Hero = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          px: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+        <Box 
+          sx={{ 
+            flex: 1, 
+            display: 'flex', 
+            alignItems: 'center',
+            width: '100%', 
+            justifyContent: 'center', 
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
+            style={{ width: '100%' }}
           >
-            <Box sx={{ position: 'relative' }}>
+            <Box 
+              sx={{ 
+                position: 'relative',
+                width: '100%', 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center', 
+              }}
+            >
               <Typography
                 variant="h1"
                 sx={{

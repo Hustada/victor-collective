@@ -105,26 +105,26 @@ const Navbar = () => {
             boxShadow: isScrolled ? 1 : 0,
           }}
         >
-          <Toolbar>
+          <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
+                flexGrow: 0, // Prevent box from growing
               }}
             >
-              <BrandSymbol size={50} />
+              <BrandSymbol size={40} /> {/* Slightly smaller on mobile */}
               <Typography
                 variant="h6"
                 component={motion.div}
                 whileHover={{ scale: 1.05 }}
                 sx={{
-                  flexGrow: 1,
                   color: isScrolled ? 'text.primary' : 'white',
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: { xs: '1.2rem', md: '1.5rem' },
+                  fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.5rem' },
                   letterSpacing: '0.02em',
-                  ml: 1,
+                  whiteSpace: 'nowrap', // Prevent text wrapping
                 }}
               >
                 The Victor Collective
@@ -135,10 +135,11 @@ const Navbar = () => {
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
-                edge="start"
+                edge="end"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 sx={{
                   color: isScrolled ? 'text.primary' : 'white',
+                  ml: 2, // Add margin to separate from title
                   '&:hover': {
                     color: 'secondary.main',
                   },
