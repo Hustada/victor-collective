@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Container, 
@@ -10,55 +10,78 @@ import {
   Chip,
   Stack,
   IconButton,
-  CardActions
+  CardActions,
+  CircularProgress
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchIcon from '@mui/icons-material/Launch';
-import project1 from '../assets/brand/project1.jpg';
-import project2 from '../assets/brand/project2.jpg';
-import project3 from '../assets/brand/project3.jpg';
+import { projectsConfig, ProjectConfig } from '../config/projectsConfig';
+import { fetchGithubRepos } from '../services/github';
 
-interface Project {
+interface GithubData {
+  githubUrl: string;
+  technologies: string[];
   title: string;
   description: string;
-  image: string;
-  technologies: string[];
-  githubUrl?: string;
   liveUrl?: string;
-  category: 'Web App' | 'Mobile' | 'AI/ML';
 }
 
+interface ProjectData extends ProjectConfig, GithubData {}
+
 const Projects = () => {
-  const projects: Project[] = [
-    {
-      title: 'Neural Network Visualizer',
-      description: 'An interactive platform for visualizing neural networks in real-time. Features dynamic node connections, weight adjustments, and learning process animations.',
-      image: project1,
-      technologies: ['React', 'TypeScript', 'Three.js', 'TensorFlow.js'],
-      githubUrl: 'https://github.com/yourusername/neural-viz',
-      liveUrl: 'https://neural-viz.demo',
-      category: 'AI/ML'
-    },
-    {
-      title: 'Quantum Computing Simulator',
-      description: 'A quantum circuit simulator that allows users to build and test quantum algorithms. Includes visualization of quantum states and interactive circuit building.',
-      image: project2,
-      technologies: ['Python', 'Qiskit', 'React', 'WebAssembly'],
-      githubUrl: 'https://github.com/yourusername/quantum-sim',
-      liveUrl: 'https://quantum-sim.demo',
-      category: 'Web App'
-    },
-    {
-      title: 'AI-Powered Code Assistant',
-      description: 'An intelligent code completion and refactoring tool that uses machine learning to understand context and suggest improvements.',
-      image: project3,
-      technologies: ['Python', 'TensorFlow', 'Natural Language Processing', 'VS Code API'],
-      githubUrl: 'https://github.com/yourusername/ai-code-assistant',
-      liveUrl: 'https://ai-code-assistant.demo',
-      category: 'AI/ML'
-    }
-  ];
+  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const repos = await fetchGithubRepos('hustada');
+        console.log('Fetched repos:', repos);
+        
+        const validProjects = repos
+          .map(repo => {
+            const config = projectsConfig[repo.name];
+            console.log('Checking repo:', repo.name, 'config:', config);
+            if (!config) return null;
+
+            const project: ProjectData = {
+              ...config,
+              githubUrl: repo.html_url,
+              technologies: [repo.language].filter(Boolean),
+              title: config.title,
+              description: config.description,
+              liveUrl: config.liveUrl || (repo.homepage || undefined)
+            };
+            return project;
+          })
+          .filter((project): project is ProjectData => project !== null)
+          .sort((a, b) => ((a?.order || 99) - (b?.order || 99)));
+
+        console.log('Valid projects:', validProjects);
+        setProjects(validProjects);
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        // Fallback to config-only if GitHub API fails
+        const fallbackProjects = Object.values(projectsConfig)
+          .map(config => ({
+            ...config,
+            githubUrl: `https://github.com/hustada/${config.repoName}`,
+            technologies: ['React', 'TypeScript'],
+            title: config.title,
+            description: config.description
+          }))
+          .sort((a, b) => ((a.order || 99) - (b.order || 99)));
+
+        console.log('Using fallback projects:', fallbackProjects);
+        setProjects(fallbackProjects);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProjects();
+  }, []);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -72,6 +95,21 @@ const Projects = () => {
       }
     })
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '50vh'
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -109,7 +147,7 @@ const Projects = () => {
         </Typography>
         <Grid container spacing={4}>
           {projects.map((project, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Grid item xs={12} md={4} key={project.repoName}>
               <Card
                 component={motion.div}
                 custom={index}
@@ -151,7 +189,9 @@ const Projects = () => {
                         fontWeight: 'medium',
                         backgroundColor: (theme) => 
                           project.category === 'AI/ML' ? theme.palette.success.main :
-                          project.category === 'Web App' ? theme.palette.primary.main :
+                          project.category === 'React' ? theme.palette.primary.main :
+                          project.category === 'Full Stack' ? theme.palette.info.main :
+                          project.category === 'Python' ? theme.palette.warning.main :
                           theme.palette.secondary.main
                       }}
                     />
