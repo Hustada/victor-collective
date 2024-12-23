@@ -14,12 +14,36 @@ const About: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Skill items with icons
+  // Skill items with icons and descriptions
   const skills = [
-    { name: 'AI/ML', level: 90, icon: '🤖' },
-    { name: 'React/TypeScript', level: 85, icon: '⚛️' },
-    { name: 'Python/TensorFlow', level: 80, icon: '🐍' },
-    { name: 'Full Stack Dev', level: 85, icon: '🚀' },
+    { 
+      name: 'AI/ML', 
+      level: 85, 
+      icon: '🤖',
+      description: 'LangChain, OpenAI, TensorFlow',
+      color: '#00A67E' // Green for AI
+    },
+    { 
+      name: 'React & TypeScript', 
+      level: 90, 
+      icon: '⚛️',
+      description: 'Next.js, Material-UI, Framer Motion',
+      color: '#61DAFB' // React blue
+    },
+    { 
+      name: 'Python Development', 
+      level: 88, 
+      icon: '🐍',
+      description: 'FastAPI, Django, Data Science',
+      color: '#3776AB' // Python blue
+    },
+    { 
+      name: 'Full Stack', 
+      level: 82, 
+      icon: '🚀',
+      description: 'Node.js, PostgreSQL, AWS',
+      color: '#FF6B6B' // Coral red
+    },
   ];
 
   return (
@@ -175,54 +199,84 @@ const About: React.FC = () => {
 
         {/* Skills Section */}
         <Box sx={{ mt: 6 }}>
-          {skills.map((skill, index) => (
-            <motion.div
-              key={skill.name}
-              initial={{ x: 50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  backgroundColor: 'background.default',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" sx={{ mr: 1 }}>
-                    {skill.icon}
-                  </Typography>
-                  <Typography variant="h6">
-                    {skill.name}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    height: '4px',
-                    backgroundColor: 'background.paper',
-                    borderRadius: 1,
-                    position: 'relative',
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              mb: 4,
+              textAlign: 'center',
+              color: 'text.primary'
+            }}
+          >
+            Technical Expertise
+          </Typography>
+          <Grid container spacing={3}>
+            {skills.map((skill, index) => (
+              <Grid item xs={12} key={skill.name}>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ 
+                    opacity: 1, 
+                    x: 0,
+                    transition: { 
+                      duration: 0.5,
+                      delay: index * 0.1
+                    }
                   }}
+                  viewport={{ once: true }}
                 >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${skill.level}%` }}
-                    transition={{ duration: 1, delay: index * 0.1 }}
-                    style={{
-                      height: '100%',
-                      backgroundColor: '#D35400',
-                      borderRadius: 4,
+                  <Box sx={{ mb: 1 }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        gap: 1,
+                        color: 'text.primary'
+                      }}
+                    >
+                      <span>{skill.icon}</span>
+                      {skill.name}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        color: 'text.secondary',
+                        ml: 4 
+                      }}
+                    >
+                      {skill.description}
+                    </Typography>
+                  </Box>
+                  <Box 
+                    sx={{ 
+                      height: 8,
+                      bgcolor: 'background.default',
+                      borderRadius: 1,
+                      overflow: 'hidden'
                     }}
-                  />
-                </Box>
-              </Paper>
-            </motion.div>
-          ))}
+                  >
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ 
+                        width: `${skill.level}%`,
+                        transition: { 
+                          duration: 1,
+                          delay: index * 0.1
+                        }
+                      }}
+                      viewport={{ once: true }}
+                      style={{
+                        height: '100%',
+                        backgroundColor: skill.color,
+                        borderRadius: 4
+                      }}
+                    />
+                  </Box>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </Container>
     </Box>

@@ -199,11 +199,12 @@ const Projects = () => {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       sx={{
-        py: 8,
+        py: { xs: 10, md: 12 },
+        pb: { xs: 16, md: 20 },
         backgroundColor: 'background.default'
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ mb: { xs: 6, md: 8 } }}>
         <Typography
           variant="h2"
           sx={{
@@ -218,14 +219,14 @@ const Projects = () => {
         <Typography
           variant="h6"
           sx={{
-            mb: 6,
+            mb: { xs: 8, md: 10 },
             textAlign: 'center',
             color: 'text.secondary'
           }}
         >
           Exploring the intersection of technology and innovation
         </Typography>
-        <Grid container spacing={4}>
+        <Grid container spacing={6}>
           {projects.map((project, index) => (
             <Grid item xs={12} md={4} key={project.repoName}>
               <Card
@@ -243,6 +244,7 @@ const Projects = () => {
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   transition: 'all 0.3s ease-in-out',
+                  mb: { xs: 4, md: 0 },
                   '&:hover': {
                     transform: 'translateY(-10px)',
                     boxShadow: (theme) => `0 10px 20px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)'}`,

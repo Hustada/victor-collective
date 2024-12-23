@@ -68,6 +68,8 @@ const Hero = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                   textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
                   textAlign: 'center',
+                  fontSize: { xs: '1.5rem', md: '2.125rem' },
+                  display: { xs: 'none', sm: 'block' },
                 }}
               >
                 Exploring the intersection of AI and modern web development
