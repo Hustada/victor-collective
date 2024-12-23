@@ -24,6 +24,7 @@ const About: React.FC = () => {
 
   return (
     <Box 
+      id="about"
       sx={{ 
         backgroundColor: 'background.paper',
         position: 'relative',

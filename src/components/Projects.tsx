@@ -331,6 +331,22 @@ const Projects = () => {
           ))}
         </Grid>
       </Container>
+      <Box
+        id="projects"
+        sx={{
+          backgroundColor: 'background.paper',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '2px',
+            backgroundColor: 'secondary.main',
+          }
+        }}
+      />
     </Box>
   );
 };

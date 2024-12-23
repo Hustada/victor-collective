@@ -275,6 +275,7 @@ const Contact: React.FC = () => {
 
   return (
     <Container 
+      id="contact"
       maxWidth="lg" 
       sx={{ 
         py: 10, 
