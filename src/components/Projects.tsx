@@ -13,22 +13,26 @@ import {
   CardActions,
   CircularProgress
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchIcon from '@mui/icons-material/Launch';
-import { projectsConfig, ProjectConfig } from '../config/projectsConfig';
-import { fetchGithubRepos } from '../services/github';
+import { projectsConfig } from '../config/projectsConfig';
+import { manualProjects } from '../config/manualProjects';
+import { fetchGithubRepos, ProjectCategory } from '../services/github';
 import { getRandomImage } from '../utils/imageUtils';
 
-interface GithubData {
-  githubUrl: string;
-  technologies: string[];
+interface ProjectData {
+  repoName: string;
   title: string;
   description: string;
+  category: ProjectCategory;
+  image: string;
+  githubUrl: string;
+  technologies: string[];
+  featured: boolean;
+  order?: number;
   liveUrl?: string;
 }
-
-interface ProjectData extends ProjectConfig, GithubData {}
 
 const Projects = () => {
   const [projects, setProjects] = useState<ProjectData[]>([]);
@@ -38,15 +42,21 @@ const Projects = () => {
     const loadProjects = async () => {
       try {
         const repos = await fetchGithubRepos('hustada');
-        console.log('Fetched repos:', repos);
+        console.log('Fetched GitHub repos:', repos);
         
-        const validProjects = repos
+        const githubProjects = repos
           .map(repo => {
             const config = projectsConfig[repo.name];
-            console.log('Checking repo:', repo.name, 'config:', config);
+            const manual = manualProjects[repo.name];
             
-            // If we have a config, use it as base, otherwise create new project
-            const baseProject = config || {
+            console.log(`Processing repo ${repo.name}:`, {
+              hasConfig: !!config,
+              hasManual: !!manual,
+              category: manual?.category || config?.category || repo.category,
+              featured: manual?.featured || config?.featured || false
+            });
+            
+            const baseProject = manual || config || {
               repoName: repo.name,
               title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
               description: repo.description || '',
@@ -54,41 +64,94 @@ const Projects = () => {
               order: 99
             };
 
-            // Use config category if available, otherwise use automatically determined category
-            const category = config?.category || repo.category;
+            const category = manual?.category || config?.category || repo.category;
             
             const project: ProjectData = {
               ...baseProject,
               category,
-              githubUrl: repo.html_url,
-              technologies: [repo.language, ...repo.topics].filter(Boolean),
-              image: getRandomImage(category), // Use the category-appropriate image
-              liveUrl: baseProject.liveUrl || repo.homepage || undefined
+              githubUrl: manual?.githubUrl || repo.html_url,
+              technologies: manual?.technologies || [repo.language, ...repo.topics].filter(Boolean),
+              image: getRandomImage(category),
+              liveUrl: manual?.liveUrl || baseProject.liveUrl || repo.homepage || undefined,
+              featured: baseProject.featured ?? false
             };
             
             return project;
-          })
-          .filter((project): project is ProjectData => 
-            project !== null && 
-            (project.featured || project.category === 'AI/ML' || project.category === 'React')
-          )
-          .sort((a, b) => ((a?.order || 99) - (b?.order || 99)));
+          });
 
-        console.log('Valid projects:', validProjects);
-        setProjects(validProjects);
+        // Add manual-only projects
+        const manualOnlyProjects = Object.entries(manualProjects)
+          .filter(([name]) => !repos.find(repo => repo.name === name))
+          .map(([name, project]): ProjectData => ({
+            ...project,
+            repoName: project.repoName || name,
+            image: getRandomImage(project.category),
+            featured: project.featured ?? false,
+            githubUrl: project.githubUrl || `https://github.com/hustada/${project.repoName}`,
+            technologies: project.technologies || []
+          }));
+
+        // Combine and sort all projects
+        const allProjects = [...githubProjects, ...manualOnlyProjects]
+          .filter((project): project is ProjectData => project !== null)
+          // Remove duplicates based on repoName
+          .reduce((unique, project) => {
+            const existingProject = unique.find(p => p.repoName === project.repoName);
+            if (!existingProject) {
+              unique.push(project);
+            }
+            return unique;
+          }, [] as ProjectData[])
+          .sort((a, b) => {
+            // Featured projects first
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            // Then by order
+            return (a.order || 99) - (b.order || 99);
+          })
+          // Take only the first 3 projects
+          .slice(0, 3);
+
+        console.log('All projects:', allProjects);
+        setProjects(allProjects);
       } catch (error) {
         console.error('Error loading projects:', error);
-        // Fallback to config-only if GitHub API fails
-        const fallbackProjects = Object.values(projectsConfig)
-          .map(config => ({
+        // Fallback to manual projects if GitHub API fails
+        const fallbackProjects = [
+          ...Object.values(projectsConfig).map(config => ({
             ...config,
+            repoName: config.repoName,
             githubUrl: `https://github.com/hustada/${config.repoName}`,
             technologies: ['React', 'TypeScript'],
             image: getRandomImage(config.category),
-            title: config.title,
-            description: config.description
+            featured: config.featured ?? false
+          })),
+          ...Object.values(manualProjects).map(project => ({
+            ...project,
+            repoName: project.repoName,
+            githubUrl: project.githubUrl || `https://github.com/hustada/${project.repoName}`,
+            image: getRandomImage(project.category),
+            featured: project.featured ?? false,
+            technologies: project.technologies || []
           }))
-          .sort((a, b) => ((a.order || 99) - (b.order || 99)));
+        ]
+          // Remove duplicates based on repoName
+          .reduce((unique, project) => {
+            const existingProject = unique.find(p => p.repoName === project.repoName);
+            if (!existingProject) {
+              unique.push(project);
+            }
+            return unique;
+          }, [] as ProjectData[])
+          .sort((a, b) => {
+            // Featured projects first
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            // Then by order
+            return (a.order || 99) - (b.order || 99);
+          })
+          // Take only the first 3 projects
+          .slice(0, 3);
 
         console.log('Using fallback projects:', fallbackProjects);
         setProjects(fallbackProjects);

@@ -40,10 +40,32 @@ export function determineProjectCategory(topics: string[], language: string): Pr
   return 'Full Stack';
 }
 
+const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+
 export async function fetchGithubRepos(username: string): Promise<GithubRepo[]> {
   try {
-    const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
-    if (!response.ok) throw new Error('Failed to fetch repos');
+    const headers: HeadersInit = {
+      'Accept': 'application/vnd.github.v3+json'
+    };
+
+    // Add authorization header if token is available
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(
+      `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`,
+      { headers }
+    );
+
+    if (!response.ok) {
+      console.error('GitHub API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      throw new Error('Failed to fetch repos');
+    }
     
     const repos = await response.json();
     
@@ -64,11 +86,19 @@ export async function fetchGithubRepos(username: string): Promise<GithubRepo[]> 
 
 export async function fetchRepoTopics(username: string, repo: string): Promise<string[]> {
   try {
-    const response = await fetch(`https://api.github.com/repos/${username}/${repo}/topics`, {
-      headers: {
-        'Accept': 'application/vnd.github.mercy-preview+json'
-      }
-    });
+    const headers: HeadersInit = {
+      'Accept': 'application/vnd.github.mercy-preview+json'
+    };
+
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(
+      `https://api.github.com/repos/${username}/${repo}/topics`,
+      { headers }
+    );
+
     if (!response.ok) throw new Error('Failed to fetch topics');
     const data = await response.json();
     return data.names || [];
