@@ -18,6 +18,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { projectsConfig, ProjectConfig } from '../config/projectsConfig';
 import { fetchGithubRepos } from '../services/github';
+import { getRandomImage } from '../utils/imageUtils';
 
 interface GithubData {
   githubUrl: string;
@@ -43,19 +44,34 @@ const Projects = () => {
           .map(repo => {
             const config = projectsConfig[repo.name];
             console.log('Checking repo:', repo.name, 'config:', config);
-            if (!config) return null;
-
-            const project: ProjectData = {
-              ...config,
-              githubUrl: repo.html_url,
-              technologies: [repo.language].filter(Boolean),
-              title: config.title,
-              description: config.description,
-              liveUrl: config.liveUrl || (repo.homepage || undefined)
+            
+            // If we have a config, use it as base, otherwise create new project
+            const baseProject = config || {
+              repoName: repo.name,
+              title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+              description: repo.description || '',
+              featured: false,
+              order: 99
             };
+
+            // Use config category if available, otherwise use automatically determined category
+            const category = config?.category || repo.category;
+            
+            const project: ProjectData = {
+              ...baseProject,
+              category,
+              githubUrl: repo.html_url,
+              technologies: [repo.language, ...repo.topics].filter(Boolean),
+              image: getRandomImage(category), // Use the category-appropriate image
+              liveUrl: baseProject.liveUrl || repo.homepage || undefined
+            };
+            
             return project;
           })
-          .filter((project): project is ProjectData => project !== null)
+          .filter((project): project is ProjectData => 
+            project !== null && 
+            (project.featured || project.category === 'AI/ML' || project.category === 'React')
+          )
           .sort((a, b) => ((a?.order || 99) - (b?.order || 99)));
 
         console.log('Valid projects:', validProjects);
@@ -68,6 +84,7 @@ const Projects = () => {
             ...config,
             githubUrl: `https://github.com/hustada/${config.repoName}`,
             technologies: ['React', 'TypeScript'],
+            image: getRandomImage(config.category),
             title: config.title,
             description: config.description
           }))
