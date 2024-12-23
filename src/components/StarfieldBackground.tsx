@@ -34,19 +34,19 @@ const StarfieldBackground = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(45deg, #000000 30%, #D35400 90%)',
+          background: 'linear-gradient(45deg, #000000 15%, #D35400 85%)',
         }}
         animate={{
           background: [
-            'linear-gradient(45deg, #000000 30%, #D35400 90%)',
-            'linear-gradient(45deg, #000000 35%, #D35400 95%)',
-            'linear-gradient(45deg, #000000 30%, #D35400 90%)',
+            'linear-gradient(45deg, #000000 15%, #D35400 85%)',
+            'linear-gradient(45deg, #000000 25%, #D35400 110%)',
+            'linear-gradient(45deg, #000000 15%, #D35400 85%)',
           ]
         }}
         transition={{
-          duration: 3,
+          duration: 5,
           repeat: Infinity,
-          ease: [0.4, 0, 0.6, 1], // This is a smoother ease curve
+          ease: [0.4, 0, 0.6, 1],
         }}
       />
 
