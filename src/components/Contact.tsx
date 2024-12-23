@@ -9,11 +9,9 @@ import {
   useTheme,
   useMediaQuery,
   Alert,
-  Snackbar
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const Contact: React.FC = () => {
   const theme = useTheme();
@@ -68,83 +66,212 @@ const Contact: React.FC = () => {
     });
   };
 
-  const SuccessMessage = () => (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        duration: 0.8,
-        delay: 0.2,
-        ease: [0, 0.71, 0.2, 1.01]
-      }}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center'
-      }}
-    >
+  const SuccessMessage = () => {
+    const circleVariants = {
+      hidden: { scale: 0, opacity: 0 },
+      visible: { 
+        scale: 1, 
+        opacity: 1,
+        transition: { duration: 0.5 }
+      }
+    };
+
+    const lineVariants = {
+      hidden: { pathLength: 0, opacity: 0 },
+      visible: {
+        pathLength: 1,
+        opacity: 1,
+        transition: { 
+          duration: 1.5,
+          ease: "easeInOut"
+        }
+      }
+    };
+
+    const pulseVariants = {
+      pulse: {
+        scale: [1, 1.1, 1],
+        opacity: [0.5, 1, 0.5],
+        transition: {
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }
+      }
+    };
+
+    const dataPointVariants = {
+      hidden: { opacity: 0, y: 20 },
+      visible: (i: number) => ({
+        opacity: 1,
+        y: 0,
+        transition: {
+          delay: i * 0.2,
+          duration: 0.5
+        }
+      })
+    };
+
+    return (
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{
-          duration: 0.5,
-          delay: 0.5,
-          type: "spring",
-          stiffness: 200
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          position: 'relative'
         }}
       >
-        <CheckCircleOutlineIcon 
-          sx={{ 
-            fontSize: '5rem', 
-            color: 'secondary.main',
-            mb: 3
-          }} 
-        />
+        <Box sx={{ position: 'relative', width: '300px', height: '300px', mb: 4 }}>
+          {/* Background Circles */}
+          <motion.svg
+            viewBox="0 0 200 200"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            {[...Array(3)].map((_, index) => (
+              <motion.circle
+                key={index}
+                cx="100"
+                cy="100"
+                r={60 - index * 15}
+                fill="none"
+                stroke={theme.palette.secondary.main}
+                strokeWidth="1"
+                initial="hidden"
+                animate="pulse"
+                variants={pulseVariants}
+                style={{ opacity: 0.2 - index * 0.05 }}
+              />
+            ))}
+          </motion.svg>
+
+          {/* Main SVG Animation */}
+          <motion.svg
+            viewBox="0 0 200 200"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            {/* Central Circle */}
+            <motion.circle
+              cx="100"
+              cy="100"
+              r="40"
+              fill="none"
+              stroke={theme.palette.secondary.main}
+              strokeWidth="2"
+              initial="hidden"
+              animate="visible"
+              variants={circleVariants}
+            />
+
+            {/* Radiating Lines */}
+            {[...Array(8)].map((_, index) => {
+              const angle = (index * Math.PI * 2) / 8;
+              const x1 = 100 + Math.cos(angle) * 45;
+              const y1 = 100 + Math.sin(angle) * 45;
+              const x2 = 100 + Math.cos(angle) * 80;
+              const y2 = 100 + Math.sin(angle) * 80;
+
+              return (
+                <motion.line
+                  key={index}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={theme.palette.secondary.main}
+                  strokeWidth="2"
+                  initial="hidden"
+                  animate="visible"
+                  variants={lineVariants}
+                />
+              );
+            })}
+
+            {/* Data Points */}
+            {[...Array(12)].map((_, index) => {
+              const angle = (index * Math.PI * 2) / 12;
+              const radius = 90;
+              const x = 100 + Math.cos(angle) * radius;
+              const y = 100 + Math.sin(angle) * radius;
+
+              return (
+                <motion.circle
+                  key={index}
+                  cx={x}
+                  cy={y}
+                  r="2"
+                  fill={theme.palette.secondary.main}
+                  initial="hidden"
+                  animate="visible"
+                  custom={index}
+                  variants={dataPointVariants}
+                />
+              );
+            })}
+          </motion.svg>
+        </Box>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontWeight: 700,
+              mb: 2,
+              color: 'text.primary',
+              textAlign: 'center'
+            }}
+          >
+            Transmission Complete
+          </Typography>
+          
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: 'text.secondary',
+              mb: 4,
+              textAlign: 'center'
+            }}
+          >
+            Message successfully received. Standby for response.
+          </Typography>
+          
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleReset}
+            sx={{
+              mt: 2,
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.05)'
+              }
+            }}
+          >
+            Initialize New Message
+          </Button>
+        </motion.div>
       </motion.div>
-      
-      <Typography 
-        variant="h4" 
-        sx={{ 
-          fontWeight: 700,
-          mb: 2,
-          color: 'text.primary'
-        }}
-      >
-        Message Sent Successfully!
-      </Typography>
-      
-      <Typography 
-        variant="body1" 
-        sx={{ 
-          color: 'text.secondary',
-          mb: 4
-        }}
-      >
-        Thank you for reaching out! I'll get back to you as soon as possible.
-      </Typography>
-      
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={handleReset}
-        sx={{
-          mt: 2,
-          px: 4,
-          py: 1.5,
-          borderRadius: 2,
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'scale(1.05)'
-          }
-        }}
-      >
-        Send Another Message
-      </Button>
-    </motion.div>
-  );
+    );
+  };
 
   return (
     <Container 
