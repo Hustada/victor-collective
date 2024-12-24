@@ -9,206 +9,152 @@ import {
   Button,
   Box,
   useTheme,
+  Chip,
 } from '@mui/material';
 import { motion } from 'framer-motion';
-
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-  image: string;
-  category: string;
-}
-
-const samplePosts: BlogPost[] = [
-  {
-    id: 1,
-    title: 'The Future of Web Development',
-    excerpt: 'Exploring emerging trends in web development and what they mean for developers.',
-    date: 'December 23, 2024',
-    image: '/assets/brand/blogWebDev1.jpg',
-    category: 'Web Development'
-  },
-  {
-    id: 2,
-    title: 'AI in Modern Development',
-    excerpt: 'How artificial intelligence is transforming the way we build applications.',
-    date: 'December 22, 2024',
-    image: '/assets/brand/blogAIDev1.jpg',
-    category: 'AI Development'
-  },
-  {
-    id: 3,
-    title: 'React Development Best Practices',
-    excerpt: 'Essential practices for building efficient and maintainable React applications.',
-    date: 'December 21, 2024',
-    image: '/assets/brand/blogReactDev1.jpg',
-    category: 'React'
-  }
-];
+import { useNavigate } from 'react-router-dom';
+import { getBlogPosts } from '../utils/blog';
+import { format } from 'date-fns';
 
 const Blog: React.FC = () => {
   const theme = useTheme();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
+  const navigate = useNavigate();
+  const posts = getBlogPosts();
 
   return (
-    <Container maxWidth="lg" id="blog" sx={{ py: 8 }}>
-      <Box sx={{ mb: 6, textAlign: 'center' }}>
+    <Box
+      id="blog"
+      component="section"
+      sx={{
+        py: 8,
+        backgroundColor: 'background.default',
+      }}
+    >
+      <Container maxWidth="lg">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
         >
           <Typography
             variant="h2"
             component="h2"
+            align="center"
             gutterBottom
             sx={{
-              fontWeight: 700,
-              color: theme.palette.text.primary
+              mb: 6,
+              fontWeight: 'bold',
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(45deg, #FF8E3C 30%, #FF5733 90%)'
+                : 'linear-gradient(45deg, #FF5733 30%, #FF8E3C 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
             }}
           >
-            Latest Insights
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: theme.palette.text.secondary,
-              maxWidth: '800px',
-              margin: '0 auto'
-            }}
-          >
-            Thoughts, tutorials, and perspectives on modern web development
+            Blog
           </Typography>
         </motion.div>
-      </Box>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-      >
         <Grid container spacing={4}>
-          {samplePosts.map((post) => (
-            <Grid item xs={12} md={4} key={post.id}>
-              <motion.div variants={itemVariants} style={{ height: '100%' }}>
+          {posts.map((post, index) => (
+            <Grid item xs={12} md={4} key={post.slug}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
                 <Card
                   sx={{
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'transform 0.3s ease-in-out',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease-in-out',
                     '&:hover': {
-                      transform: 'translateY(-8px)',
+                      transform: 'translateY(-4px)',
                     },
-                    backgroundColor: theme.palette.background.paper,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                   }}
+                  onClick={() => navigate(`/blog/${post.slug}`)}
                 >
                   <CardMedia
                     component="img"
                     height="200"
-                    image={post.image}
+                    image={post.coverImage}
                     alt={post.title}
-                    sx={{
-                      objectFit: 'cover',
-                    }}
+                    sx={{ objectFit: 'cover' }}
                   />
-                  <CardContent sx={{ 
-                    flexGrow: 1, 
-                    p: 3,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%'
-                  }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography
-                      variant="overline"
-                      sx={{
-                        color: theme.palette.primary.main,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {post.category}
-                    </Typography>
-                    <Typography
+                      gutterBottom
                       variant="h5"
                       component="h3"
-                      gutterBottom
-                      sx={{
-                        fontWeight: 700,
-                        color: theme.palette.text.primary,
-                        mt: 1,
-                      }}
+                      sx={{ fontWeight: 'bold' }}
                     >
                       {post.title}
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="caption"
                       color="text.secondary"
-                      sx={{ 
-                        mb: 2,
-                        flexGrow: 1
-                      }}
+                      sx={{ mb: 2, display: 'block' }}
                     >
-                      {post.excerpt}
+                      {format(new Date(post.date), 'MMMM d, yyyy')}
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant="body2"
+                      color="text.secondary"
+                      paragraph
                       sx={{
-                        color: theme.palette.text.secondary,
-                        mt: 'auto'
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
                       }}
                     >
-                      {post.date}
+                      {post.description}
                     </Typography>
+                    <Box sx={{ mt: 2 }}>
+                      {post.tags.map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          sx={{ mr: 1, mb: 1 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/blog/tag/${tag}`);
+                          }}
+                        />
+                      ))}
+                    </Box>
                   </CardContent>
                 </Card>
               </motion.div>
             </Grid>
           ))}
         </Grid>
-      </motion.div>
 
-      <Box sx={{ textAlign: 'center', mt: 6 }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          size="large"
-          sx={{
-            px: 4,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: 'none',
-            fontSize: '1.1rem',
-          }}
-        >
-          View All Posts
-        </Button>
-      </Box>
-    </Container>
+        <Box sx={{ textAlign: 'center', mt: 6 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/blog')}
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontSize: '1.1rem',
+            }}
+          >
+            View All Posts
+          </Button>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

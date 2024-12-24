@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
 import BrandSymbol from './BrandSymbol';
 
 interface Props {
@@ -41,6 +42,8 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,20 +54,22 @@ const Navbar = () => {
   }, []);
 
   const scrollTo = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    element?.scrollIntoView({ behavior: 'smooth' });
+    if (isHomePage) {
+      const element = document.getElementById(elementId);
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
     if (mobileOpen) {
       setMobileOpen(false);
     }
   };
 
   const menuItems = [
-    { title: 'Home', id: 'hero' },
-    { title: 'About', id: 'about' },
-    { title: 'Projects', id: 'projects' },
-    { title: 'Blog', id: 'blog' },
-    { title: 'Newsletter', id: 'newsletter-section' }, 
-    { title: 'Contact', id: 'contact' }
+    { title: 'Home', id: 'hero', path: '/' },
+    { title: 'About', id: 'about', path: '/#about' },
+    { title: 'Projects', id: 'projects', path: '/#projects' },
+    { title: 'Blog', id: 'blog', path: '/blog' },
+    { title: 'Newsletter', id: 'newsletter-section', path: '/#newsletter-section' },
+    { title: 'Contact', id: 'contact', path: '/#contact' }
   ];
 
   const drawer = (
@@ -80,11 +85,17 @@ const Navbar = () => {
         {menuItems.map((item) => (
           <ListItem
             key={item.title}
-            component={motion.div}
-            whileHover={{ x: 10 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => scrollTo(item.id)}
-            sx={{ cursor: 'pointer' }}
+            component={Link}
+            to={item.path}
+            onClick={() => {
+              if (isHomePage) scrollTo(item.id);
+              setMobileOpen(false);
+            }}
+            sx={{ 
+              cursor: 'pointer',
+              textDecoration: 'none',
+              color: 'inherit'
+            }}
           >
             <ListItemText
               primary={item.title}
@@ -118,11 +129,14 @@ const Navbar = () => {
         >
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Box
+              component={Link}
+              to="/"
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
                 flexGrow: 0,
+                textDecoration: 'none'
               }}
             >
               <BrandSymbol size={40} />
@@ -175,9 +189,11 @@ const Navbar = () => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button
-                      variant="text"
-                      color="secondary"
-                      onClick={() => scrollTo(item.id)}
+                      component={Link}
+                      to={item.path}
+                      onClick={() => {
+                        if (isHomePage) scrollTo(item.id);
+                      }}
                       sx={{
                         color: isScrolled 
                           ? theme.palette.mode === 'dark'
@@ -187,6 +203,7 @@ const Navbar = () => {
                         '&:hover': {
                           color: 'primary.main',
                         },
+                        textDecoration: 'none'
                       }}
                     >
                       {item.title}
@@ -198,29 +215,17 @@ const Navbar = () => {
           </Toolbar>
         </AppBar>
       </HideOnScroll>
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <Drawer
-            variant="temporary"
-            anchor="right"
-            open={mobileOpen}
-            onClose={() => setMobileOpen(false)}
-            ModalProps={{
-              keepMounted: true,
-            }}
-            PaperProps={{
-              sx: {
-                backgroundColor: 'background.paper',
-                borderLeft: '2px solid',
-                borderColor: 'secondary.main',
-              },
-            }}
-          >
-            {drawer}
-          </Drawer>
-        )}
-      </AnimatePresence>
+      <Drawer
+        anchor="right"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        ModalProps={{
+          keepMounted: true,
+        }}
+      >
+        {drawer}
+      </Drawer>
+      <Toolbar /> {/* Spacer */}
     </>
   );
 };
