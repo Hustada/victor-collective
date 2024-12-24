@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Container, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import StarfieldBackground from './StarfieldBackground';
+import SpaceshipAnimation from './SpaceshipAnimation';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 const Hero = () => {
@@ -24,6 +25,7 @@ const Hero = () => {
       }}
     >
       <StarfieldBackground />
+      <SpaceshipAnimation />
       
       <Container 
         maxWidth="md" 
