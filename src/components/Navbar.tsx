@@ -1,12 +1,10 @@
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
   Typography,
   Button,
   Box,
-  useScrollTrigger,
-  Slide,
   IconButton,
   Drawer,
   List,
@@ -14,15 +12,17 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
+  useScrollTrigger,
+  Slide,
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import BrandSymbol from './BrandSymbol';
 
 interface Props {
   window?: () => Window;
-  children: ReactElement;
+  children: React.ReactElement;
 }
 
 const HideOnScroll = ({ children, window }: Props) => {
@@ -77,7 +77,7 @@ const Navbar = () => {
       sx={{
         width: 250,
         height: '100%',
-        backgroundColor: 'background.paper',
+        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
         pt: 8,
       }}
     >
@@ -94,13 +94,16 @@ const Navbar = () => {
             sx={{ 
               cursor: 'pointer',
               textDecoration: 'none',
-              color: 'inherit'
+              color: theme.palette.mode === 'dark' ? 'white' : 'text.primary',
+              '&:hover': {
+                backgroundColor: 'transparent',
+                color: 'primary.main',
+              },
             }}
           >
             <ListItemText
               primary={item.title}
               sx={{
-                color: 'text.primary',
                 '& .MuiTypography-root': {
                   fontSize: '1.1rem',
                   fontWeight: 500,
@@ -121,13 +124,14 @@ const Navbar = () => {
             backgroundColor: isScrolled 
               ? theme.palette.mode === 'dark' 
                 ? 'rgba(0, 0, 0, 0.95)' 
-                : 'rgba(255, 255, 255, 0.95)' 
+                : 'rgba(255, 255, 255, 0.95)'
               : 'transparent',
-            transition: 'background-color 0.3s ease',
-            boxShadow: isScrolled ? 1 : 0,
+            backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: isScrolled ? '0px 2px 4px -1px rgba(0,0,0,0.1)' : 'none',
           }}
         >
-          <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Toolbar>
             <Box
               component={Link}
               to="/"
@@ -136,46 +140,43 @@ const Navbar = () => {
                 alignItems: 'center',
                 gap: 2,
                 flexGrow: 0,
-                textDecoration: 'none'
+                textDecoration: 'none',
               }}
             >
-              <BrandSymbol size={40} />
-              <Typography
-                variant="h6"
-                component={motion.div}
-                whileHover={{ scale: 1.05 }}
-                sx={{
-                  color: isScrolled 
-                    ? theme.palette.mode === 'dark'
-                      ? 'white'
-                      : 'text.primary'
-                    : 'white',
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.5rem' },
-                  letterSpacing: '0.02em',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                The Victor Collective
-              </Typography>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <BrandSymbol size={40} />
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: !isScrolled || theme.palette.mode === 'dark' ? 'white' : 'text.primary',
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.5rem' },
+                    letterSpacing: '0.02em',
+                    whiteSpace: 'nowrap',
+                    transition: 'color 0.3s ease',
+                  }}
+                >
+                  The Victor Collective
+                </Typography>
+              </motion.div>
             </Box>
+
+            <Box sx={{ flexGrow: 1 }} />
 
             {isMobile ? (
               <IconButton
-                color="inherit"
-                aria-label="open drawer"
                 edge="end"
+                color="inherit"
+                aria-label="menu"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 sx={{
-                  color: isScrolled 
-                    ? theme.palette.mode === 'dark'
-                      ? 'white'
-                      : 'text.primary'
-                    : 'white',
-                  ml: 2,
+                  color: !isScrolled || theme.palette.mode === 'dark' ? 'white' : 'text.primary',
                   '&:hover': {
                     color: 'primary.main',
                   },
+                  transition: 'color 0.3s ease',
                 }}
               >
                 <MenuIcon />
@@ -195,15 +196,15 @@ const Navbar = () => {
                         if (isHomePage) scrollTo(item.id);
                       }}
                       sx={{
-                        color: isScrolled 
-                          ? theme.palette.mode === 'dark'
-                            ? 'white'
-                            : 'text.primary'
-                          : 'white',
+                        color: !isScrolled || theme.palette.mode === 'dark' ? 'white' : 'text.primary',
+                        textTransform: 'none',
+                        fontSize: '1rem',
+                        fontWeight: 500,
                         '&:hover': {
+                          backgroundColor: 'transparent',
                           color: 'primary.main',
                         },
-                        textDecoration: 'none'
+                        transition: 'color 0.3s ease',
                       }}
                     >
                       {item.title}
@@ -215,6 +216,7 @@ const Navbar = () => {
           </Toolbar>
         </AppBar>
       </HideOnScroll>
+
       <Drawer
         anchor="right"
         open={mobileOpen}
@@ -222,10 +224,15 @@ const Navbar = () => {
         ModalProps={{
           keepMounted: true,
         }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: 250,
+          },
+        }}
       >
         {drawer}
       </Drawer>
-      <Toolbar /> {/* Spacer */}
     </>
   );
 };
