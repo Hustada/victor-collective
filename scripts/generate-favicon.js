@@ -3,7 +3,7 @@ const path = require('path');
 
 const sizes = [16, 32, 64];
 const inputImage = path.join(__dirname, '../public/assets/brand/victorcol4.jpg');
-const outputDir = path.join(__dirname, '../public/assets/brand');
+const outputDir = path.join(__dirname, '../public');
 
 async function generateFavicons() {
   try {
