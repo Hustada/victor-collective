@@ -15,7 +15,7 @@ import emailjs from '@emailjs/browser';
 
 const Contact: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const matches = useMediaQuery(theme.breakpoints.down('md'));
 
   const [formData, setFormData] = useState({
     from_name: '',
