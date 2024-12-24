@@ -291,145 +291,169 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <Container 
+    <Box
       id="contact"
-      maxWidth="lg" 
-      sx={{ 
-        py: 10, 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center',
-        backgroundColor: 'background.paper'
+      component="section"
+      sx={{
+        py: 8,
+        backgroundColor: 'background.default',
+        position: 'relative',
+        overflow: 'hidden',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center'
       }}
     >
-      <Grid container spacing={4} alignItems="center">
-        <Grid item xs={12} md={6}>
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ 
-              opacity: 1, 
-              x: 0,
-              transition: { 
-                duration: 0.8,
-                ease: "easeInOut"
-              }
-            }}
-            viewport={{ once: true }}
-          >
-            <Typography 
-              variant="h3" 
-              gutterBottom 
-              sx={{ 
-                fontWeight: 700,
-                color: 'text.primary',
-                mb: 3 
-              }}
+      <Container maxWidth="lg">
+        <AnimatePresence mode="wait">
+          {isSubmitted ? (
+            <motion.div
+              key="success-container"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              Get in Touch
-            </Typography>
-            
-            <Typography 
-              variant="body1" 
-              paragraph 
-              sx={{ 
-                color: 'text.secondary', 
-                lineHeight: 1.6,
-                mb: 4 
-              }}
-            >
-              Have a project in mind or want to collaborate? 
-              I'm always open to discussing innovative ideas and opportunities.
-              Drop me a message, and I'll get back to you soon.
-            </Typography>
-          </motion.div>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <AnimatePresence mode="wait">
-            {isSubmitted ? (
-              <SuccessMessage />
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ 
-                  duration: 0.8,
-                  ease: "easeInOut"
-                }}
-              >
-                <Box 
-                  component="form" 
-                  onSubmit={handleSubmit}
-                  sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: 3 
-                  }}
-                >
-                  <TextField
-                    fullWidth
-                    label="Name"
-                    name="from_name"
-                    value={formData.from_name}
-                    onChange={handleChange}
-                    variant="outlined"
-                    required
-                  />
-                  
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="from_email"
-                    type="email"
-                    value={formData.from_email}
-                    onChange={handleChange}
-                    variant="outlined"
-                    required
-                  />
-                  
-                  <TextField
-                    fullWidth
-                    label="Message"
-                    name="message"
-                    multiline
-                    rows={4}
-                    value={formData.message}
-                    onChange={handleChange}
-                    variant="outlined"
-                    required
-                  />
-                  
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                    sx={{ 
-                      mt: 2,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'scale(1.05)'
-                      }
-                    }}
+              <Grid container justifyContent="center">
+                <Grid item xs={12} md={8}>
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
                   >
-                    Send Message
-                  </Button>
+                    <SuccessMessage />
+                  </motion.div>
+                </Grid>
+              </Grid>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="form-container"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Grid container spacing={4} alignItems="center">
+                <Grid item xs={12} md={6}>
+                  <motion.div
+                    key="contact-text"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Typography 
+                      variant="h3" 
+                      gutterBottom 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        mb: 3 
+                      }}
+                    >
+                      Get in Touch
+                    </Typography>
+                    
+                    <Typography 
+                      variant="body1" 
+                      paragraph 
+                      sx={{ 
+                        color: 'text.secondary', 
+                        lineHeight: 1.6,
+                        mb: 4 
+                      }}
+                    >
+                      Have a project in mind or want to collaborate? 
+                      I'm always open to discussing innovative ideas and opportunities.
+                      Drop me a message, and I'll get back to you soon.
+                    </Typography>
+                  </motion.div>
+                </Grid>
 
-                  {error && (
-                    <Alert severity="error" sx={{ mt: 2 }}>
-                      {error}
-                    </Alert>
-                  )}
-                </Box>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Grid>
-      </Grid>
-    </Container>
+                <Grid item xs={12} md={6}>
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  >
+                    <Box
+                      component="form"
+                      onSubmit={handleSubmit}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 3
+                      }}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Name"
+                        name="from_name"
+                        value={formData.from_name}
+                        onChange={handleChange}
+                        variant="outlined"
+                        required
+                      />
+                      
+                      <TextField
+                        fullWidth
+                        label="Email"
+                        name="from_email"
+                        type="email"
+                        value={formData.from_email}
+                        onChange={handleChange}
+                        variant="outlined"
+                        required
+                      />
+                      
+                      <TextField
+                        fullWidth
+                        label="Message"
+                        name="message"
+                        multiline
+                        rows={4}
+                        value={formData.message}
+                        onChange={handleChange}
+                        variant="outlined"
+                        required
+                      />
+                      
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="secondary"
+                        size="large"
+                        sx={{ 
+                          mt: 2,
+                          py: 1.5,
+                          fontWeight: 'bold',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)'
+                          }
+                        }}
+                      >
+                        Send Message
+                      </Button>
+
+                      {error && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                          {error}
+                        </Alert>
+                      )}
+                    </Box>
+                  </motion.div>
+                </Grid>
+              </Grid>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Container>
+    </Box>
   );
 };
 
