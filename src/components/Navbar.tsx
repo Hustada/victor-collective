@@ -58,7 +58,14 @@ const Navbar = () => {
     }
   };
 
-  const menuItems = ['about', 'projects', 'contact'];
+  const menuItems = [
+    { title: 'Home', id: 'hero' },
+    { title: 'About', id: 'about' },
+    { title: 'Projects', id: 'projects' },
+    { title: 'Blog', id: 'blog' },
+    { title: 'Newsletter', id: 'newsletter-section' }, 
+    { title: 'Contact', id: 'contact' }
+  ];
 
   const drawer = (
     <Box
@@ -72,15 +79,15 @@ const Navbar = () => {
       <List>
         {menuItems.map((item) => (
           <ListItem
-            key={item}
+            key={item.title}
             component={motion.div}
             whileHover={{ x: 10 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => scrollTo(item)}
+            onClick={() => scrollTo(item.id)}
             sx={{ cursor: 'pointer' }}
           >
             <ListItemText
-              primary={item.charAt(0).toUpperCase() + item.slice(1)}
+              primary={item.title}
               sx={{
                 color: 'text.primary',
                 '& .MuiTypography-root': {
@@ -100,7 +107,11 @@ const Navbar = () => {
       <HideOnScroll>
         <AppBar
           sx={{
-            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+            backgroundColor: isScrolled 
+              ? theme.palette.mode === 'dark' 
+                ? 'rgba(0, 0, 0, 0.95)' 
+                : 'rgba(255, 255, 255, 0.95)' 
+              : 'transparent',
             transition: 'background-color 0.3s ease',
             boxShadow: isScrolled ? 1 : 0,
           }}
@@ -111,20 +122,24 @@ const Navbar = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
-                flexGrow: 0, // Prevent box from growing
+                flexGrow: 0,
               }}
             >
-              <BrandSymbol size={40} /> {/* Slightly smaller on mobile */}
+              <BrandSymbol size={40} />
               <Typography
                 variant="h6"
                 component={motion.div}
                 whileHover={{ scale: 1.05 }}
                 sx={{
-                  color: isScrolled ? 'text.primary' : 'white',
+                  color: isScrolled 
+                    ? theme.palette.mode === 'dark'
+                      ? 'white'
+                      : 'text.primary'
+                    : 'white',
                   fontFamily: "'Playfair Display', serif",
                   fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.5rem' },
                   letterSpacing: '0.02em',
-                  whiteSpace: 'nowrap', // Prevent text wrapping
+                  whiteSpace: 'nowrap',
                 }}
               >
                 The Victor Collective
@@ -138,10 +153,14 @@ const Navbar = () => {
                 edge="end"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 sx={{
-                  color: isScrolled ? 'text.primary' : 'white',
-                  ml: 2, // Add margin to separate from title
+                  color: isScrolled 
+                    ? theme.palette.mode === 'dark'
+                      ? 'white'
+                      : 'text.primary'
+                    : 'white',
+                  ml: 2,
                   '&:hover': {
-                    color: 'secondary.main',
+                    color: 'primary.main',
                   },
                 }}
               >
@@ -151,22 +170,26 @@ const Navbar = () => {
               <Box sx={{ display: 'flex', gap: 2 }}>
                 {menuItems.map((item) => (
                   <motion.div
-                    key={item}
+                    key={item.title}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button
                       variant="text"
                       color="secondary"
-                      onClick={() => scrollTo(item)}
+                      onClick={() => scrollTo(item.id)}
                       sx={{
-                        color: isScrolled ? 'text.primary' : 'white',
+                        color: isScrolled 
+                          ? theme.palette.mode === 'dark'
+                            ? 'white'
+                            : 'text.primary'
+                          : 'white',
                         '&:hover': {
-                          color: 'secondary.main',
+                          color: 'primary.main',
                         },
                       }}
                     >
-                      {item.charAt(0).toUpperCase() + item.slice(1)}
+                      {item.title}
                     </Button>
                   </motion.div>
                 ))}
@@ -184,7 +207,7 @@ const Navbar = () => {
             open={mobileOpen}
             onClose={() => setMobileOpen(false)}
             ModalProps={{
-              keepMounted: true, // Better mobile performance
+              keepMounted: true,
             }}
             PaperProps={{
               sx: {

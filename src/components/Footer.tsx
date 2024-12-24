@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, IconButton, Grid } from '@mui/material';
+import { Box, Container, Typography, Link, Grid } from '@mui/material';
 import { GitHub, LinkedIn, Twitter } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
@@ -8,21 +8,24 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        py: 4,
-        backgroundColor: 'primary.main',
-        color: 'white'
+        bgcolor: 'black',
+        color: 'white',
+        py: 3,
+        borderTop: '1px solid',
+        borderColor: 'divider',
       }}
     >
       <Container maxWidth="lg">
         <Grid container spacing={3} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} md={4}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontFamily: "'Playfair Display', serif",
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
                 mb: 1,
+                color: 'primary.main',
+                fontFamily: "'Playfair Display', serif",
                 textAlign: { xs: 'center', md: 'left' },
-                color: 'secondary.main'
               }}
             >
               The Victor Collective
@@ -41,11 +44,11 @@ const Footer = () => {
           <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
             <Box sx={{ mb: 1 }}>
               {[
-                { icon: <GitHub />, url: 'https://github.com' },
+                { icon: <GitHub />, url: 'https://github.com/hustada' },
                 { icon: <LinkedIn />, url: 'https://linkedin.com' },
                 { icon: <Twitter />, url: 'https://twitter.com' }
               ].map((social, index) => (
-                <IconButton
+                <Link
                   key={index}
                   component={motion.a}
                   whileHover={{ scale: 1.2 }}
@@ -55,27 +58,36 @@ const Footer = () => {
                   sx={{
                     color: 'white',
                     mx: 1,
+                    textDecoration: 'none',
                     '&:hover': {
-                      color: 'secondary.main'
-                    }
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
                   }}
                 >
                   {social.icon}
-                </IconButton>
+                </Link>
               ))}
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
             <Typography 
               variant="body2" 
               sx={{ 
-                textAlign: { xs: 'center', md: 'right' },
-                opacity: 0.8
+                color: 'grey.400',
+                fontFamily: "'Inter', sans-serif",
               }}
             >
-              &copy; {new Date().getFullYear()} <Box component="span" sx={{ color: 'secondary.main' }}>The Victor Collective</Box>
-              <br />
+              &copy; {new Date().getFullYear()} The Victor Collective
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: 'grey.400',
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
               All rights reserved
             </Typography>
           </Grid>
