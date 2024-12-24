@@ -7,7 +7,6 @@ import {
   Box, 
   Grid,
   useTheme,
-  useMediaQuery,
   Alert,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +14,6 @@ import emailjs from '@emailjs/browser';
 
 const Contact: React.FC = () => {
   const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
 
   const [formData, setFormData] = useState({
     from_name: '',

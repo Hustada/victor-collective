@@ -4,14 +4,12 @@ import {
   Typography, 
   Grid, 
   Box, 
-  useMediaQuery, 
   useTheme 
 } from '@mui/material';
 import { motion } from 'framer-motion';
 
 const About: React.FC = () => {
   const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
 
   // Skill items with icons and descriptions
   const skills = [
