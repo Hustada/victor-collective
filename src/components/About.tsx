@@ -114,7 +114,7 @@ const About: React.FC = () => {
                 }}
               >
                 <img 
-                  src="/assets/brand/profile.jpg" 
+                  src={process.env.PUBLIC_URL + "/assets/brand/victorcol1.jpg"} 
                   alt="Victor Profile" 
                   style={{
                     width: '100%',
