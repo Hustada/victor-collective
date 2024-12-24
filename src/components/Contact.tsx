@@ -8,6 +8,7 @@ import {
   Grid,
   useTheme,
   Alert,
+  Divider,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';

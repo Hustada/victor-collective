@@ -305,225 +305,235 @@ const Newsletter: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          background: 'transparent',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <AnimatePresence mode="wait">
-          {status !== 'success' && (
-            <motion.div
-              initial={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Box textAlign="center" mb={4}>
-                <Typography
-                  variant="h3"
-                  component="h2"
-                  sx={{
-                    fontWeight: 700,
-                    mb: 2,
-                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  Stay Updated
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Subscribe to receive the latest updates and insights
-                </Typography>
-              </Box>
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <Box
+      component="section"
+      sx={{
+        py: 8,
+        backgroundColor: 'background.default',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        mb: 8
+      }}
+    >
+      <Container maxWidth="md">
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            background: 'transparent',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <AnimatePresence mode="wait">
+            {status !== 'success' && (
+              <motion.div
+                initial={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Box textAlign="center" mb={4}>
+                  <Typography
+                    variant="h3"
+                    component="h2"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 2,
+                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    Stay Updated
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Subscribe to receive the latest updates and insights
+                  </Typography>
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <AnimatePresence mode="wait">
-          {status !== 'success' ? (
-            <motion.div
-              initial={{ opacity: 1 }}
-              exit={{ 
-                opacity: 0,
-                transition: {
-                  duration: 1,
-                  delay: 0.8
-                }
-              }}
-            >
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-                sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  gap: 2,
-                  maxWidth: '600px',
-                  mx: 'auto',
-                  position: 'relative',
-                  height: '56px',
+          <AnimatePresence mode="wait">
+            {status !== 'success' ? (
+              <motion.div
+                initial={{ opacity: 1 }}
+                exit={{ 
+                  opacity: 0,
+                  transition: {
+                    duration: 1,
+                    delay: 0.8
+                  }
                 }}
               >
-                {/* Mechanical Panel Pieces */}
-                <motion.div
-                  initial={false}
-                  animate={{
-                    opacity: isClosing ? 1 : 0,
-                    zIndex: isClosing ? 10 : -1,
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
+                <Box
+                  component="form"
+                  onSubmit={handleSubmit}
+                  sx={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: '4px',
-                    perspective: '1000px',
-                    pointerEvents: 'none',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                    maxWidth: '600px',
+                    mx: 'auto',
+                    position: 'relative',
+                    height: '56px',
                   }}
                 >
-                  {[...Array(3)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ y: panelDirection === 'down' ? '-150%' : '150%' }}
-                      animate={isClosing ? {
-                        y: panelDirection === 'down' ? ['0%', '150%'] : ['-150%', '0%'],
-                        rotateX: panelDirection === 'down' ? [0, 60] : [-60, 0],
-                        transition: {
-                          duration: 0.8,
-                          delay: i * 0.2,
-                          ease: [0.4, 0, 0.2, 1]
-                        }
-                      } : {
-                        y: '0%',
-                        rotateX: 0
-                      }}
-                      style={{
-                        width: '33%',
-                        height: '100%',
-                        background: `linear-gradient(135deg, ${theme.palette.background.paper}, ${theme.palette.primary.dark})`,
-                        borderRadius: '4px',
-                        border: `2px solid ${theme.palette.primary.main}`,
-                        position: 'relative',
-                        transformOrigin: panelDirection === 'down' ? 'top' : 'bottom',
-                      }}
-                    >
-                      {/* Gear decoration */}
-                      <motion.svg
-                        viewBox="0 0 50 50"
-                        style={{
-                          width: '30px',
-                          height: '30px',
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                        }}
+                  {/* Mechanical Panel Pieces */}
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      opacity: isClosing ? 1 : 0,
+                      zIndex: isClosing ? 10 : -1,
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: '4px',
+                      perspective: '1000px',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ y: panelDirection === 'down' ? '-150%' : '150%' }}
                         animate={isClosing ? {
-                          rotate: [0, panelDirection === 'down' ? 360 : -360],
-                          scale: [1, 0.8],
+                          y: panelDirection === 'down' ? ['0%', '150%'] : ['-150%', '0%'],
+                          rotateX: panelDirection === 'down' ? [0, 60] : [-60, 0],
                           transition: {
                             duration: 0.8,
                             delay: i * 0.2,
-                            ease: "linear"
+                            ease: [0.4, 0, 0.2, 1]
                           }
-                        } : {}}
+                        } : {
+                          y: '0%',
+                          rotateX: 0
+                        }}
+                        style={{
+                          width: '33%',
+                          height: '100%',
+                          background: `linear-gradient(135deg, ${theme.palette.background.paper}, ${theme.palette.primary.dark})`,
+                          borderRadius: '4px',
+                          border: `2px solid ${theme.palette.primary.main}`,
+                          position: 'relative',
+                          transformOrigin: panelDirection === 'down' ? 'top' : 'bottom',
+                        }}
                       >
-                        <path
-                          d="M25 10L28 3L22 3L25 10ZM40 25L47 28L47 22L40 25ZM25 40L22 47L28 47L25 40ZM10 25L3 22L3 28L10 25ZM25 15C19.5 15 15 19.5 15 25C15 30.5 19.5 35 25 35C30.5 35 35 30.5 35 25C35 19.5 30.5 15 25 15Z"
-                          fill={theme.palette.secondary.main}
+                        {/* Gear decoration */}
+                        <motion.svg
+                          viewBox="0 0 50 50"
                           style={{
-                            filter: `drop-shadow(0 0 2px ${theme.palette.secondary.main})`
+                            width: '30px',
+                            height: '30px',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
                           }}
-                        />
-                      </motion.svg>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                          animate={isClosing ? {
+                            rotate: [0, panelDirection === 'down' ? 360 : -360],
+                            scale: [1, 0.8],
+                            transition: {
+                              duration: 0.8,
+                              delay: i * 0.2,
+                              ease: "linear"
+                            }
+                          } : {}}
+                        >
+                          <path
+                            d="M25 10L28 3L22 3L25 10ZM40 25L47 28L47 22L40 25ZM25 40L22 47L28 47L25 40ZM10 25L3 22L3 28L10 25ZM25 15C19.5 15 15 19.5 15 25C15 30.5 19.5 35 25 35C30.5 35 35 30.5 35 25C35 19.5 30.5 15 25 15Z"
+                            fill={theme.palette.secondary.main}
+                            style={{
+                              filter: `drop-shadow(0 0 2px ${theme.palette.secondary.main})`
+                            }}
+                          />
+                        </motion.svg>
+                      </motion.div>
+                    ))}
+                  </motion.div>
 
-                <TextField
-                  fullWidth
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isClosing}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: 'background.paper',
-                    },
-                    position: 'relative',
-                    zIndex: isClosing ? 1 : 2
-                  }}
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={status === 'loading' || isClosing}
-                  sx={{
-                    px: 4,
-                    minWidth: { xs: '100%', sm: 'auto' },
-                    position: 'relative',
-                    overflow: 'hidden',
-                    zIndex: isClosing ? 1 : 2
-                  }}
-                >
-                  {status === 'loading' ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    'Subscribe'
-                  )}
-                </Button>
-              </Box>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                transition: {
-                  delay: 0.8, // Start after panels close
-                  duration: 0.5,
-                  ease: [0.4, 0, 0.2, 1]
-                }
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <SuccessMessage />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {status === 'error' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Alert
-                severity="error"
-                sx={{ mt: 2, maxWidth: '600px', mx: 'auto' }}
+                  <TextField
+                    fullWidth
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isClosing}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: 'background.paper',
+                      },
+                      position: 'relative',
+                      zIndex: isClosing ? 1 : 2
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={status === 'loading' || isClosing}
+                    sx={{
+                      px: 4,
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      position: 'relative',
+                      overflow: 'hidden',
+                      zIndex: isClosing ? 1 : 2
+                    }}
+                  >
+                    {status === 'loading' ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      'Subscribe'
+                    )}
+                  </Button>
+                </Box>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  transition: {
+                    delay: 0.8, // Start after panels close
+                    duration: 0.5,
+                    ease: [0.4, 0, 0.2, 1]
+                  }
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                {errorMessage}
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Paper>
-    </Container>
+                <SuccessMessage />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {status === 'error' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Alert
+                  severity="error"
+                  sx={{ mt: 2, maxWidth: '600px', mx: 'auto' }}
+                >
+                  {errorMessage}
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

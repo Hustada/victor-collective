@@ -28,6 +28,8 @@ const Blog: React.FC = () => {
       sx={{
         py: 8,
         backgroundColor: 'background.default',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        mb: 8
       }}
     >
       <Container maxWidth="lg">
@@ -45,11 +47,7 @@ const Blog: React.FC = () => {
             sx={{
               mb: 6,
               fontWeight: 'bold',
-              background: theme.palette.mode === 'dark'
-                ? 'linear-gradient(45deg, #FF8E3C 30%, #FF5733 90%)'
-                : 'linear-gradient(45deg, #FF5733 30%, #FF8E3C 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: theme.palette.text.primary,
             }}
           >
             Blog
