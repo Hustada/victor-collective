@@ -21,7 +21,10 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
             whileTap={{ scale: 0.98 }}
           >
             <Card 
-              onClick={() => navigate(`/blog/${post.slug}`)}
+              onClick={() => {
+                window.scrollTo(0, 0);
+                navigate(`/blog/${post.slug}`);
+              }}
               sx={{ 
                 cursor: 'pointer',
                 height: '100%',

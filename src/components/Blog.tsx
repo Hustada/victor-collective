@@ -76,7 +76,10 @@ const Blog: React.FC = () => {
                       transform: 'translateY(-4px)',
                     },
                   }}
-                  onClick={() => navigate(`/blog/${post.slug}`)}
+                  onClick={() => {
+                    window.scrollTo(0, 0);
+                    navigate(`/blog/${post.slug}`);
+                  }}
                 >
                   <CardMedia
                     component="img"
