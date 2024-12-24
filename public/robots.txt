@@ -1,0 +1,10 @@
+# Allow all web crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://victorcollective.com/sitemap.xml
+
+# Prevent crawling of certain directories if needed
+# Disallow: /private/
+# Disallow: /admin/
