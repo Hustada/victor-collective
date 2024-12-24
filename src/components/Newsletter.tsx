@@ -375,7 +375,7 @@ const Newsletter: React.FC = () => {
                     maxWidth: '600px',
                     mx: 'auto',
                     position: 'relative',
-                    height: '56px',
+                    minHeight: '56px',
                   }}
                 >
                   {/* Mechanical Panel Pieces */}
@@ -480,10 +480,13 @@ const Newsletter: React.FC = () => {
                     disabled={status === 'loading' || isClosing}
                     sx={{
                       px: 4,
+                      py: { xs: 1.5, sm: 'auto' },
                       minWidth: { xs: '100%', sm: 'auto' },
                       position: 'relative',
                       overflow: 'hidden',
-                      zIndex: isClosing ? 1 : 2
+                      zIndex: isClosing ? 1 : 2,
+                      height: { xs: '48px', sm: '56px' },
+                      alignSelf: { sm: 'stretch' }
                     }}
                   >
                     {status === 'loading' ? (
