@@ -23,13 +23,14 @@ export const manualProjects: Record<string, ManualProject> = {
     liveUrl: 'https://metacraft-beta.vercel.app',
     technologies: ['React', 'TypeScript', 'OpenAI', 'Next.js'],
   },
-  'cascade': {
-    repoName: 'cascade',
-    title: 'Cascade AI Assistant',
-    description: 'A powerful AI coding assistant that helps developers write, debug, and understand code through natural language interaction.',
+  'q-bot': {
+    repoName: 'q-bot',
+    title: 'Q Bot',
+    description: 'An AI-powered Discord bot that helps manage server queues and provides interactive features for community engagement.',
     category: 'AI/ML',
     featured: true,
     order: 2,
-    technologies: ['Python', 'TypeScript', 'GPT-4', 'LangChain'],
+    githubUrl: 'https://github.com/Hustada/Q-AI-X-Bot',
+    technologies: ['Python', 'Discord.py', 'OpenAI', 'MongoDB'],
   }
 };
