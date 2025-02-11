@@ -13,24 +13,34 @@ export interface ManualProject {
 }
 
 export const manualProjects: Record<string, ManualProject> = {
-  'metacraft': {
-    repoName: 'metacraft',
-    title: 'MetaCraft AI',
-    description: 'An innovative AI-powered platform for building and deploying intelligent applications.',
+  'vectus-ai': {
+    repoName: 'vectus-ai',
+    title: 'Vectus AI',
+    description: 'Intelligent medical scheduling assistant that leverages natural language processing for seamless appointment management. Features real-time availability checking and contextual conversation memory.',
     category: 'AI/ML',
     featured: true,
     order: 1,
-    liveUrl: 'https://metacraft-beta.vercel.app',
-    technologies: ['React', 'TypeScript', 'OpenAI', 'Next.js'],
+    liveUrl: 'https://vectus-ai.vercel.app',
+    technologies: ['Node.js', 'Express', 'OpenAI GPT-4', 'JavaScript', 'Real-time Processing'],
+  },
+  'fallacy-bot': {
+    repoName: 'fallacy-bot',
+    title: 'Fallacy Bot',
+    description: 'Advanced AI system for detecting and explaining logical fallacies in text. Features comprehensive fallacy detection, educational feedback, and an interactive testing dashboard.',
+    category: 'AI/ML',
+    featured: true,
+    order: 2,
+    githubUrl: 'https://github.com/Hustada/fallacy-bot',
+    technologies: ['Python', 'Streamlit', 'OpenAI GPT-3.5', 'SQLite', 'Machine Learning'],
   },
   'q-bot': {
     repoName: 'q-bot',
     title: 'Q Bot',
-    description: 'An AI-powered Discord bot that helps manage server queues and provides interactive features for community engagement.',
+    description: 'AI-powered social media bot that generates and posts Star Trek Q character-themed content. Showcases creative content generation and automated social media management.',
     category: 'AI/ML',
     featured: true,
-    order: 2,
+    order: 3,
     githubUrl: 'https://github.com/Hustada/Q-AI-X-Bot',
-    technologies: ['Python', 'Discord.py', 'OpenAI', 'MongoDB'],
+    technologies: ['Python', 'OpenAI GPT', 'Twitter API', 'Automation', 'NLP'],
   }
 };

@@ -8,38 +8,39 @@ export interface ProjectConfig {
   image: string;
   category: ProjectCategory;
   liveUrl?: string;
+  html_url?: string;
   featured: boolean;
   order?: number;
 }
 
 export const projectsConfig: Record<string, ProjectConfig> = {
-  'metacraft': {
-    repoName: 'metacraft',
-    title: 'MetaCraft AI',
-    description: 'An intelligent web content analyzer using GPT-4 and Claude 3 for instant summaries, insights, and structured data extraction. Features modern React UI and real-time analysis.',
+  'vectus-ai': {
+    repoName: 'vectus-ai',
+    title: 'Vectus AI - Medical Scheduling Assistant',
+    description: 'Intelligent medical scheduling system featuring natural language processing, real-time availability checking, and contextual conversation memory. Built with Node.js, Express, and GPT-4 integration, demonstrating expertise in healthcare AI applications.',
     image: getRandomImage('AI/ML'),
     category: 'AI/ML',
-    liveUrl: 'https://metacraft-beta.vercel.app',
+    liveUrl: 'https://vectus-ai.vercel.app',
     featured: true,
     order: 1
   },
-  'ai-showcase': {
-    repoName: 'ai-showcase',
-    title: 'The Victor Collective',
-    description: 'A modern portfolio built with React, TypeScript, and Material-UI, featuring dynamic animations and EmailJS integration for seamless contact functionality.',
-    image: getRandomImage('React'),
-    category: 'React',
-    liveUrl: 'https://ai-showcase-one.vercel.app',
+  'fallacy-bot': {
+    repoName: 'fallacy-bot',
+    title: 'Fallacy Bot - AI Logic Analyzer',
+    description: 'Sophisticated AI system that detects logical fallacies in text and provides educational feedback. Features advanced GPT integration, interactive dashboard, and comprehensive fallacy detection across multiple categories. Built with Python and Streamlit.',
+    image: getRandomImage('AI/ML'),
+    category: 'AI/ML',
+    html_url: 'https://github.com/Hustada/fallacy-bot',
     featured: true,
     order: 2
   },
-  'fleet-dashboard': {
-    repoName: 'fleet-dashboard',
-    title: 'Fleet Dashboard',
-    description: 'Modern fleet management dashboard with responsive UI, built with React and Material-UI. Features real-time tracking and analytics.',
-    image: getRandomImage('Full Stack'),
-    category: 'Full Stack',
-    liveUrl: 'https://fleet-dashboard-demo.vercel.app',
+  'q-bot': {
+    repoName: 'q-bot',
+    title: 'Q Bot - AI Content Generation',
+    description: 'Creative AI bot that generates and posts Star Trek Q character-themed content on X (Twitter). Demonstrates expertise in AI content generation, automated social media management, and character-based interactions using OpenAI GPT models.',
+    image: getRandomImage('AI/ML'),
+    category: 'AI/ML',
+    html_url: 'https://github.com/Hustada/Q-AI-X-Bot',
     featured: true,
     order: 3
   }
