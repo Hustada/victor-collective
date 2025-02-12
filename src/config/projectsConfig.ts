@@ -22,7 +22,7 @@ export const projectsConfig: Record<string, ProjectConfig> = {
     image: getRandomImage('Full Stack'),
     category: 'Full Stack',
     topics: ['nodejs', 'express', 'gpt-4', 'nlp', 'ai', 'typescript', 'react'],
-    liveUrl: 'https://vectus-ai.vercel.app',
+    liveUrl: 'https://vectus-ai-hustadas-projects.vercel.app/',
     featured: true,
     order: 1
   },

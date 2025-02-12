@@ -7,7 +7,7 @@ description: "A technical exploration of building an AI-powered bot to detect an
 
 # Introduction
 
-In the age of social media, misinformation and flawed arguments can spread like wildfire. To help combat this, we developed RhetoricalRef - an AI-powered system that detects logical fallacies in social media posts and provides explanations and constructive feedback. 
+In the age of social media, misinformation and flawed arguments can spread like wildfire. To help combat this, I developed RhetoricalRef - an AI-powered system that detects logical fallacies in social media posts and provides explanations and constructive feedback. 
 
 The bot leverages multiple advanced language models including OpenAI's GPT-4, Anthropic's Claude, and Google's Gemini to analyze text, identify common logical fallacies, and generate human-like responses. It's built using Python and utilizes Playwright for web automation, enabling it to interact with social media platforms directly without relying on API limitations.
 
@@ -198,8 +198,6 @@ The dashboard also includes pages for viewing recent bot activity and analytics.
 
 # Conclusion
 
-Building Rhetoric Ref was an exciting journey into the world of AI, NLP, and software architecture. By leveraging powerful language models like GPT-3 and a robust Python tech stack, we were able to create an engaging and educational tool to promote critical thinking on social media.
+RhetoricalRef demonstrates how AI can be leveraged to promote critical thinking and combat misinformation on social media. The combination of multiple language models and web automation creates a system that can effectively identify and explain logical fallacies in real-time.
 
-Through this project, we learned valuable lessons in prompt engineering, error handling, scalability, and iterative development. We also realized the immense potential and responsibility that comes with building AI systems that interact directly with users.
-
-As we continue to enhance Rhetoric Ref, we're excited about the possibilities of using AI for good - to foster healthier online discourse, combat misinformation, and empower individuals to think more critically.
+While the current implementation focuses on basic fallacy detection and explanation, the architecture supports expansion into more sophisticated analysis techniques and educational features. The modular design allows for easy integration of new models and capabilities as the project grows.
