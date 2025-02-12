@@ -1,41 +1,55 @@
 import matter from 'gray-matter';
 import { BlogPost, BlogPostMeta } from '../types/blog';
-import {
-  masteringReactHooks,
-  buildingModernPortfolio,
-  futureOfWebDevelopment,
-} from '../content/blog';
 
-export type BlogSlug = 'mastering-react-hooks' | 'building-modern-portfolio' | 'future-of-web-development';
+// Blog post images
+const qBotImage = '/assets/brand/blogAIDev1.jpg';
+const fallacyBotImage = '/assets/brand/blogAIDev2.jpg';
+const vectusAiImage = '/assets/brand/blogTypescriptDev1.jpg';
 
-type BlogPosts = {
-  [K in BlogSlug]: string;
+// Import blog posts
+const qBotContent = require('../content/blog/q-bot.md');
+const fallacyBotContent = require('../content/blog/fallacy-bot.md');
+const vectusAiContent = require('../content/blog/vectus-ai.md');
+
+function getMarkdownContent(content: any): string {
+  // If content is a module with a default export, use that
+  if (content && typeof content === 'object' && 'default' in content) {
+    return content.default;
+  }
+  // Otherwise use the content directly
+  return content;
+}
+
+const blogPosts: { [key: string]: { content: string; image: string } } = {
+  'q-bot': { content: getMarkdownContent(qBotContent), image: qBotImage },
+  'fallacy-bot': { content: getMarkdownContent(fallacyBotContent), image: fallacyBotImage },
+  'vectus-ai': { content: getMarkdownContent(vectusAiContent), image: vectusAiImage }
 };
 
-// Map blog posts
-const blogPosts: BlogPosts = {
-  'mastering-react-hooks': masteringReactHooks,
-  'building-modern-portfolio': buildingModernPortfolio,
-  'future-of-web-development': futureOfWebDevelopment,
-};
-
-function isValidSlug(slug: string): slug is BlogSlug {
-  return Object.keys(blogPosts).includes(slug);
+function isValidSlug(slug: string): boolean {
+  return slug in blogPosts;
 }
 
 export function getBlogPosts(): BlogPostMeta[] {
-  const posts = Object.entries(blogPosts).map(([slug, content]) => {
+  const posts = Object.entries(blogPosts).map(([slug, { content, image }]) => {
     try {
-      const parsed = matter(content);
+      console.log(`Raw content for ${slug}:`, content);
+      // Remove any BOM characters that might be present
+      const cleanContent = content.replace(/^\ufeff/, '');
+      console.log(`Clean content for ${slug}:`, cleanContent);
+      const parsed = matter(cleanContent);
+      console.log(`Parsed data for ${slug}:`, parsed);
       
-      return {
+      const meta = {
         slug,
         title: parsed.data.title || '',
         date: parsed.data.date || new Date().toISOString(),
         tags: parsed.data.tags || [],
         description: parsed.data.description || '',
-        coverImage: parsed.data.coverImage || '',
+        coverImage: image,
       };
+      console.log('Blog post meta:', meta);
+      return meta;
     } catch (error) {
       console.error(`Error parsing blog post ${slug}:`, error);
       return {
@@ -61,12 +75,7 @@ export function getBlogPost(slug: string): BlogPost | null {
       return null;
     }
     
-    const content = blogPosts[slug];
-    if (!content) {
-      console.log('No content for slug:', slug);
-      return null;
-    }
-
+    const { content, image } = blogPosts[slug];
     const parsed = matter(content);
 
     return {
@@ -75,7 +84,7 @@ export function getBlogPost(slug: string): BlogPost | null {
       date: parsed.data.date || new Date().toISOString(),
       tags: parsed.data.tags || [],
       description: parsed.data.description || '',
-      coverImage: parsed.data.coverImage || '',
+      coverImage: image,
       content: parsed.content || '',
     };
   } catch (error) {

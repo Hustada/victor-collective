@@ -73,6 +73,7 @@ const Blog: React.FC = () => {
                     '&:hover': {
                       transform: 'translateY(-4px)',
                     },
+                    minHeight: { xs: 'auto', md: 500 }, // Responsive minimum height
                   }}
                   onClick={() => {
                     window.scrollTo(0, 0);
@@ -81,24 +82,38 @@ const Blog: React.FC = () => {
                 >
                   <CardMedia
                     component="img"
-                    height="200"
+                    height="250"
                     image={post.coverImage}
                     alt={post.title}
-                    sx={{ objectFit: 'cover' }}
+                    sx={{
+                      objectFit: 'cover',
+                      borderBottom: `1px solid ${theme.palette.divider}`,
+                    }}
                   />
-                  <CardContent sx={{ flexGrow: 1 }}>
+                  <CardContent sx={{ 
+                    flexGrow: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: 2,
+                    p: 3 // Add consistent padding
+                  }}>
                     <Typography
                       gutterBottom
                       variant="h5"
                       component="h3"
-                      sx={{ fontWeight: 'bold' }}
+                      sx={{ 
+                        fontWeight: 'bold',
+                        fontSize: { xs: '1.25rem', md: '1.5rem' }, // Responsive font size
+                        lineHeight: 1.2,
+                        mb: 1
+                      }}
                     >
                       {post.title}
                     </Typography>
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ mb: 2, display: 'block' }}
+                      sx={{ display: 'block' }}
                     >
                       {format(new Date(post.date), 'MMMM d, yyyy')}
                     </Typography>
@@ -116,7 +131,7 @@ const Blog: React.FC = () => {
                     >
                       {post.description}
                     </Typography>
-                    <Box sx={{ mt: 2 }}>
+                    <Box sx={{ mt: 'auto', pt: 2 }}>
                       {post.tags.map((tag) => (
                         <Chip
                           key={tag}

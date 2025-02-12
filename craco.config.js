@@ -18,6 +18,12 @@ module.exports = {
         })
       );
 
+      // Add markdown loader
+      webpackConfig.module.rules.push({
+        test: /\.md$/,
+        type: 'asset/source'
+      });
+
       return webpackConfig;
     },
   },
