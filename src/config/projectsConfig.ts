@@ -33,6 +33,7 @@ export const projectsConfig: Record<string, ProjectConfig> = {
     image: getRandomImage('Python'),
     category: 'Python',
     topics: ['python', 'streamlit', 'gpt-3.5', 'nlp', 'ai', 'sqlite', 'machine-learning'],
+    liveUrl: 'https://fallacy-bot-f2yogzwbkm8g7njxxfasz4.streamlit.app',
     html_url: 'https://github.com/Hustada/fallacy-bot',
     featured: true,
     order: 2

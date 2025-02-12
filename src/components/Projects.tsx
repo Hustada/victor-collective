@@ -72,7 +72,7 @@ const Projects = () => {
               githubUrl: manual?.githubUrl || repo.html_url,
               technologies: manual?.technologies || [repo.language, ...repo.topics].filter(Boolean),
               image: getRandomImage(category),
-              liveUrl: manual?.liveUrl || baseProject.liveUrl || repo.homepage || undefined,
+              liveUrl: config?.liveUrl || manual?.liveUrl || repo.homepage || undefined,
               featured: baseProject.featured ?? false
             };
             
