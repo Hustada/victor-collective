@@ -1,6 +1,6 @@
 ---
 title: "Building Q Bot: An AI-Powered Star Trek Twitter Bot"
-date: 2023-07-11
+date: 2025-01-15
 tags: [AI, Twitter, Node.js, OpenAI, Automation]
 description: "Explore the technical journey of creating Q Bot, an AI-powered Twitter bot that generates Star Trek Q character-themed content using Node.js, OpenAI GPT, and the Twitter API."
 ---

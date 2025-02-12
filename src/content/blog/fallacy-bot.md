@@ -1,6 +1,6 @@
 ---
 title: "Building RhetoricalRef: An AI-Powered Logical Fallacy Detector"
-date: 2023-05-22
+date: 2024-12-18
 tags: [Python, AI, NLP, Machine Learning, Playwright]
 description: "A technical exploration of building an AI-powered bot to detect and explain logical fallacies in social media posts using Python, multiple LLM models, and web automation."
 ---

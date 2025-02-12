@@ -1,6 +1,6 @@
 ---
 title: "Building Vectus AI: An Intelligent Medical Scheduling Assistant with OpenAI GPT-4"
-date: 2023-06-01
+date: 2025-02-05
 tags: [AI, NLP, Node.js, OpenAI, GPT-4, JavaScript]
 description: "Learn how we built Vectus AI, an advanced medical scheduling assistant powered by OpenAI GPT-4. This technical deep dive explores the architecture, implementation, and challenges of creating an AI-driven conversational agent for streamlining medical appointments."
 ---
@@ -45,6 +45,41 @@ app.listen(port, () => {
   console.log(`Vectus AI running on port ${port}`);
 });
 ```
+
+## Real-World Interactions and Logging
+
+Let's look at how Vectus AI handles a real patient interaction. Here's an example of the system processing a patient's complaint about ankle pain:
+
+```javascript
+CRM Update: {
+  "id": 1739368593728,
+  "phone": "web-user",
+  "status": "new",
+  "interactions": [
+    {
+      "timestamp": "2025-02-12T13:56:33.728Z",
+      "inbound": "I have ankle pain",
+      "outbound": {
+        "score": 8,
+        "qualified": true,
+        "response": "I'm sorry to hear that you're experiencing ankle pain. It's important to have that checked by a medical professional. Shall I schedule an appointment for you? Please provide me with your day and time preferences.",
+        "nextStep": "appointment_scheduling",
+        "shouldTerminate": false
+      }
+    }
+  ]
+}
+```
+
+In this interaction, we can see several important aspects of how Vectus AI works:
+
+1. **Initial Response**: The system immediately acknowledges the patient's concern and shows empathy.
+2. **Qualification Score**: A score of 8 indicates this is a high-priority case that requires medical attention.
+3. **Next Steps**: The system transitions to appointment scheduling mode, ready to book a visit.
+4. **Interaction Tracking**: All interactions are logged with timestamps and unique IDs for future reference.
+5. **State Management**: The conversation status is tracked, allowing for continuous dialogue.
+
+This structured logging helps us monitor the system's performance, track patient interactions, and continuously improve the AI's responses.
 
 ## OpenAI GPT-4 Integration
 
