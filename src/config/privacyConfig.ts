@@ -31,14 +31,14 @@ export interface PrivacyPolicy {
 }
 
 export const privacyPolicies: Record<string, PrivacyPolicy> = {
-  stacks: {
-    appName: 'Stacks',
-    slug: 'stacks',
+  stakks: {
+    appName: 'Stakks',
+    slug: 'stakks',
     lastUpdated: '2026-01-08',
     effectiveDate: '2026-01-08',
     contactEmail: 'hello@victorcollective.com',
     sections: {
-      overview: `Stacks ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.`,
+      overview: `Stakks ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.`,
       dataCollected: {
         title: 'Information We Collect',
         items: [
@@ -91,7 +91,7 @@ export const privacyPolicies: Record<string, PrivacyPolicy> = {
         'Export your data',
         'Opt out of non-essential communications',
       ],
-      childrenPrivacy: `Stacks is not intended for children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately.`,
+      childrenPrivacy: `Stakks is not intended for children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately.`,
       changes: `We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.`,
     },
   },
