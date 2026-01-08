@@ -1,97 +1,166 @@
 import React from 'react';
-import { Box, Container, Typography, Link, Grid } from '@mui/material';
-import { GitHub, LinkedIn, Twitter } from '@mui/icons-material';
+import { Box, Container, Typography, Link, Grid, IconButton } from '@mui/material';
+import { GithubLogo, LinkedinLogo, TwitterLogo } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { alpha } from '@mui/material/styles';
+import { palette } from '../theme';
 
-const Footer = () => {
+const Footer: React.FC = () => {
+  const socialLinks = [
+    {
+      icon: <GithubLogo size={20} weight="bold" />,
+      url: 'https://github.com/hustada',
+      label: 'GitHub',
+    },
+    {
+      icon: <LinkedinLogo size={20} weight="bold" />,
+      url: 'https://linkedin.com',
+      label: 'LinkedIn',
+    },
+    {
+      icon: <TwitterLogo size={20} weight="bold" />,
+      url: 'https://twitter.com',
+      label: 'Twitter',
+    },
+  ];
+
   return (
     <Box
       component="footer"
       sx={{
-        bgcolor: 'black',
-        color: 'white',
-        py: 3,
-        borderTop: '1px solid',
-        borderColor: 'divider',
+        py: 6,
+        backgroundColor: palette.background.void,
+        borderTop: `1px solid ${palette.border.subtle}`,
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={3} alignItems="center" justifyContent="space-between">
+        <Grid
+          container
+          spacing={4}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          {/* Brand */}
           <Grid item xs={12} md={4}>
             <Typography
               variant="h6"
               sx={{
+                fontFamily: '"Space Grotesk", sans-serif',
                 fontWeight: 700,
+                color: palette.text.primary,
                 mb: 1,
-                color: 'primary.main',
-                fontFamily: "'Playfair Display', serif",
                 textAlign: { xs: 'center', md: 'left' },
               }}
             >
-              The Victor Collective
+              THE VICTOR COLLECTIVE
             </Typography>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                opacity: 0.8,
-                textAlign: { xs: 'center', md: 'left' }
+            <Typography
+              variant="body2"
+              sx={{
+                color: palette.text.muted,
+                textAlign: { xs: 'center', md: 'left' },
+                fontFamily: '"Inter", sans-serif',
               }}
             >
-              Innovating at the intersection of AI and web development
+              Building digital experiences with modern tech
             </Typography>
           </Grid>
-          
+
+          {/* Social Links */}
           <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
-            <Box sx={{ mb: 1 }}>
-              {[
-                { icon: <GitHub />, url: 'https://github.com/hustada' },
-                { icon: <LinkedIn />, url: 'https://linkedin.com' },
-                { icon: <Twitter />, url: 'https://twitter.com' }
-              ].map((social, index) => (
-                <Link
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+              {socialLinks.map((social, index) => (
+                <motion.div
                   key={index}
-                  component={motion.a}
-                  whileHover={{ scale: 1.2 }}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'white',
-                    mx: 1,
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'primary.main',
-                      textDecoration: 'underline',
-                    },
-                  }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {social.icon}
-                </Link>
+                  <IconButton
+                    component={Link}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    sx={{
+                      color: palette.text.secondary,
+                      border: `1px solid ${palette.border.subtle}`,
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        color: palette.primary.main,
+                        borderColor: palette.primary.main,
+                        backgroundColor: alpha(palette.primary.main, 0.1),
+                      },
+                    }}
+                  >
+                    {social.icon}
+                  </IconButton>
+                </motion.div>
               ))}
             </Box>
           </Grid>
 
+          {/* Copyright */}
           <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: 'grey.400',
-                fontFamily: "'Inter', sans-serif",
+            <Typography
+              variant="caption"
+              sx={{
+                color: palette.text.muted,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '0.7rem',
+                letterSpacing: '0.05em',
+                display: 'block',
               }}
             >
-              &copy; {new Date().getFullYear()} The Victor Collective
+              &copy; {new Date().getFullYear()} THE VICTOR COLLECTIVE
             </Typography>
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: 'grey.400',
-                fontFamily: "'Inter', sans-serif",
+            <Typography
+              variant="caption"
+              sx={{
+                color: palette.text.muted,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '0.7rem',
+                letterSpacing: '0.05em',
               }}
             >
-              All rights reserved
+              ALL RIGHTS RESERVED
             </Typography>
           </Grid>
         </Grid>
+
+        {/* Bottom accent line */}
+        <Box
+          sx={{
+            mt: 6,
+            pt: 4,
+            borderTop: `1px solid ${palette.border.subtle}`,
+            textAlign: 'center',
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: palette.text.muted,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.65rem',
+              letterSpacing: '0.1em',
+            }}
+          >
+            DESIGNED & BUILT WITH{' '}
+            <Box
+              component="span"
+              sx={{ color: palette.primary.main }}
+            >
+              REACT
+            </Box>{' '}
+            +{' '}
+            <Box
+              component="span"
+              sx={{ color: palette.secondary.main }}
+            >
+              TYPESCRIPT
+            </Box>
+          </Typography>
+        </Box>
       </Container>
     </Box>
   );

@@ -1,169 +1,206 @@
 import React from 'react';
-import {
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Box,
-  useTheme,
-  Chip,
-} from '@mui/material';
+import { Container, Grid, Typography, Button, Box, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from '@phosphor-icons/react';
+import { alpha } from '@mui/material/styles';
 import { getBlogPosts } from '../utils/blog';
 import { format } from 'date-fns';
+import SectionHeader from './ui/SectionHeader';
+import { palette } from '../theme';
+
+const BlogCard: React.FC<{
+  post: {
+    slug: string;
+    title: string;
+    description: string;
+    date: string;
+    coverImage: string;
+    tags: string[];
+  };
+  index: number;
+}> = ({ post, index }) => {
+  const navigate = useNavigate();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+    >
+      <Box
+        onClick={() => {
+          window.scrollTo(0, 0);
+          navigate(`/blog/${post.slug}`);
+        }}
+        sx={{
+          cursor: 'pointer',
+          p: 3,
+          background: palette.background.elevated,
+          border: `1px solid ${palette.border.subtle}`,
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            borderColor: palette.primary.main,
+            transform: 'translateY(-4px)',
+            '& .post-arrow': {
+              transform: 'translateX(4px)',
+            },
+            '& .post-number': {
+              color: palette.primary.main,
+            },
+          },
+          // Corner accent
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: 40,
+            height: 40,
+            background: `linear-gradient(135deg, transparent 50%, ${alpha(palette.primary.main, 0.1)} 50%)`,
+          },
+        }}
+      >
+        {/* Post number/date */}
+        <Typography
+          className="post-number"
+          variant="caption"
+          sx={{
+            color: palette.text.muted,
+            mb: 1,
+            transition: 'color 0.2s',
+            display: 'block',
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '0.75rem',
+          }}
+        >
+          {`${format(new Date(post.date), 'yyyy.MM.dd')} // #${(index + 1).toString().padStart(3, '0')}`}
+        </Typography>
+
+        {/* Title */}
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: '"Space Grotesk", sans-serif',
+            fontSize: '1.25rem',
+            fontWeight: 600,
+            mb: 2,
+            color: 'text.primary',
+            lineHeight: 1.3,
+          }}
+        >
+          {post.title}
+        </Typography>
+
+        {/* Excerpt */}
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mb: 3,
+            lineHeight: 1.6,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {post.description}
+        </Typography>
+
+        {/* Tags */}
+        <Box sx={{ mb: 3 }}>
+          {post.tags.slice(0, 3).map((tag) => (
+            <Chip
+              key={tag}
+              label={tag}
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/blog/tag/${tag}`);
+              }}
+              sx={{
+                mr: 1,
+                mb: 1,
+                fontSize: '0.7rem',
+                height: 24,
+                backgroundColor: alpha(palette.primary.main, 0.1),
+                color: palette.primary.light,
+                border: `1px solid ${alpha(palette.primary.main, 0.2)}`,
+                '&:hover': {
+                  backgroundColor: alpha(palette.primary.main, 0.2),
+                },
+              }}
+            />
+          ))}
+        </Box>
+
+        {/* Read more */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: palette.primary.main,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.75rem',
+              letterSpacing: '0.1em',
+            }}
+          >
+            READ MORE
+          </Typography>
+          <ArrowRight
+            className="post-arrow"
+            size={16}
+            color={palette.primary.main}
+            weight="bold"
+            style={{ transition: 'transform 0.2s' }}
+          />
+        </Box>
+      </Box>
+    </motion.div>
+  );
+};
 
 const Blog: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const posts = getBlogPosts();
 
   return (
     <Box
       id="blog"
-      component="section"
       sx={{
-        py: 8,
-        backgroundColor: 'background.default',
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        mb: 8
+        py: 16,
+        backgroundColor: palette.background.base,
+        position: 'relative',
       }}
     >
       <Container maxWidth="lg">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <Typography
-            variant="h2"
-            component="h2"
-            align="center"
-            gutterBottom
-            sx={{
-              mb: 6,
-              fontWeight: 'bold',
-              color: theme.palette.text.primary,
-            }}
-          >
-            Blog
-          </Typography>
-        </motion.div>
+        <SectionHeader
+          number="03"
+          title="Blog"
+          subtitle="Thoughts on development, AI, and building digital products"
+        />
 
-        <Grid container spacing={4}>
+        <Grid container spacing={3}>
           {posts.map((post, index) => (
             <Grid item xs={12} md={4} key={post.slug}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                    },
-                    minHeight: { xs: 'auto', md: 500 }, // Responsive minimum height
-                  }}
-                  onClick={() => {
-                    window.scrollTo(0, 0);
-                    navigate(`/blog/${post.slug}`);
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="250"
-                    image={post.coverImage}
-                    alt={post.title}
-                    sx={{
-                      objectFit: 'cover',
-                      borderBottom: `1px solid ${theme.palette.divider}`,
-                    }}
-                  />
-                  <CardContent sx={{ 
-                    flexGrow: 1, 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    gap: 2,
-                    p: 3 // Add consistent padding
-                  }}>
-                    <Typography
-                      gutterBottom
-                      variant="h5"
-                      component="h3"
-                      sx={{ 
-                        fontWeight: 'bold',
-                        fontSize: { xs: '1.25rem', md: '1.5rem' }, // Responsive font size
-                        lineHeight: 1.2,
-                        mb: 1
-                      }}
-                    >
-                      {post.title}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: 'block' }}
-                    >
-                      {format(new Date(post.date), 'MMMM d, yyyy')}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      paragraph
-                      sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {post.description}
-                    </Typography>
-                    <Box sx={{ mt: 'auto', pt: 2 }}>
-                      {post.tags.map((tag) => (
-                        <Chip
-                          key={tag}
-                          label={tag}
-                          size="small"
-                          sx={{ mr: 1, mb: 1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/blog/tag/${tag}`);
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
+              <BlogCard post={post} index={index} />
             </Grid>
           ))}
         </Grid>
 
-        <Box sx={{ textAlign: 'center', mt: 6 }}>
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
           <Button
-            variant="contained"
-            color="primary"
+            variant="outlined"
             size="large"
             onClick={() => navigate('/blog')}
+            endIcon={<ArrowRight size={20} weight="bold" />}
             sx={{
               px: 4,
               py: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontSize: '1.1rem',
             }}
           >
             View All Posts

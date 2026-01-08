@@ -15,14 +15,15 @@ export interface ProjectConfig {
 }
 
 export const projectsConfig: Record<string, ProjectConfig> = {
-  'vectus-ai': {
-    repoName: 'vectus-ai',
-    title: 'Vectus AI - Medical Scheduling Assistant',
-    description: 'Intelligent medical scheduling system featuring natural language processing, real-time availability checking, and contextual conversation memory. Built with Node.js, Express, and GPT-4 integration, demonstrating expertise in healthcare AI applications.',
-    image: getRandomImage('Full Stack'),
-    category: 'Full Stack',
-    topics: ['nodejs', 'express', 'gpt-4', 'nlp', 'ai', 'typescript', 'react'],
-    liveUrl: 'https://vectus-ai-hustadas-projects.vercel.app/',
+  'ai-photo-tools-demo': {
+    repoName: 'ai-photo-tools-demo',
+    title: 'AI Photo Tools - Intelligent Image Processing',
+    description: 'Full-stack AI application for intelligent photo manipulation and enhancement. Features AI-powered image processing, real-time transformations, and seamless user experience. Built with TypeScript, React, and advanced vision models, demonstrating production-ready AI product engineering.',
+    image: getRandomImage('AI/ML'),
+    category: 'AI/ML',
+    topics: ['typescript', 'react', 'ai', 'computer-vision', 'image-processing', 'vercel', 'nextjs'],
+    liveUrl: 'https://ai-photo-tools-theta.vercel.app',
+    html_url: 'https://github.com/hustada/ai-photo-tools-demo',
     featured: true,
     order: 1
   },
@@ -40,11 +41,11 @@ export const projectsConfig: Record<string, ProjectConfig> = {
   },
   'q-bot': {
     repoName: 'q-bot',
-    title: 'Q Bot - AI Content Generation',
-    description: 'Creative AI bot that generates and posts Star Trek Q character-themed content on X (Twitter). Demonstrates expertise in AI content generation, automated social media management, and character-based interactions using OpenAI GPT models.',
+    title: 'Q Bot - Autonomous AI Content Agent',
+    description: 'Autonomous AI agent that generates and publishes Star Trek Q character content on X platform. Features self-directed content creation, personality modeling, and automated social media engagement. Demonstrates advanced agent autonomy, creative AI generation, and production deployment of conversational agents using OpenAI GPT models.',
     image: getRandomImage('Python'),
     category: 'Python',
-    topics: ['python', 'openai', 'twitter-api', 'automation', 'nlp', 'ai', 'content-generation'],
+    topics: ['python', 'openai', 'autonomous-agents', 'twitter-api', 'nlp', 'ai-agents', 'content-generation', 'gpt'],
     html_url: 'https://github.com/Hustada/Q-AI-X-Bot',
     featured: true,
     order: 3
