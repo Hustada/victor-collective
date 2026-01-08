@@ -30,6 +30,8 @@ import CursorGlow from './components/effects/CursorGlow';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import BlogTagPage from './pages/BlogTagPage';
+import PrivacyHubPage from './pages/PrivacyHubPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function HomePage() {
   return (
@@ -64,6 +66,8 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/blog/tag/:tag" element={<BlogTagPage />} />
+            <Route path="/privacy" element={<PrivacyHubPage />} />
+            <Route path="/privacy/:appName" element={<PrivacyPolicyPage />} />
           </Routes>
           <Footer />
         </Box>
