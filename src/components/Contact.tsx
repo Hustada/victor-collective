@@ -13,8 +13,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   EnvelopeSimple,
   GithubLogo,
-  LinkedinLogo,
-  TwitterLogo,
   CheckCircle,
   PaperPlaneTilt,
 } from '@phosphor-icons/react';
@@ -237,26 +235,14 @@ const Contact: React.FC = () => {
                     <ContactLink
                       icon={<EnvelopeSimple size={24} weight="bold" />}
                       label="Email"
-                      value="hello@victorcollective.com"
-                      href="mailto:hello@victorcollective.com"
+                      value="victorhustad@victorcollective.com"
+                      href="mailto:victorhustad@victorcollective.com"
                     />
                     <ContactLink
                       icon={<GithubLogo size={24} weight="bold" />}
                       label="GitHub"
                       value="@hustada"
                       href="https://github.com/hustada"
-                    />
-                    <ContactLink
-                      icon={<LinkedinLogo size={24} weight="bold" />}
-                      label="LinkedIn"
-                      value="Connect"
-                      href="https://linkedin.com"
-                    />
-                    <ContactLink
-                      icon={<TwitterLogo size={24} weight="bold" />}
-                      label="Twitter"
-                      value="@victorcollective"
-                      href="https://twitter.com"
                     />
                   </Box>
                 </Grid>

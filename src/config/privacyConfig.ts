@@ -36,7 +36,7 @@ export const privacyPolicies: Record<string, PrivacyPolicy> = {
     slug: 'stakks',
     lastUpdated: '2026-01-08',
     effectiveDate: '2026-01-08',
-    contactEmail: 'hello@victorcollective.com',
+    contactEmail: 'victorhustad@victorcollective.com',
     sections: {
       overview: `Stakks ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.`,
       dataCollected: {

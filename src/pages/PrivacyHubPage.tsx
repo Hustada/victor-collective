@@ -220,7 +220,7 @@ const PrivacyHubPage: React.FC = () => {
               Contact us at{' '}
               <Box
                 component="a"
-                href="mailto:hello@victorcollective.com"
+                href="mailto:victorhustad@victorcollective.com"
                 sx={{
                   color: palette.primary.main,
                   textDecoration: 'none',
@@ -229,7 +229,7 @@ const PrivacyHubPage: React.FC = () => {
                   },
                 }}
               >
-                hello@victorcollective.com
+                victorhustad@victorcollective.com
               </Box>
             </Typography>
           </Box>

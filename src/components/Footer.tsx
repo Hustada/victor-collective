@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Link, Grid, IconButton } from '@mui/material';
-import { GithubLogo, LinkedinLogo, TwitterLogo } from '@phosphor-icons/react';
+import { GithubLogo } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { alpha } from '@mui/material/styles';
 import { palette } from '../theme';
@@ -11,16 +11,6 @@ const Footer: React.FC = () => {
       icon: <GithubLogo size={20} weight="bold" />,
       url: 'https://github.com/hustada',
       label: 'GitHub',
-    },
-    {
-      icon: <LinkedinLogo size={20} weight="bold" />,
-      url: 'https://linkedin.com',
-      label: 'LinkedIn',
-    },
-    {
-      icon: <TwitterLogo size={20} weight="bold" />,
-      url: 'https://twitter.com',
-      label: 'Twitter',
     },
   ];
 
