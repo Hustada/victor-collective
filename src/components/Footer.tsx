@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
                 display: 'block',
               }}
             >
-              &copy; {new Date().getFullYear()} THE VICTOR COLLECTIVE
+              &copy; {new Date().getFullYear()} MARK HUSTAD | THE VICTOR COLLECTIVE
             </Typography>
             <Typography
               variant="caption"
