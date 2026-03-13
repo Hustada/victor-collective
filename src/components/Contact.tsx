@@ -1,22 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Grid,
-  Alert,
-  Link,
-} from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Grid, Alert, Link } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  EnvelopeSimple,
-  GithubLogo,
-  CheckCircle,
-  PaperPlaneTilt,
-} from '@phosphor-icons/react';
-import { alpha } from '@mui/material/styles';
+import { EnvelopeSimple, GithubLogo, CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react';
 import emailjs from '@emailjs/browser';
 import SectionHeader from './ui/SectionHeader';
 import { palette } from '../theme';
@@ -102,9 +87,7 @@ const Contact: React.FC = () => {
     emailjs.init('LOfBCNYKVmwoQ10nV');
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -169,11 +152,7 @@ const Contact: React.FC = () => {
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                 >
-                  <CheckCircle
-                    size={80}
-                    color={palette.primary.main}
-                    weight="duotone"
-                  />
+                  <CheckCircle size={80} color={palette.primary.main} weight="duotone" />
                 </motion.div>
 
                 <Typography
@@ -186,18 +165,11 @@ const Contact: React.FC = () => {
                   Message Sent
                 </Typography>
 
-                <Typography
-                  variant="body1"
-                  sx={{ color: 'text.secondary' }}
-                >
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   Thanks for reaching out. I'll get back to you as soon as possible.
                 </Typography>
 
-                <Button
-                  variant="outlined"
-                  onClick={handleReset}
-                  sx={{ mt: 2 }}
-                >
+                <Button variant="outlined" onClick={handleReset} sx={{ mt: 2 }}>
                   Send Another Message
                 </Button>
               </Box>
@@ -226,8 +198,8 @@ const Contact: React.FC = () => {
                       lineHeight: 1.8,
                     }}
                   >
-                    Have a project in mind or want to collaborate? I'm always open
-                    to discussing innovative ideas and opportunities.
+                    Have a project in mind or want to collaborate? I'm always open to discussing
+                    innovative ideas and opportunities.
                   </Typography>
 
                   {/* Contact links */}
@@ -316,11 +288,7 @@ const Contact: React.FC = () => {
                         variant="contained"
                         size="large"
                         disabled={isLoading}
-                        endIcon={
-                          isLoading ? null : (
-                            <PaperPlaneTilt size={20} weight="bold" />
-                          )
-                        }
+                        endIcon={isLoading ? null : <PaperPlaneTilt size={20} weight="bold" />}
                         sx={{
                           py: 1.5,
                           mt: 1,

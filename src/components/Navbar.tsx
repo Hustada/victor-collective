@@ -34,7 +34,7 @@ interface NavItemProps {
   onClick: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, id, path, isActive, onClick }) => {
+const NavItem: React.FC<NavItemProps> = ({ icon, label, id: _id, path, isActive, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -132,9 +132,19 @@ const Navbar: React.FC = () => {
   const menuItems = [
     { title: 'Home', id: 'hero', path: '/', icon: <HouseLine size={24} weight="bold" /> },
     { title: 'About', id: 'about', path: '/#about', icon: <User size={24} weight="bold" /> },
-    { title: 'Projects', id: 'projects', path: '/#projects', icon: <Cube size={24} weight="bold" /> },
+    {
+      title: 'Projects',
+      id: 'projects',
+      path: '/#projects',
+      icon: <Cube size={24} weight="bold" />,
+    },
     { title: 'Blog', id: 'blog', path: '/#blog', icon: <Article size={24} weight="bold" /> },
-    { title: 'Contact', id: 'contact', path: '/#contact', icon: <EnvelopeSimple size={24} weight="bold" /> },
+    {
+      title: 'Contact',
+      id: 'contact',
+      path: '/#contact',
+      icon: <EnvelopeSimple size={24} weight="bold" />,
+    },
   ];
 
   const getActiveItem = () => {

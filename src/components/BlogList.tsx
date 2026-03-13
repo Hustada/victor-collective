@@ -29,8 +29,8 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 '&:hover': {
-                  boxShadow: (theme) => theme.shadows[4]
-                }
+                  boxShadow: (theme) => theme.shadows[4],
+                },
               }}
             >
               <Box
@@ -42,11 +42,13 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
                   backgroundPosition: 'center',
                 }}
               />
-              <CardContent sx={{
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-              }}>
+              <CardContent
+                sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
                 <Typography variant="h5" gutterBottom>
                   {post.title}
                 </Typography>

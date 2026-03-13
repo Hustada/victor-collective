@@ -6,10 +6,7 @@ interface GridPatternProps {
   fadeDirection?: 'top' | 'bottom' | 'both' | 'none';
 }
 
-const GridPattern: React.FC<GridPatternProps> = ({
-  opacity = 0.03,
-  fadeDirection = 'bottom'
-}) => {
+const GridPattern: React.FC<GridPatternProps> = ({ opacity = 0.03, fadeDirection = 'bottom' }) => {
   const getMaskImage = () => {
     switch (fadeDirection) {
       case 'top':

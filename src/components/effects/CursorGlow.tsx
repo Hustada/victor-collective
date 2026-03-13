@@ -52,7 +52,8 @@ const CursorGlow: React.FC = () => {
           width: 600,
           height: 600,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(211, 84, 0, 0.08) 0%, rgba(211, 84, 0, 0.02) 40%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(211, 84, 0, 0.08) 0%, rgba(211, 84, 0, 0.02) 40%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />

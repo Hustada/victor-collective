@@ -1,5 +1,4 @@
 import { ProjectCategory } from '../services/github';
-import { getRandomImage } from '../utils/imageUtils';
 
 export interface ProjectConfig {
   repoName: string;

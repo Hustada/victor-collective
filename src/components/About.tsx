@@ -222,10 +222,10 @@ const About: React.FC = () => {
                   lineHeight: 1.8,
                 }}
               >
-                I'm a passionate developer focused on creating innovative digital solutions
-                at the intersection of AI and modern web development. With expertise in
-                full-stack development and machine learning, I transform complex ideas
-                into elegant, functional experiences.
+                I'm a passionate developer focused on creating innovative digital solutions at the
+                intersection of AI and modern web development. With expertise in full-stack
+                development and machine learning, I transform complex ideas into elegant, functional
+                experiences.
               </Typography>
 
               <Typography
@@ -236,9 +236,9 @@ const About: React.FC = () => {
                   lineHeight: 1.8,
                 }}
               >
-                My approach combines technical expertise with creative problem-solving,
-                ensuring that every project not only meets but exceeds expectations.
-                I believe in writing clean, maintainable code that scales.
+                My approach combines technical expertise with creative problem-solving, ensuring
+                that every project not only meets but exceeds expectations. I believe in writing
+                clean, maintainable code that scales.
               </Typography>
 
               {/* Skills */}

@@ -150,11 +150,7 @@ const ProjectCard: React.FC<{ project: ProjectData; index: number }> = ({ projec
         {/* Card content */}
         <CardContent sx={{ p: 3 }}>
           {/* Tech stack chips */}
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
-          >
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
             {project.technologies.slice(0, 4).map((tech) => (
               <Chip
                 key={tech}
@@ -221,9 +217,7 @@ const Projects: React.FC = () => {
           const baseProject = manual ||
             config || {
               repoName: repo.name,
-              title: repo.name
-                .replace(/-/g, ' ')
-                .replace(/\b\w/g, (c) => c.toUpperCase()),
+              title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
               description: repo.description || '',
               featured: false,
               order: 99,
@@ -235,11 +229,9 @@ const Projects: React.FC = () => {
             ...baseProject,
             category,
             githubUrl: manual?.githubUrl || repo.html_url,
-            technologies: manual?.technologies ||
-              [repo.language, ...repo.topics].filter(Boolean),
+            technologies: manual?.technologies || [repo.language, ...repo.topics].filter(Boolean),
             image: getRandomImage(category),
-            liveUrl:
-              config?.liveUrl || manual?.liveUrl || repo.homepage || undefined,
+            liveUrl: config?.liveUrl || manual?.liveUrl || repo.homepage || undefined,
             featured: baseProject.featured ?? false,
           };
 
@@ -255,9 +247,7 @@ const Projects: React.FC = () => {
               repoName: project.repoName || name,
               image: getRandomImage(project.category),
               featured: project.featured ?? false,
-              githubUrl:
-                project.githubUrl ||
-                `https://github.com/hustada/${project.repoName}`,
+              githubUrl: project.githubUrl || `https://github.com/hustada/${project.repoName}`,
               technologies: project.technologies || [],
             })
           );
@@ -266,9 +256,7 @@ const Projects: React.FC = () => {
         const allProjects = [...githubProjects, ...manualOnlyProjects]
           .filter((project): project is ProjectData => project !== null)
           .reduce((unique, project) => {
-            const existingProject = unique.find(
-              (p) => p.repoName === project.repoName
-            );
+            const existingProject = unique.find((p) => p.repoName === project.repoName);
             if (!existingProject) {
               unique.push(project);
             }
@@ -297,18 +285,14 @@ const Projects: React.FC = () => {
           ...Object.values(manualProjects).map((project) => ({
             ...project,
             repoName: project.repoName,
-            githubUrl:
-              project.githubUrl ||
-              `https://github.com/hustada/${project.repoName}`,
+            githubUrl: project.githubUrl || `https://github.com/hustada/${project.repoName}`,
             image: getRandomImage(project.category),
             featured: project.featured ?? false,
             technologies: project.technologies || [],
           })),
         ]
           .reduce((unique, project) => {
-            const existingProject = unique.find(
-              (p) => p.repoName === project.repoName
-            );
+            const existingProject = unique.find((p) => p.repoName === project.repoName);
             if (!existingProject) {
               unique.push(project);
             }

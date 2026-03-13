@@ -12,11 +12,7 @@ const BlogTagPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/blog')}
-        sx={{ mb: 4 }}
-      >
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/blog')} sx={{ mb: 4 }}>
         Back to Blog
       </Button>
       <Typography variant="h2" component="h1" gutterBottom>

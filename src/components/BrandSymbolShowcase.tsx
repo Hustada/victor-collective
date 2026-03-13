@@ -8,18 +8,18 @@ const BrandSymbolShowcase: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Brand Symbol Variations
       </Typography>
-      
-      <Stack 
-        direction="row" 
-        spacing={4} 
-        alignItems="center" 
+
+      <Stack
+        direction="row"
+        spacing={4}
+        alignItems="center"
         justifyContent="center"
-        sx={{ 
-          flexWrap: 'wrap', 
+        sx={{
+          flexWrap: 'wrap',
           gap: 4,
           p: 4,
           background: 'linear-gradient(45deg, #000000 30%, #D35400 90%)',
-          borderRadius: 2
+          borderRadius: 2,
         }}
       >
         {/* First image variation */}

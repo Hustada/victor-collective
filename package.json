@@ -43,15 +43,46 @@
     "start": "craco start",
     "build": "CI=false craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src/ --ext .ts,.tsx --max-warnings 0",
+    "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
+    "fmt": "prettier --write 'src/**/*.{ts,tsx,json,css}'",
+    "fmt:check": "prettier --check 'src/**/*.{ts,tsx,json,css}'",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run fmt:check && npm run lint && npm run typecheck",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --max-warnings 0"
+    ],
+    "src/**/*.{json,css}": [
+      "prettier --write"
+    ]
   },
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest"
+      "react-app/jest",
+      "prettier"
     ],
     "rules": {
-      "@typescript-eslint/no-unused-vars": "off"
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "no-console": [
+        "warn",
+        {
+          "allow": [
+            "warn",
+            "error"
+          ]
+        }
+      ]
     }
   },
   "browserslist": {
@@ -71,6 +102,10 @@
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
     "@types/node": "^22.13.1",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.3",
+    "prettier": "^3.8.1",
     "raw-loader": "^4.0.2",
     "sharp": "^0.33.5",
     "string-replace-loader": "^3.1.0",

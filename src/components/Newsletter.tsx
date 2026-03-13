@@ -88,11 +88,7 @@ const Newsletter: React.FC = () => {
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                 >
-                  <CheckCircle
-                    size={64}
-                    color={palette.primary.main}
-                    weight="duotone"
-                  />
+                  <CheckCircle size={64} color={palette.primary.main} weight="duotone" />
                 </motion.div>
 
                 <Typography
@@ -105,18 +101,11 @@ const Newsletter: React.FC = () => {
                   You're In
                 </Typography>
 
-                <Typography
-                  variant="body1"
-                  sx={{ color: 'text.secondary', maxWidth: 400 }}
-                >
+                <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400 }}>
                   Thanks for subscribing. You'll receive updates on new projects and insights.
                 </Typography>
 
-                <Button
-                  variant="outlined"
-                  onClick={resetForm}
-                  sx={{ mt: 2 }}
-                >
+                <Button variant="outlined" onClick={resetForm} sx={{ mt: 2 }}>
                   Subscribe Another Email
                 </Button>
               </Box>
@@ -162,7 +151,8 @@ const Newsletter: React.FC = () => {
                   mx: 'auto',
                 }}
               >
-                Get notified about new projects, blog posts, and insights. No spam, unsubscribe anytime.
+                Get notified about new projects, blog posts, and insights. No spam, unsubscribe
+                anytime.
               </Typography>
 
               {/* Email input with sharp styling */}
@@ -226,21 +216,14 @@ const Newsletter: React.FC = () => {
                   ) : (
                     <>
                       Subscribe
-                      <PaperPlaneTilt
-                        size={18}
-                        weight="bold"
-                        style={{ marginLeft: 8 }}
-                      />
+                      <PaperPlaneTilt size={18} weight="bold" style={{ marginLeft: 8 }} />
                     </>
                   )}
                 </Button>
               </Box>
 
               {status === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <Alert
                     severity="error"
                     sx={{

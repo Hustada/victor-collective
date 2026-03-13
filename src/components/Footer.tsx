@@ -24,12 +24,7 @@ const Footer: React.FC = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid
-          container
-          spacing={4}
-          alignItems="center"
-          justifyContent="space-between"
-        >
+        <Grid container spacing={4} alignItems="center" justifyContent="space-between">
           {/* Brand */}
           <Grid item xs={12} md={4}>
             <Typography
@@ -60,11 +55,7 @@ const Footer: React.FC = () => {
           <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
               {socialLinks.map((social, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ y: -4 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div key={index} whileHover={{ y: -4 }} whileTap={{ scale: 0.95 }}>
                   <IconButton
                     component={Link}
                     href={social.url}
@@ -136,17 +127,11 @@ const Footer: React.FC = () => {
             }}
           >
             DESIGNED & BUILT WITH{' '}
-            <Box
-              component="span"
-              sx={{ color: palette.primary.main }}
-            >
+            <Box component="span" sx={{ color: palette.primary.main }}>
               REACT
             </Box>{' '}
             +{' '}
-            <Box
-              component="span"
-              sx={{ color: palette.secondary.main }}
-            >
+            <Box component="span" sx={{ color: palette.secondary.main }}>
               TYPESCRIPT
             </Box>
           </Typography>

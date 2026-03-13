@@ -68,8 +68,8 @@ const PrivacyHubPage: React.FC = () => {
                 lineHeight: 1.8,
               }}
             >
-              We believe in transparency. Select an app below to view its privacy policy
-              and learn how we handle your data.
+              We believe in transparency. Select an app below to view its privacy policy and learn
+              how we handle your data.
             </Typography>
           </Box>
         </motion.div>

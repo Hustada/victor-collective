@@ -130,11 +130,7 @@ const Hero: React.FC = () => {
         <Grid container spacing={4} alignItems="center" sx={{ minHeight: '100vh', py: 8 }}>
           {/* Left side - Text content */}
           <Grid item xs={12} md={7}>
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
+            <motion.div variants={containerVariants} initial="hidden" animate="visible">
               {/* Eyebrow text with terminal style */}
               <motion.div variants={itemVariants}>
                 <Typography

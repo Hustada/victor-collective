@@ -26,7 +26,10 @@ const blogPosts: { [key: string]: { content: string; image: string } } = {
   'q-bot': { content: getMarkdownContent(qBotContent), image: qBotImage },
   'fallacy-bot': { content: getMarkdownContent(fallacyBotContent), image: fallacyBotImage },
   'vectus-ai': { content: getMarkdownContent(vectusAiContent), image: vectusAiImage },
-  'intent-engineering': { content: getMarkdownContent(intentEngineeringContent), image: intentEngineeringImage }
+  'intent-engineering': {
+    content: getMarkdownContent(intentEngineeringContent),
+    image: intentEngineeringImage,
+  },
 };
 
 function isValidSlug(slug: string): boolean {
@@ -36,14 +39,11 @@ function isValidSlug(slug: string): boolean {
 export function getBlogPosts(): BlogPostMeta[] {
   const posts = Object.entries(blogPosts).map(([slug, { content, image }]) => {
     try {
-      console.log(`Raw content for ${slug}:`, content);
       // Remove any BOM characters that might be present
       const cleanContent = content.replace(/^\ufeff/, '');
-      console.log(`Clean content for ${slug}:`, cleanContent);
       const parsed = matter(cleanContent);
-      console.log(`Parsed data for ${slug}:`, parsed);
-      
-      const meta = {
+
+      return {
         slug,
         title: parsed.data.title || '',
         date: parsed.data.date || new Date().toISOString(),
@@ -51,8 +51,6 @@ export function getBlogPosts(): BlogPostMeta[] {
         description: parsed.data.description || '',
         coverImage: image,
       };
-      console.log('Blog post meta:', meta);
-      return meta;
     } catch (error) {
       console.error(`Error parsing blog post ${slug}:`, error);
       return {
@@ -66,18 +64,18 @@ export function getBlogPosts(): BlogPostMeta[] {
     }
   });
 
-  return posts.sort((a: BlogPostMeta, b: BlogPostMeta) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+  return posts.sort(
+    (a: BlogPostMeta, b: BlogPostMeta) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 }
 
 export function getBlogPost(slug: string): BlogPost | null {
   try {
     if (!isValidSlug(slug)) {
-      console.log('Invalid slug:', slug);
+      console.warn('Invalid slug:', slug);
       return null;
     }
-    
+
     const { content, image } = blogPosts[slug];
     const parsed = matter(content);
 
@@ -104,10 +102,10 @@ export function getBlogPostsByTag(tag: string): BlogPostMeta[] {
 export function getAllTags(): string[] {
   const posts = getBlogPosts();
   const tags = new Set<string>();
-  
+
   posts.forEach((post) => {
     post.tags.forEach((tag) => tags.add(tag));
   });
-  
+
   return Array.from(tags).sort();
 }

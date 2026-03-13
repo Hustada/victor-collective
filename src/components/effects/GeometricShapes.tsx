@@ -68,10 +68,42 @@ const WireframeCube: React.FC<{
           opacity={strokeOpacity * 0.5}
         />
         {/* Connecting lines */}
-        <line x1="20" y1="20" x2="30" y2="10" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.7} />
-        <line x1="80" y1="20" x2="90" y2="10" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.7} />
-        <line x1="80" y1="80" x2="90" y2="70" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.7} />
-        <line x1="20" y1="80" x2="30" y2="70" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.7} />
+        <line
+          x1="20"
+          y1="20"
+          x2="30"
+          y2="10"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.7}
+        />
+        <line
+          x1="80"
+          y1="20"
+          x2="90"
+          y2="10"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.7}
+        />
+        <line
+          x1="80"
+          y1="80"
+          x2="90"
+          y2="70"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.7}
+        />
+        <line
+          x1="20"
+          y1="80"
+          x2="30"
+          y2="70"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.7}
+        />
       </svg>
     </motion.div>
   );
@@ -129,10 +161,42 @@ const WireframePyramid: React.FC<{
           opacity={strokeOpacity}
         />
         {/* Edges to apex */}
-        <line x1="20" y1="80" x2="50" y2="20" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity} />
-        <line x1="80" y1="80" x2="50" y2="20" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity} />
-        <line x1="30" y1="60" x2="50" y2="20" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.6} />
-        <line x1="90" y1="60" x2="50" y2="20" stroke={strokeColor} strokeWidth="1" opacity={strokeOpacity * 0.6} />
+        <line
+          x1="20"
+          y1="80"
+          x2="50"
+          y2="20"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity}
+        />
+        <line
+          x1="80"
+          y1="80"
+          x2="50"
+          y2="20"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity}
+        />
+        <line
+          x1="30"
+          y1="60"
+          x2="50"
+          y2="20"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.6}
+        />
+        <line
+          x1="90"
+          y1="60"
+          x2="50"
+          y2="20"
+          stroke={strokeColor}
+          strokeWidth="1"
+          opacity={strokeOpacity * 0.6}
+        />
       </svg>
     </motion.div>
   );
@@ -186,11 +250,41 @@ const GeometricShapes: React.FC<GeometricShapesProps> = ({ mousePosition }) => {
   }, [mousePosition]);
 
   const shapes = [
-    { type: 'cube', size: 120, position: { x: '10%', y: '20%' }, rotation: { x: 45, y: 45, z: 0 }, delay: 0 },
-    { type: 'cube', size: 80, position: { x: '70%', y: '15%' }, rotation: { x: 30, y: 60, z: 15 }, delay: 0.2 },
-    { type: 'pyramid', size: 100, position: { x: '60%', y: '50%' }, rotation: { x: 20, y: 30, z: 10 }, delay: 0.4 },
-    { type: 'cube', size: 60, position: { x: '25%', y: '65%' }, rotation: { x: 60, y: 30, z: 45 }, delay: 0.6 },
-    { type: 'pyramid', size: 70, position: { x: '80%', y: '70%' }, rotation: { x: 15, y: 45, z: 20 }, delay: 0.8 },
+    {
+      type: 'cube',
+      size: 120,
+      position: { x: '10%', y: '20%' },
+      rotation: { x: 45, y: 45, z: 0 },
+      delay: 0,
+    },
+    {
+      type: 'cube',
+      size: 80,
+      position: { x: '70%', y: '15%' },
+      rotation: { x: 30, y: 60, z: 15 },
+      delay: 0.2,
+    },
+    {
+      type: 'pyramid',
+      size: 100,
+      position: { x: '60%', y: '50%' },
+      rotation: { x: 20, y: 30, z: 10 },
+      delay: 0.4,
+    },
+    {
+      type: 'cube',
+      size: 60,
+      position: { x: '25%', y: '65%' },
+      rotation: { x: 60, y: 30, z: 45 },
+      delay: 0.6,
+    },
+    {
+      type: 'pyramid',
+      size: 70,
+      position: { x: '80%', y: '70%' },
+      rotation: { x: 15, y: 45, z: 20 },
+      delay: 0.8,
+    },
   ];
 
   const particles = [
@@ -227,12 +321,10 @@ const GeometricShapes: React.FC<GeometricShapesProps> = ({ mousePosition }) => {
         }}
       >
         {shapes.map((shape, index) => {
-          const posX = typeof shape.position.x === 'string'
-            ? shape.position.x
-            : `${shape.position.x}px`;
-          const posY = typeof shape.position.y === 'string'
-            ? shape.position.y
-            : `${shape.position.y}px`;
+          const posX =
+            typeof shape.position.x === 'string' ? shape.position.x : `${shape.position.x}px`;
+          const posY =
+            typeof shape.position.y === 'string' ? shape.position.y : `${shape.position.y}px`;
 
           if (shape.type === 'cube') {
             return (

@@ -19,11 +19,7 @@ const BlogPostPage: React.FC = () => {
   if (!post) {
     return (
       <Container id="top" maxWidth="lg" sx={{ py: 8 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/blog')}
-          sx={{ mb: 4 }}
-        >
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/blog')} sx={{ mb: 4 }}>
           Back to Blog
         </Button>
         <div>Post not found</div>
@@ -33,11 +29,7 @@ const BlogPostPage: React.FC = () => {
 
   return (
     <Container id="top" maxWidth="lg" sx={{ py: 8 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate('/blog')}
-        sx={{ mb: 4 }}
-      >
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/blog')} sx={{ mb: 4 }}>
         Back to Blog
       </Button>
       <BlogPost post={post} />

@@ -197,10 +197,7 @@ const PrivacyPolicyPage: React.FC = () => {
 
         {/* Overview */}
         <Section icon={<Eye size={24} weight="bold" />} title="Overview" index={0}>
-          <Typography
-            variant="body1"
-            sx={{ color: palette.text.secondary, lineHeight: 1.8 }}
-          >
+          <Typography variant="body1" sx={{ color: palette.text.secondary, lineHeight: 1.8 }}>
             {sections.overview}
           </Typography>
         </Section>
@@ -234,10 +231,7 @@ const PrivacyPolicyPage: React.FC = () => {
               >
                 {item.type}
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: palette.text.secondary, mb: 0.5 }}
-              >
+              <Typography variant="body2" sx={{ color: palette.text.secondary, mb: 0.5 }}>
                 {item.description}
               </Typography>
               <Typography
@@ -254,11 +248,7 @@ const PrivacyPolicyPage: React.FC = () => {
         </Section>
 
         {/* Data Usage */}
-        <Section
-          icon={<Eye size={24} weight="bold" />}
-          title="How We Use Your Data"
-          index={2}
-        >
+        <Section icon={<Eye size={24} weight="bold" />} title="How We Use Your Data" index={2}>
           <Box component="ul" sx={{ m: 0, pl: 2 }}>
             {sections.dataUsage.map((usage, idx) => (
               <Typography
@@ -274,15 +264,8 @@ const PrivacyPolicyPage: React.FC = () => {
         </Section>
 
         {/* Third Party Services */}
-        <Section
-          icon={<LinkIcon size={24} weight="bold" />}
-          title="Third-Party Services"
-          index={3}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: palette.text.secondary, mb: 3 }}
-          >
+        <Section icon={<LinkIcon size={24} weight="bold" />} title="Third-Party Services" index={3}>
+          <Typography variant="body2" sx={{ color: palette.text.secondary, mb: 3 }}>
             We use the following third-party services that may collect information:
           </Typography>
           {sections.thirdPartyServices.map((service, idx) => (
@@ -337,29 +320,15 @@ const PrivacyPolicyPage: React.FC = () => {
         </Section>
 
         {/* Data Retention */}
-        <Section
-          icon={<Clock size={24} weight="bold" />}
-          title="Data Retention"
-          index={4}
-        >
-          <Typography
-            variant="body1"
-            sx={{ color: palette.text.secondary, lineHeight: 1.8 }}
-          >
+        <Section icon={<Clock size={24} weight="bold" />} title="Data Retention" index={4}>
+          <Typography variant="body1" sx={{ color: palette.text.secondary, lineHeight: 1.8 }}>
             {sections.dataRetention}
           </Typography>
         </Section>
 
         {/* User Rights */}
-        <Section
-          icon={<UserCircle size={24} weight="bold" />}
-          title="Your Rights"
-          index={5}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: palette.text.secondary, mb: 2 }}
-          >
+        <Section icon={<UserCircle size={24} weight="bold" />} title="Your Rights" index={5}>
+          <Typography variant="body2" sx={{ color: palette.text.secondary, mb: 2 }}>
             You have the right to:
           </Typography>
           <Box component="ul" sx={{ m: 0, pl: 2 }}>
@@ -377,29 +346,15 @@ const PrivacyPolicyPage: React.FC = () => {
         </Section>
 
         {/* Children's Privacy */}
-        <Section
-          icon={<Baby size={24} weight="bold" />}
-          title="Children's Privacy"
-          index={6}
-        >
-          <Typography
-            variant="body1"
-            sx={{ color: palette.text.secondary, lineHeight: 1.8 }}
-          >
+        <Section icon={<Baby size={24} weight="bold" />} title="Children's Privacy" index={6}>
+          <Typography variant="body1" sx={{ color: palette.text.secondary, lineHeight: 1.8 }}>
             {sections.childrenPrivacy}
           </Typography>
         </Section>
 
         {/* Changes */}
-        <Section
-          icon={<Bell size={24} weight="bold" />}
-          title="Changes to This Policy"
-          index={7}
-        >
-          <Typography
-            variant="body1"
-            sx={{ color: palette.text.secondary, lineHeight: 1.8 }}
-          >
+        <Section icon={<Bell size={24} weight="bold" />} title="Changes to This Policy" index={7}>
+          <Typography variant="body1" sx={{ color: palette.text.secondary, lineHeight: 1.8 }}>
             {sections.changes}
           </Typography>
         </Section>
@@ -435,10 +390,7 @@ const PrivacyPolicyPage: React.FC = () => {
             >
               Questions or Concerns?
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: palette.text.secondary, mb: 2 }}
-            >
+            <Typography variant="body2" sx={{ color: palette.text.secondary, mb: 2 }}>
               If you have any questions about this Privacy Policy, please contact us:
             </Typography>
             <Box

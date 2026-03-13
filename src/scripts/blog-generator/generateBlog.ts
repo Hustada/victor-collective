@@ -10,7 +10,7 @@ const writeFile = promisify(fs.writeFile);
 dotenv.config();
 
 const octokit = new Octokit({
-  auth: process.env.REACT_APP_GITHUB_TOKEN
+  auth: process.env.REACT_APP_GITHUB_TOKEN,
 });
 
 dotenv.config();
@@ -42,7 +42,7 @@ async function getRepoFiles(owner: string, repo: string): Promise<string> {
       owner,
       repo,
       tree_sha: defaultBranch,
-      recursive: 'true'
+      recursive: 'true',
     });
 
     let codeContent = '';
@@ -50,16 +50,14 @@ async function getRepoFiles(owner: string, repo: string): Promise<string> {
     const MAX_SIZE = 500000; // 500KB limit for code content
 
     // Filter and process files
-    const codeFiles = tree.tree.filter(file => 
-      file.type === 'blob' && 
-      file.path && (
-        file.path.endsWith('.py') || 
-        file.path.endsWith('.js') || 
-        file.path.endsWith('.ts')
-      ) &&
-      !file.path.includes('test') &&
-      !file.path.includes('__tests__') &&
-      !file.path.startsWith('node_modules/')
+    const codeFiles = tree.tree.filter(
+      (file) =>
+        file.type === 'blob' &&
+        file.path &&
+        (file.path.endsWith('.py') || file.path.endsWith('.js') || file.path.endsWith('.ts')) &&
+        !file.path.includes('test') &&
+        !file.path.includes('__tests__') &&
+        !file.path.startsWith('node_modules/')
     );
 
     // Sort files by path to maintain consistent order
@@ -71,13 +69,13 @@ async function getRepoFiles(owner: string, repo: string): Promise<string> {
         const { data } = await octokit.git.getBlob({
           owner,
           repo,
-          file_sha: file.sha!
+          file_sha: file.sha!,
         });
 
         const content = Buffer.from(data.content, 'base64').toString('utf-8');
 
         if (content.length + totalSize > MAX_SIZE) {
-          console.log(`Skipping ${file.path} due to size limit`);
+          console.warn(`Skipping ${file.path} due to size limit`);
           continue;
         }
 
@@ -144,7 +142,7 @@ Make the content engaging and educational for developers.`;
 
     if ('text' in response.content[0]) {
       const blogContent = response.content[0].text;
-    return frontmatter + blogContent;
+      return frontmatter + blogContent;
     }
     throw new Error('Unexpected response format from Anthropic API');
   } catch (error) {
@@ -156,10 +154,10 @@ Make the content engaging and educational for developers.`;
 async function saveBlogPosts(blogPosts: { name: string; content: string }[]): Promise<void> {
   const blogPath = path.join(process.cwd(), 'src', 'content', 'blog');
   const indexPath = path.join(blogPath, 'index.ts');
-  
+
   try {
     let indexContent = '';
-    
+
     // Create exports for each blog post
     for (const post of blogPosts) {
       const varName = post.name.toLowerCase().replace(/\s+/g, '-');
@@ -167,9 +165,9 @@ async function saveBlogPosts(blogPosts: { name: string; content: string }[]): Pr
 
 `;
     }
-    
+
     await writeFile(indexPath, indexContent);
-    console.log('Blog posts saved to index.ts');
+    console.warn('Blog posts saved to index.ts');
   } catch (error) {
     console.error('Error saving blog posts:', error);
     throw error;
@@ -183,7 +181,8 @@ async function main() {
       name: 'Q Bot',
       repoOwner: 'Hustada',
       repoName: 'Q-AI-X-Bot',
-      description: 'AI-powered social media bot that generates and posts Star Trek Q character-themed content',
+      description:
+        'AI-powered social media bot that generates and posts Star Trek Q character-themed content',
       technologies: ['Python', 'OpenAI GPT', 'Twitter API', 'Automation', 'NLP'],
     },
     {
@@ -206,7 +205,7 @@ async function main() {
 
   for (const project of projects) {
     try {
-      console.log(`Generating blog post for ${project.name}...`);
+      console.warn(`Generating blog post for ${project.name}...`);
       const blogContent = await generateBlogPost(project);
       generatedPosts.push({ name: project.name, content: blogContent });
     } catch (error) {

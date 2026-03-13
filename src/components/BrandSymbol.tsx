@@ -8,12 +8,12 @@ interface BrandSymbolProps extends BoxProps {
   imageSrc?: string;
 }
 
-const BrandSymbol: React.FC<BrandSymbolProps> = ({ 
-  size = 100, 
-  animated = true, 
-  sx, 
+const BrandSymbol: React.FC<BrandSymbolProps> = ({
+  size = 100,
+  animated = true,
+  sx,
   imageSrc = '/assets/brand/victorcol4.jpg',
-  ...props 
+  ...props
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -36,12 +36,12 @@ const BrandSymbol: React.FC<BrandSymbolProps> = ({
       }}
     >
       {!imageLoaded && (
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            color: 'secondary.main', 
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'secondary.main',
             fontWeight: 'bold',
-            opacity: 0.5 
+            opacity: 0.5,
           }}
         >
           VC
@@ -59,16 +59,24 @@ const BrandSymbol: React.FC<BrandSymbolProps> = ({
         }}
         onLoad={() => setImageLoaded(true)}
         initial={animated ? { scale: 0.8, opacity: 0 } : {}}
-        animate={animated && imageLoaded ? { 
-          scale: [0.8, 1.05, 1],
-          opacity: [0, 1, 1],
-        } : {}}
-        transition={animated ? {
-          duration: 1,
-          ease: "easeInOut",
-        } : {}}
+        animate={
+          animated && imageLoaded
+            ? {
+                scale: [0.8, 1.05, 1],
+                opacity: [0, 1, 1],
+              }
+            : {}
+        }
+        transition={
+          animated
+            ? {
+                duration: 1,
+                ease: 'easeInOut',
+              }
+            : {}
+        }
       />
-      
+
       {/* Optional hover/interaction effect */}
       {animated && imageLoaded && (
         <motion.div
@@ -84,7 +92,7 @@ const BrandSymbol: React.FC<BrandSymbolProps> = ({
           }}
           whileHover={{
             opacity: 1,
-            transition: { duration: 0.3 }
+            transition: { duration: 0.3 },
           }}
         />
       )}
