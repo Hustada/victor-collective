@@ -4,56 +4,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CaretDown } from '@phosphor-icons/react';
 import GridPattern from './effects/GridPattern';
 import GeometricShapes from './effects/GeometricShapes';
+import ScrambleText from './effects/ScrambleText';
+import Cursor from './effects/Cursor';
 import { palette } from '../theme';
-
-// Blinking cursor component using CSS animation for step effect
-const Cursor: React.FC = () => (
-  <Box
-    component="span"
-    sx={{
-      color: palette.primary.main,
-      animation: 'blink 1s step-end infinite',
-      '@keyframes blink': {
-        '0%, 50%': { opacity: 1 },
-        '51%, 100%': { opacity: 0 },
-      },
-    }}
-  >
-    _
-  </Box>
-);
-
-// Text scramble effect for the eyebrow text
-const ScrambleText: React.FC<{ text: string; delay?: number }> = ({ text, delay = 0 }) => {
-  const [displayText, setDisplayText] = useState('');
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      let iteration = 0;
-      const interval = setInterval(() => {
-        setDisplayText(
-          text
-            .split('')
-            .map((char, i) => {
-              if (char === ' ') return ' ';
-              if (i < iteration) return text[i];
-              return chars[Math.floor(Math.random() * chars.length)];
-            })
-            .join('')
-        );
-        if (iteration >= text.length) {
-          clearInterval(interval);
-        }
-        iteration += 1 / 2;
-      }, 40);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [text, delay]);
-
-  return <>{displayText || text}</>;
-};
 
 const Hero: React.FC = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -76,7 +29,6 @@ const Hero: React.FC = () => {
     projectsSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -112,10 +64,8 @@ const Hero: React.FC = () => {
         background: `linear-gradient(135deg, ${palette.background.void} 0%, ${palette.background.base} 50%, ${palette.background.elevated} 100%)`,
       }}
     >
-      {/* Grid pattern background */}
       <GridPattern opacity={0.04} fadeDirection="both" />
 
-      {/* Gradient overlay */}
       <Box
         sx={{
           position: 'absolute',
@@ -128,10 +78,8 @@ const Hero: React.FC = () => {
 
       <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
         <Grid container spacing={4} alignItems="center" sx={{ minHeight: '100vh', py: 8 }}>
-          {/* Left side - Text content */}
           <Grid item xs={12} md={7}>
             <motion.div variants={containerVariants} initial="hidden" animate="visible">
-              {/* Eyebrow text with terminal style */}
               <motion.div variants={itemVariants}>
                 <Typography
                   variant="overline"
@@ -151,7 +99,6 @@ const Hero: React.FC = () => {
                 </Typography>
               </motion.div>
 
-              {/* Main headline with gradient */}
               <motion.div variants={itemVariants}>
                 <Typography
                   variant="h1"
@@ -181,7 +128,6 @@ const Hero: React.FC = () => {
                 </Typography>
               </motion.div>
 
-              {/* Subtitle */}
               <motion.div variants={itemVariants}>
                 <Typography
                   variant="body1"
@@ -198,7 +144,6 @@ const Hero: React.FC = () => {
                 </Typography>
               </motion.div>
 
-              {/* CTAs */}
               <motion.div variants={itemVariants}>
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Button
@@ -206,10 +151,7 @@ const Hero: React.FC = () => {
                     size="large"
                     onClick={scrollToProjects}
                     endIcon={<ArrowRight size={20} weight="bold" />}
-                    sx={{
-                      px: 4,
-                      py: 1.5,
-                    }}
+                    sx={{ px: 4, py: 1.5 }}
                   >
                     View Projects
                   </Button>
@@ -217,10 +159,7 @@ const Hero: React.FC = () => {
                     variant="outlined"
                     size="large"
                     onClick={scrollToAbout}
-                    sx={{
-                      px: 4,
-                      py: 1.5,
-                    }}
+                    sx={{ px: 4, py: 1.5 }}
                   >
                     About Me
                   </Button>
@@ -229,7 +168,6 @@ const Hero: React.FC = () => {
             </motion.div>
           </Grid>
 
-          {/* Right side - Geometric shapes */}
           <Grid
             item
             xs={12}
@@ -245,7 +183,6 @@ const Hero: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
