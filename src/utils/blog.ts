@@ -14,11 +14,9 @@ const vectusAiContent = require('../content/blog/vectus-ai.md');
 const intentEngineeringContent = require('../content/blog/intent-engineering.md');
 
 function getMarkdownContent(content: any): string {
-  // If content is a module with a default export, use that
   if (content && typeof content === 'object' && 'default' in content) {
     return content.default;
   }
-  // Otherwise use the content directly
   return content;
 }
 
@@ -32,14 +30,19 @@ const blogPosts: { [key: string]: { content: string; image: string } } = {
   },
 };
 
+// Memoize parsed blog posts — parse once, reuse on every call
+let cachedPosts: BlogPostMeta[] | null = null;
+let cachedFullPosts: { [slug: string]: BlogPost } = {};
+
 function isValidSlug(slug: string): boolean {
   return slug in blogPosts;
 }
 
 export function getBlogPosts(): BlogPostMeta[] {
+  if (cachedPosts) return cachedPosts;
+
   const posts = Object.entries(blogPosts).map(([slug, { content, image }]) => {
     try {
-      // Remove any BOM characters that might be present
       const cleanContent = content.replace(/^\ufeff/, '');
       const parsed = matter(cleanContent);
 
@@ -64,12 +67,15 @@ export function getBlogPosts(): BlogPostMeta[] {
     }
   });
 
-  return posts.sort(
+  cachedPosts = posts.sort(
     (a: BlogPostMeta, b: BlogPostMeta) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+  return cachedPosts;
 }
 
 export function getBlogPost(slug: string): BlogPost | null {
+  if (cachedFullPosts[slug]) return cachedFullPosts[slug];
+
   try {
     if (!isValidSlug(slug)) {
       console.warn('Invalid slug:', slug);
@@ -79,7 +85,7 @@ export function getBlogPost(slug: string): BlogPost | null {
     const { content, image } = blogPosts[slug];
     const parsed = matter(content);
 
-    return {
+    const post: BlogPost = {
       slug,
       title: parsed.data.title || '',
       date: parsed.data.date || new Date().toISOString(),
@@ -88,6 +94,9 @@ export function getBlogPost(slug: string): BlogPost | null {
       coverImage: image,
       content: parsed.content || '',
     };
+
+    cachedFullPosts[slug] = post;
+    return post;
   } catch (error) {
     console.error(`Error loading blog post ${slug}:`, error);
     return null;

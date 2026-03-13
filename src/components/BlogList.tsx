@@ -37,11 +37,21 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
                 sx={{
                   height: 200,
                   flexShrink: 0,
-                  backgroundImage: `url(${post.coverImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  overflow: 'hidden',
                 }}
-              />
+              >
+                <img
+                  src={post.coverImage}
+                  alt={post.title}
+                  loading="lazy"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              </Box>
               <CardContent
                 sx={{
                   flexGrow: 1,

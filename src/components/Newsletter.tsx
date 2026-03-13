@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Box,
@@ -11,17 +11,14 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react';
 import { alpha } from '@mui/material/styles';
-import emailjs from '@emailjs/browser';
+import { useEmailJS } from '../hooks/useEmailJS';
 import { palette } from '../theme';
 
 const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    emailjs.init('LOfBCNYKVmwoQ10nV');
-  }, []);
+  const { send } = useEmailJS();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,17 +28,14 @@ const Newsletter: React.FC = () => {
     setErrorMessage('');
 
     try {
-      await emailjs.send(
-        'service_na22lkl',
-        'template_geuplen',
-        { subscriber_email: email },
-        'LOfBCNYKVmwoQ10nV'
-      );
+      await send(process.env.REACT_APP_EMAILJS_NEWSLETTER_TEMPLATE_ID || '', {
+        subscriber_email: email,
+      });
 
       setStatus('success');
       setEmail('');
-    } catch (error) {
-      console.error('Email send failed:', error);
+    } catch (err) {
+      console.error('Email send failed:', err);
       setStatus('error');
       setErrorMessage('Failed to subscribe. Please try again.');
     }
@@ -155,7 +149,6 @@ const Newsletter: React.FC = () => {
                 anytime.
               </Typography>
 
-              {/* Email input with sharp styling */}
               <Box
                 component="form"
                 onSubmit={handleSubmit}

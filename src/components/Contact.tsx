@@ -1,77 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography, TextField, Button, Box, Grid, Alert, Link } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Typography, TextField, Button, Box, Grid, Alert } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EnvelopeSimple, GithubLogo, CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react';
-import emailjs from '@emailjs/browser';
 import SectionHeader from './ui/SectionHeader';
+import ContactLink from './ContactLink';
+import { useEmailJS } from '../hooks/useEmailJS';
 import { palette } from '../theme';
-
-interface ContactLinkProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  href: string;
-}
-
-const ContactLink: React.FC<ContactLinkProps> = ({ icon, label, value, href }) => (
-  <Link
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      py: 2,
-      px: 3,
-      textDecoration: 'none',
-      border: `1px solid ${palette.border.subtle}`,
-      background: palette.background.elevated,
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        borderColor: palette.primary.main,
-        transform: 'translateX(8px)',
-        '& .contact-icon': {
-          color: palette.primary.main,
-        },
-      },
-    }}
-  >
-    <Box
-      className="contact-icon"
-      sx={{
-        color: palette.text.secondary,
-        transition: 'color 0.2s',
-        display: 'flex',
-      }}
-    >
-      {icon}
-    </Box>
-    <Box>
-      <Typography
-        variant="caption"
-        sx={{
-          color: palette.text.muted,
-          fontSize: '0.7rem',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          display: 'block',
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: palette.text.primary,
-          fontFamily: '"JetBrains Mono", monospace',
-        }}
-      >
-        {value}
-      </Typography>
-    </Box>
-  </Link>
-);
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -82,17 +16,11 @@ const Contact: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    emailjs.init('LOfBCNYKVmwoQ10nV');
-  }, []);
+  const { send } = useEmailJS();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,10 +29,10 @@ const Contact: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await emailjs.send('service_na22lkl', 'template_6z9asrk', formData);
+      await send(process.env.REACT_APP_EMAILJS_CONTACT_TEMPLATE_ID || '', formData);
       setIsSubmitted(true);
-    } catch (error) {
-      console.error('Error sending email:', error);
+    } catch (err) {
+      console.error('Error sending email:', err);
       setError('Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);
@@ -202,7 +130,6 @@ const Contact: React.FC = () => {
                     innovative ideas and opportunities.
                   </Typography>
 
-                  {/* Contact links */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <ContactLink
                       icon={<EnvelopeSimple size={24} weight="bold" />}

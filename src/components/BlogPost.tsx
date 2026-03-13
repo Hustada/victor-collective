@@ -40,6 +40,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
             component="img"
             src={post.coverImage}
             alt={post.title}
+            loading="lazy"
             sx={{
               width: '100%',
               height: 400,
@@ -165,7 +166,21 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
             },
           }}
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              img: ({ node: _node, alt, ...props }) => (
+                <img
+                  {...props}
+                  alt={alt || ''}
+                  loading="lazy"
+                  style={{ maxWidth: '100%', height: 'auto' }}
+                />
+              ),
+            }}
+          >
+            {post.content}
+          </ReactMarkdown>
         </Box>
       </Box>
     </Container>

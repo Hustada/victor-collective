@@ -1,29 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Box } from '@mui/material';
 
 const CursorGlow: React.FC = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const rafRef = useRef<number>(0);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
       setPosition({ x: e.clientX, y: e.clientY });
       setIsVisible(true);
-    };
+    });
+  }, []);
 
-    const handleMouseLeave = () => {
-      setIsVisible(false);
-    };
+  const handleMouseLeave = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
+  useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     document.body.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       document.body.removeEventListener('mouseleave', handleMouseLeave);
+      cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [handleMouseMove, handleMouseLeave]);
 
   return (
     <Box
