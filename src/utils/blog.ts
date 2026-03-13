@@ -5,11 +5,13 @@ import { BlogPost, BlogPostMeta } from '../types/blog';
 const qBotImage = '/assets/brand/blogAIDev1.jpg';
 const fallacyBotImage = '/assets/brand/blogAIDev2.jpg';
 const vectusAiImage = '/assets/brand/blogTypescriptDev1.jpg';
+const intentEngineeringImage = '/assets/brand/blogWebDev1.jpg';
 
 // Import blog posts
 const qBotContent = require('../content/blog/q-bot.md');
 const fallacyBotContent = require('../content/blog/fallacy-bot.md');
 const vectusAiContent = require('../content/blog/vectus-ai.md');
+const intentEngineeringContent = require('../content/blog/intent-engineering.md');
 
 function getMarkdownContent(content: any): string {
   // If content is a module with a default export, use that
@@ -23,7 +25,8 @@ function getMarkdownContent(content: any): string {
 const blogPosts: { [key: string]: { content: string; image: string } } = {
   'q-bot': { content: getMarkdownContent(qBotContent), image: qBotImage },
   'fallacy-bot': { content: getMarkdownContent(fallacyBotContent), image: fallacyBotImage },
-  'vectus-ai': { content: getMarkdownContent(vectusAiContent), image: vectusAiImage }
+  'vectus-ai': { content: getMarkdownContent(vectusAiContent), image: vectusAiImage },
+  'intent-engineering': { content: getMarkdownContent(intentEngineeringContent), image: intentEngineeringImage }
 };
 
 function isValidSlug(slug: string): boolean {
