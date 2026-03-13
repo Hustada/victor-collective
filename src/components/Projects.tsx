@@ -279,7 +279,7 @@ const Projects: React.FC = () => {
             if (!a.featured && b.featured) return 1;
             return (a.order || 99) - (b.order || 99);
           })
-          .slice(0, 3);
+          .slice(0, 6);
 
         setProjects(allProjects);
       } catch (error) {
@@ -319,7 +319,7 @@ const Projects: React.FC = () => {
             if (!a.featured && b.featured) return 1;
             return (a.order || 99) - (b.order || 99);
           })
-          .slice(0, 3);
+          .slice(0, 6);
 
         setProjects(fallbackProjects);
       } finally {
