@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CssBaseline, Box } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import theme from './theme';
 
 // Font imports
@@ -33,6 +33,14 @@ import BlogTagPage from './pages/BlogTagPage';
 import PrivacyHubPage from './pages/PrivacyHubPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function HomePage() {
   return (
     <>
@@ -59,6 +67,7 @@ function App() {
             overflow: 'hidden',
           }}
         >
+          <ScrollToTop />
           <CursorGlow />
           <Navbar />
           <Routes>
