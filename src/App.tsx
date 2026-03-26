@@ -21,7 +21,7 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Projects from './components/Projects';
 import Blog from './components/Blog';
-import Newsletter from './components/Newsletter';
+
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CursorGlow from './components/effects/CursorGlow';
@@ -49,7 +49,6 @@ function HomePage() {
       <About />
       <Projects />
       <Blog />
-      <Newsletter />
       <Contact />
     </>
   );

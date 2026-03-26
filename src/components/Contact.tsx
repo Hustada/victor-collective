@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { Container, Typography, TextField, Button, Box, Grid, Alert } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EnvelopeSimple, GithubLogo, CheckCircle, PaperPlaneTilt } from '@phosphor-icons/react';
+import {
+  EnvelopeSimple,
+  GithubLogo,
+  LinkedinLogo,
+  CheckCircle,
+  PaperPlaneTilt,
+  CalendarBlank,
+} from '@phosphor-icons/react';
 import SectionHeader from './ui/SectionHeader';
 import ContactLink from './ContactLink';
 import { useEmailJS } from '../hooks/useEmailJS';
@@ -115,20 +122,30 @@ const Contact: React.FC = () => {
                   <SectionHeader
                     number="04"
                     title="Contact"
-                    subtitle="Let's build something great together"
+                    subtitle="Start a conversation about your AI project"
                   />
 
                   <Typography
                     variant="body1"
                     sx={{
                       color: 'text.secondary',
-                      mb: 4,
+                      mb: 2,
                       lineHeight: 1.8,
                     }}
                   >
-                    Have a project in mind or want to collaborate? I'm always open to discussing
-                    innovative ideas and opportunities.
+                    I'm looking for people who see the inflection point and want to build at it —
+                    not talk about it. If you have an AI problem worth solving, let's talk.
                   </Typography>
+
+                  <Button
+                    variant="contained"
+                    size="large"
+                    href="#"
+                    startIcon={<CalendarBlank size={20} weight="bold" />}
+                    sx={{ mb: 4, px: 4, py: 1.5 }}
+                  >
+                    Book a Call
+                  </Button>
 
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <ContactLink
@@ -142,6 +159,12 @@ const Contact: React.FC = () => {
                       label="GitHub"
                       value="@hustada"
                       href="https://github.com/hustada"
+                    />
+                    <ContactLink
+                      icon={<LinkedinLogo size={24} weight="bold" />}
+                      label="LinkedIn"
+                      value="Viktor Ash"
+                      href="https://www.linkedin.com/in/markhustad/"
                     />
                   </Box>
                 </Grid>

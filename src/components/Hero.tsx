@@ -19,14 +19,14 @@ const Hero: React.FC = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const scrollToAbout = () => {
-    const aboutSection = document.getElementById('about');
-    aboutSection?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const scrollToProjects = () => {
     const projectsSection = document.getElementById('projects');
     projectsSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    contactSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const containerVariants = {
@@ -94,7 +94,7 @@ const Hero: React.FC = () => {
                   }}
                 >
                   {'// '}
-                  <ScrambleText text="FULL-STACK DEVELOPER" delay={500} />
+                  <ScrambleText text="AI SYSTEMS ENGINEERING" delay={500} />
                   <Cursor />
                 </Typography>
               </motion.div>
@@ -139,8 +139,25 @@ const Hero: React.FC = () => {
                     lineHeight: 1.8,
                   }}
                 >
-                  Crafting performant, accessible web applications with modern technologies.
-                  Exploring the intersection of AI and development.
+                  Building production AI systems while the rest of the world is still figuring out
+                  the prompt. Agent orchestration, vision pipelines, LLM infrastructure. First
+                  principles. Smallest solution that earns its place.
+                </Typography>
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: palette.text.muted,
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: '0.75rem',
+                    letterSpacing: '0.15em',
+                    mb: 6,
+                    display: 'block',
+                  }}
+                >
+                  VIKTOR ASH — BUILDING AT THE FRONTIER
                 </Typography>
               </motion.div>
 
@@ -153,15 +170,15 @@ const Hero: React.FC = () => {
                     endIcon={<ArrowRight size={20} weight="bold" />}
                     sx={{ px: 4, py: 1.5 }}
                   >
-                    View Projects
+                    See Our Work
                   </Button>
                   <Button
                     variant="outlined"
                     size="large"
-                    onClick={scrollToAbout}
+                    onClick={scrollToContact}
                     sx={{ px: 4, py: 1.5 }}
                   >
-                    About Me
+                    Book a Call
                   </Button>
                 </Box>
               </motion.div>
@@ -198,7 +215,7 @@ const Hero: React.FC = () => {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          onClick={scrollToAbout}
+          onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
           style={{ cursor: 'pointer' }}
         >
           <Box

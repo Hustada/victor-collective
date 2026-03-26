@@ -9,7 +9,9 @@ import { palette } from '../theme';
 
 const Blog: React.FC = () => {
   const navigate = useNavigate();
-  const posts = getBlogPosts();
+  const allPosts = getBlogPosts();
+  const featuredSlugs = ['intent-engineering', 'vectus-ai'];
+  const posts = allPosts.filter((post) => featuredSlugs.includes(post.slug));
 
   return (
     <Box
@@ -24,7 +26,7 @@ const Blog: React.FC = () => {
         <SectionHeader
           number="03"
           title="Blog"
-          subtitle="Thoughts on development, AI, and building digital products"
+          subtitle="Thoughts on AI systems, agent architecture, and production engineering"
         />
 
         <Grid container spacing={3}>
