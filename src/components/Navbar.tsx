@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { IconButton, useMediaQuery, useTheme } from '@mui/material';
 import {
   HouseLine,
-  User,
-  Cube,
+  Crosshair,
+  Briefcase,
   Article,
   EnvelopeSimple,
   List as ListIcon,
@@ -17,8 +17,18 @@ import { palette } from '../theme';
 
 const menuItems = [
   { title: 'Home', id: 'hero', path: '/', icon: <HouseLine size={24} weight="bold" /> },
-  { title: 'About', id: 'about', path: '/#about', icon: <User size={24} weight="bold" /> },
-  { title: 'Projects', id: 'projects', path: '/#projects', icon: <Cube size={24} weight="bold" /> },
+  {
+    title: 'Capabilities',
+    id: 'about',
+    path: '/#about',
+    icon: <Crosshair size={24} weight="bold" />,
+  },
+  {
+    title: 'Case Studies',
+    id: 'projects',
+    path: '/#projects',
+    icon: <Briefcase size={24} weight="bold" />,
+  },
   { title: 'Blog', id: 'blog', path: '/#blog', icon: <Article size={24} weight="bold" /> },
   {
     title: 'Contact',

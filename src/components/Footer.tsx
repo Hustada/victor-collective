@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container, Typography, Link, Grid, IconButton } from '@mui/material';
-import { GithubLogo } from '@phosphor-icons/react';
+import { GithubLogo, LinkedinLogo } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { alpha } from '@mui/material/styles';
 import { palette } from '../theme';
@@ -11,6 +11,11 @@ const Footer: React.FC = () => {
       icon: <GithubLogo size={20} weight="bold" />,
       url: 'https://github.com/hustada',
       label: 'GitHub',
+    },
+    {
+      icon: <LinkedinLogo size={20} weight="bold" />,
+      url: 'https://www.linkedin.com/in/markhustad/',
+      label: 'LinkedIn',
     },
   ];
 
@@ -47,7 +52,7 @@ const Footer: React.FC = () => {
                 fontFamily: '"Inter", sans-serif',
               }}
             >
-              Building digital experiences with modern tech
+              AI systems that work in production
             </Typography>
           </Grid>
 
@@ -92,7 +97,7 @@ const Footer: React.FC = () => {
                 display: 'block',
               }}
             >
-              &copy; {new Date().getFullYear()} MARK HUSTAD | THE VICTOR COLLECTIVE
+              &copy; {new Date().getFullYear()} THE VICTOR COLLECTIVE LLC
             </Typography>
             <Typography
               variant="caption"
@@ -133,6 +138,10 @@ const Footer: React.FC = () => {
             +{' '}
             <Box component="span" sx={{ color: palette.secondary.main }}>
               TYPESCRIPT
+            </Box>{' '}
+            +{' '}
+            <Box component="span" sx={{ color: palette.primary.light || palette.primary.main }}>
+              CLAUDE
             </Box>
           </Typography>
         </Box>

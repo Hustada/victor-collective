@@ -2,35 +2,39 @@ import React from 'react';
 import { Container, Typography, Grid, Box } from '@mui/material';
 import { motion } from 'framer-motion';
 import { alpha } from '@mui/material/styles';
+import { Brain, Eye, CurrencyCircleDollar, CloudArrowUp, Code } from '@phosphor-icons/react';
 import SectionHeader from './ui/SectionHeader';
 import GridPattern from './effects/GridPattern';
-import SkillBar, { Skill } from './SkillBar';
 import { palette } from '../theme';
 
-const skills: Skill[] = [
+const capabilities = [
   {
-    name: 'AI / Machine Learning',
-    level: 85,
-    description: 'LangChain, OpenAI, TensorFlow, RAG Systems',
-    color: palette.primary.main,
+    icon: <Brain size={28} weight="duotone" />,
+    title: 'AI Agent Architecture & Orchestration',
+    description:
+      'Multi-agent systems with sub-agent coordination, semantic memory, and scheduled autonomy.',
   },
   {
-    name: 'React & TypeScript',
-    level: 90,
-    description: 'Next.js, Material-UI, Framer Motion, React Native',
-    color: palette.secondary.main,
+    icon: <Eye size={28} weight="duotone" />,
+    title: 'Computer Vision & Photo Intelligence',
+    description:
+      'Multi-stage vision pipelines combining GPT-4V, Cloud Vision, and Claude for domain-specific analysis.',
   },
   {
-    name: 'Python Development',
-    level: 88,
-    description: 'FastAPI, Django, Data Science, Automation',
-    color: palette.primary.light,
+    icon: <CurrencyCircleDollar size={28} weight="duotone" />,
+    title: 'LLM Integration & Cost Optimization',
+    description:
+      'Smart model routing across providers, budget management, and complexity-based task classification.',
   },
   {
-    name: 'Full Stack & DevOps',
-    level: 82,
-    description: 'Node.js, PostgreSQL, AWS, Docker',
-    color: palette.secondary.light,
+    icon: <CloudArrowUp size={28} weight="duotone" />,
+    title: 'Production Deployment',
+    description: 'Docker, AWS, CI/CD — systems that run 24/7 without babysitting.',
+  },
+  {
+    icon: <Code size={28} weight="duotone" />,
+    title: 'Full-Stack Applications',
+    description: 'React, TypeScript, Python, FastAPI, PostgreSQL — whatever the problem demands.',
   },
 ];
 
@@ -50,11 +54,11 @@ const About: React.FC = () => {
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <SectionHeader
           number="01"
-          title="About"
-          subtitle="Building digital experiences with modern technologies"
+          title="Capabilities"
+          subtitle="What we build and how we think about it"
         />
 
-        <Grid container spacing={8} alignItems="center">
+        <Grid container spacing={8} alignItems="flex-start">
           <Grid item xs={12} md={5}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -96,7 +100,7 @@ const About: React.FC = () => {
                 >
                   <img
                     src={process.env.PUBLIC_URL + '/assets/brand/victorcol1.jpg'}
-                    alt="Victor Profile"
+                    alt="Viktor Ash — Founder, The Victor Collective"
                     loading="lazy"
                     style={{
                       width: '100%',
@@ -129,27 +133,11 @@ const About: React.FC = () => {
                 variant="body1"
                 sx={{
                   color: 'text.secondary',
-                  mb: 3,
+                  mb: 5,
                   lineHeight: 1.8,
                 }}
               >
-                I'm a passionate developer focused on creating innovative digital solutions at the
-                intersection of AI and modern web development. With expertise in full-stack
-                development and machine learning, I transform complex ideas into elegant, functional
-                experiences.
-              </Typography>
-
-              <Typography
-                variant="body1"
-                sx={{
-                  color: 'text.secondary',
-                  mb: 6,
-                  lineHeight: 1.8,
-                }}
-              >
-                My approach combines technical expertise with creative problem-solving, ensuring
-                that every project not only meets but exceeds expectations. I believe in writing
-                clean, maintainable code that scales.
+                Production is the only proof that matters. Everything else is a pitch deck.
               </Typography>
 
               <Box>
@@ -163,11 +151,52 @@ const About: React.FC = () => {
                     mb: 3,
                   }}
                 >
-                  {'// TECHNICAL EXPERTISE'}
+                  {'// WHAT WE DO'}
                 </Typography>
 
-                {skills.map((skill, index) => (
-                  <SkillBar key={skill.name} skill={skill} index={index} />
+                {capabilities.map((cap, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 2.5,
+                      mb: 3,
+                      '&:last-child': { mb: 0 },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        color: palette.primary.main,
+                        mt: 0.25,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {cap.icon}
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          color: palette.text.primary,
+                          fontFamily: '"Space Grotesk", sans-serif',
+                          fontWeight: 600,
+                          mb: 0.5,
+                        }}
+                      >
+                        {cap.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: palette.text.secondary,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {cap.description}
+                      </Typography>
+                    </Box>
+                  </Box>
                 ))}
               </Box>
             </motion.div>
