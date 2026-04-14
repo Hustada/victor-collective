@@ -12,7 +12,16 @@ import {
   Collapse,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash, PencilSimple, X } from '@phosphor-icons/react';
+import {
+  Plus,
+  Trash,
+  PencilSimple,
+  X,
+  CaretDown,
+  CaretUp,
+  Warning,
+  Lightning,
+} from '@phosphor-icons/react';
 import PortalGate from '../components/PortalGate';
 import DepthCard from '../components/ui/DepthCard';
 import {
@@ -90,6 +99,16 @@ const PortalPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<PortalEntry, 'id'>>(emptyForm);
   const [filter, setFilter] = useState<EntryCategory | 'all'>('all');
+  const [expandedFlows, setExpandedFlows] = useState<Set<string>>(new Set());
+
+  const toggleFlow = (moduleKey: string) => {
+    setExpandedFlows((prev) => {
+      const next = new Set(prev);
+      if (next.has(moduleKey)) next.delete(moduleKey);
+      else next.add(moduleKey);
+      return next;
+    });
+  };
 
   const persist = (updated: PortalEntry[]) => {
     setEntries(updated);
@@ -686,6 +705,195 @@ const PortalPage: React.FC = () => {
                                   <Typography variant="caption" sx={{ color: palette.text.muted }}>
                                     Est. {mod.hours}
                                   </Typography>
+                                )}
+
+                                {mod.technicalFlow && (
+                                  <>
+                                    <Button
+                                      size="small"
+                                      onClick={() => toggleFlow(`${entry.id}-${mod.name}`)}
+                                      endIcon={
+                                        expandedFlows.has(`${entry.id}-${mod.name}`) ? (
+                                          <CaretUp size={12} />
+                                        ) : (
+                                          <CaretDown size={12} />
+                                        )
+                                      }
+                                      sx={{
+                                        mt: 1.5,
+                                        fontSize: '0.65rem',
+                                        color: palette.primary.main,
+                                        letterSpacing: '0.1em',
+                                        p: 0,
+                                        minWidth: 0,
+                                        '&:hover': { backgroundColor: 'transparent', opacity: 0.8 },
+                                      }}
+                                    >
+                                      TECHNICAL FLOW
+                                    </Button>
+
+                                    <Collapse in={expandedFlows.has(`${entry.id}-${mod.name}`)}>
+                                      <Box
+                                        sx={{
+                                          mt: 2,
+                                          pt: 2,
+                                          borderTop: `1px solid ${palette.border.subtle}`,
+                                        }}
+                                      >
+                                        {/* Stack */}
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            gap: 0.5,
+                                            flexWrap: 'wrap',
+                                            mb: 2,
+                                          }}
+                                        >
+                                          {mod.technicalFlow.stack.map((tech) => (
+                                            <Chip
+                                              key={tech}
+                                              label={tech}
+                                              size="small"
+                                              sx={{
+                                                backgroundColor: palette.primary.main + '15',
+                                                border: `1px solid ${palette.primary.main}30`,
+                                                color: palette.primary.main,
+                                                fontFamily: '"JetBrains Mono", monospace',
+                                                fontSize: '0.5rem',
+                                                borderRadius: 0,
+                                                height: 20,
+                                              }}
+                                            />
+                                          ))}
+                                        </Box>
+
+                                        {/* Steps */}
+                                        {mod.technicalFlow.steps.map((step, i) => (
+                                          <Box
+                                            key={i}
+                                            sx={{
+                                              display: 'flex',
+                                              gap: 1.5,
+                                              mb: 1,
+                                              pl: 0.5,
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="caption"
+                                              sx={{
+                                                color: palette.primary.main,
+                                                fontFamily: '"JetBrains Mono", monospace',
+                                                fontSize: '0.6rem',
+                                                mt: 0.3,
+                                                flexShrink: 0,
+                                                opacity: 0.6,
+                                              }}
+                                            >
+                                              {String(i + 1).padStart(2, '0')}
+                                            </Typography>
+                                            <Typography
+                                              variant="caption"
+                                              sx={{
+                                                color: palette.text.secondary,
+                                                lineHeight: 1.6,
+                                                fontSize: '0.75rem',
+                                              }}
+                                            >
+                                              {step}
+                                            </Typography>
+                                          </Box>
+                                        ))}
+
+                                        {/* Risks */}
+                                        {mod.technicalFlow.risks &&
+                                          mod.technicalFlow.risks.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                              <Box
+                                                sx={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  gap: 0.5,
+                                                  mb: 1,
+                                                }}
+                                              >
+                                                <Warning size={12} color={palette.error} />
+                                                <Typography
+                                                  variant="caption"
+                                                  sx={{
+                                                    color: palette.error,
+                                                    fontFamily: '"JetBrains Mono", monospace',
+                                                    fontSize: '0.55rem',
+                                                    letterSpacing: '0.1em',
+                                                  }}
+                                                >
+                                                  RISKS
+                                                </Typography>
+                                              </Box>
+                                              {mod.technicalFlow.risks.map((risk, i) => (
+                                                <Typography
+                                                  key={i}
+                                                  variant="caption"
+                                                  sx={{
+                                                    color: palette.text.muted,
+                                                    display: 'block',
+                                                    fontSize: '0.7rem',
+                                                    lineHeight: 1.5,
+                                                    mb: 0.5,
+                                                    pl: 2,
+                                                  }}
+                                                >
+                                                  {risk}
+                                                </Typography>
+                                              ))}
+                                            </Box>
+                                          )}
+
+                                        {/* Leverages */}
+                                        {mod.technicalFlow.leverages &&
+                                          mod.technicalFlow.leverages.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                              <Box
+                                                sx={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  gap: 0.5,
+                                                  mb: 1,
+                                                }}
+                                              >
+                                                <Lightning size={12} color={palette.success} />
+                                                <Typography
+                                                  variant="caption"
+                                                  sx={{
+                                                    color: palette.success,
+                                                    fontFamily: '"JetBrains Mono", monospace',
+                                                    fontSize: '0.55rem',
+                                                    letterSpacing: '0.1em',
+                                                  }}
+                                                >
+                                                  LEVERAGES
+                                                </Typography>
+                                              </Box>
+                                              {mod.technicalFlow.leverages.map((lev, i) => (
+                                                <Typography
+                                                  key={i}
+                                                  variant="caption"
+                                                  sx={{
+                                                    color: palette.text.muted,
+                                                    display: 'block',
+                                                    fontSize: '0.7rem',
+                                                    lineHeight: 1.5,
+                                                    mb: 0.5,
+                                                    pl: 2,
+                                                  }}
+                                                >
+                                                  {lev}
+                                                </Typography>
+                                              ))}
+                                            </Box>
+                                          )}
+                                      </Box>
+                                    </Collapse>
+                                  </>
                                 )}
                               </Box>
                             </Grid>
