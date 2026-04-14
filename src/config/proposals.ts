@@ -35,6 +35,8 @@ export interface RequirementCategory {
 }
 
 const STORAGE_KEY = 'portal_entries';
+const SEED_VERSION_KEY = 'portal_seed_version';
+const SEED_VERSION = 2;
 
 export const seedEntries: PortalEntry[] = [
   {
@@ -257,14 +259,25 @@ export const seedEntries: PortalEntry[] = [
 ];
 
 export function loadEntries(): PortalEntry[] {
+  const storedVersion = Number(localStorage.getItem(SEED_VERSION_KEY) || 0);
+
+  if (storedVersion < SEED_VERSION) {
+    const initial = [...seedEntries];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    localStorage.setItem(SEED_VERSION_KEY, String(SEED_VERSION));
+    return initial;
+  }
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return JSON.parse(stored);
   } catch {
     // fall through to seed
   }
+
   const initial = [...seedEntries];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+  localStorage.setItem(SEED_VERSION_KEY, String(SEED_VERSION));
   return initial;
 }
 
