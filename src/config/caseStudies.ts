@@ -48,17 +48,17 @@ export const caseStudies: CaseStudy[] = [
     category: 'Agent Systems',
   },
   {
-    id: 'kodeskald',
-    title: 'Kodeskald — LLM Cost Optimization Engine',
+    id: 'intent-engineering',
+    title: 'Intent Engineering — Aspiration-Based Agent Prompts',
     context:
-      'Internal tool for managing LLM costs across multiple providers and models, with intelligent routing based on task complexity.',
+      'Original research into whether aspiration-based system prompts change LLM decision-making in autonomous agents, tested across multiple model families.',
     challenge:
-      'LLM costs grow fast when every request hits the most expensive model. Needed smart routing that matches task complexity to the cheapest capable model without sacrificing quality.',
+      'Standard system prompts tell agents what to do. But autonomous agents face ambiguous decisions where instructions run out. Needed a way to shape judgment, not just behavior.',
     approach:
-      'Built a routing layer that classifies incoming requests by complexity and routes to the appropriate model tier. Budget management tracks spend per project with configurable limits. Multi-provider support (OpenAI, Anthropic, local models) with automatic fallback.',
-    techStack: ['TypeScript', 'React', 'Node.js', 'OpenAI', 'Anthropic API', 'PostgreSQL'],
+      "Developed aspiration-based intent prompts — short identity statements that frame the agent's goals as intrinsic motivation. Tested across Claude, GPT, and Gemini using psychometric methodology (Big Five, Dark Triad). Added a severity clause to prevent over-identification with persona traits.",
+    techStack: ['Claude', 'GPT-4', 'Gemini', 'Python', 'Psychometric Evaluation'],
     outcome:
-      'Reduced LLM spend by 40-60% across projects while maintaining output quality on benchmarked tasks. Budget alerts prevent runaway costs.',
-    category: 'LLM Infrastructure',
+      'Measurable personality shifts across all three model families. Intent prompts produced more consistent autonomous behavior than instruction-based prompts. Published as ongoing research, validated in production with Alvis.',
+    category: 'AI Research',
   },
 ];

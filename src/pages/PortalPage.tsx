@@ -18,6 +18,8 @@ import DepthCard from '../components/ui/DepthCard';
 import {
   PortalEntry,
   ProposalModule,
+  RequirementCategory,
+  RequirementStatus,
   EntryCategory,
   loadEntries,
   saveEntries,
@@ -49,11 +51,37 @@ const statusColor: Record<string, string> = {
   declined: palette.error,
 };
 
+const requirementStatusColor: Record<RequirementStatus, string> = {
+  needed: palette.error,
+  requested: palette.secondary.main,
+  received: palette.success,
+};
+
+const requirementStatusLabel: Record<RequirementStatus, string> = {
+  needed: 'NEEDED',
+  requested: 'REQUESTED',
+  received: 'RECEIVED',
+};
+
+const requirementPriorityColor: Record<RequirementCategory['priority'], string> = {
+  urgent: palette.error,
+  soon: palette.secondary.main,
+  later: palette.text.muted,
+};
+
 const emptyForm: Omit<PortalEntry, 'id'> = {
   category: 'idea',
   title: '',
   date: new Date().toISOString().split('T')[0],
   body: '',
+};
+
+const emptyModule: ProposalModule = {
+  name: '',
+  description: '',
+  price: 0,
+  hours: '',
+  priority: 'later',
 };
 
 const PortalPage: React.FC = () => {
@@ -97,6 +125,7 @@ const PortalPage: React.FC = () => {
       body: entry.body,
       client: entry.client,
       status: entry.status,
+      modules: entry.modules ? [...entry.modules] : undefined,
     });
     setEditingId(entry.id);
     setShowForm(true);
@@ -289,6 +318,172 @@ const PortalPage: React.FC = () => {
                       required
                     />
                   </Grid>
+                  {form.category === 'proposal' && (
+                    <Grid item xs={12}>
+                      <Box
+                        sx={{
+                          mt: 1,
+                          pt: 2,
+                          borderTop: `1px solid ${palette.border.subtle}`,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 2,
+                          }}
+                        >
+                          <Typography
+                            variant="overline"
+                            sx={{
+                              color: palette.primary.main,
+                              fontSize: '0.65rem',
+                              letterSpacing: '0.15em',
+                            }}
+                          >
+                            {'// MODULES'}
+                          </Typography>
+                          <Button
+                            size="small"
+                            startIcon={<Plus size={14} weight="bold" />}
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                modules: [...(form.modules || []), { ...emptyModule }],
+                              })
+                            }
+                            sx={{ fontSize: '0.7rem' }}
+                          >
+                            Add Module
+                          </Button>
+                        </Box>
+
+                        {(form.modules || []).map((mod, idx) => (
+                          <Box
+                            key={idx}
+                            sx={{
+                              p: 2,
+                              mb: 2,
+                              border: `1px solid ${palette.border.subtle}`,
+                              backgroundColor: palette.background.base,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 1.5,
+                              }}
+                            >
+                              <Typography variant="caption" sx={{ color: palette.text.muted }}>
+                                MODULE {idx + 1}
+                              </Typography>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const updated = [...(form.modules || [])];
+                                  updated.splice(idx, 1);
+                                  setForm({
+                                    ...form,
+                                    modules: updated.length > 0 ? updated : undefined,
+                                  });
+                                }}
+                              >
+                                <Trash size={14} color={palette.text.muted} />
+                              </IconButton>
+                            </Box>
+                            <Grid container spacing={1.5}>
+                              <Grid item xs={12} sm={6}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Name"
+                                  value={mod.name}
+                                  onChange={(e) => {
+                                    const updated = [...(form.modules || [])];
+                                    updated[idx] = { ...updated[idx], name: e.target.value };
+                                    setForm({ ...form, modules: updated });
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item xs={4} sm={2}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Price"
+                                  type="number"
+                                  value={mod.price || ''}
+                                  onChange={(e) => {
+                                    const updated = [...(form.modules || [])];
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      price: Number(e.target.value) || 0,
+                                    };
+                                    setForm({ ...form, modules: updated });
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item xs={4} sm={2}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Hours"
+                                  value={mod.hours || ''}
+                                  onChange={(e) => {
+                                    const updated = [...(form.modules || [])];
+                                    updated[idx] = { ...updated[idx], hours: e.target.value };
+                                    setForm({ ...form, modules: updated });
+                                  }}
+                                />
+                              </Grid>
+                              <Grid item xs={4} sm={2}>
+                                <TextField
+                                  select
+                                  fullWidth
+                                  size="small"
+                                  label="Priority"
+                                  value={mod.priority}
+                                  onChange={(e) => {
+                                    const updated = [...(form.modules || [])];
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      priority: e.target.value as ProposalModule['priority'],
+                                    };
+                                    setForm({ ...form, modules: updated });
+                                  }}
+                                >
+                                  <MenuItem value="start here">Start Here</MenuItem>
+                                  <MenuItem value="next">Next</MenuItem>
+                                  <MenuItem value="later">Later</MenuItem>
+                                </TextField>
+                              </Grid>
+                              <Grid item xs={12}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Description"
+                                  multiline
+                                  rows={2}
+                                  value={mod.description}
+                                  onChange={(e) => {
+                                    const updated = [...(form.modules || [])];
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      description: e.target.value,
+                                    };
+                                    setForm({ ...form, modules: updated });
+                                  }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Grid>
+                  )}
                   <Grid item xs={12}>
                     <Button type="submit" variant="contained" sx={{ px: 4, py: 1.5 }}>
                       {editingId ? 'Save Changes' : 'Add Entry'}
@@ -522,6 +717,134 @@ const PortalPage: React.FC = () => {
                           </Typography>
                         </Box>
                       </>
+                    )}
+
+                    {/* Requirements */}
+                    {entry.requirements && entry.requirements.length > 0 && (
+                      <Box sx={{ mt: entry.modules ? 5 : 0 }}>
+                        <Typography
+                          variant="overline"
+                          sx={{
+                            color: palette.primary.main,
+                            fontSize: '0.7rem',
+                            letterSpacing: '0.15em',
+                            display: 'block',
+                            mb: 1,
+                          }}
+                        >
+                          {'// REQUIREMENTS'}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: palette.text.muted, display: 'block', mb: 3 }}
+                        >
+                          {entry.requirements.reduce(
+                            (acc, cat) =>
+                              acc + cat.items.filter((i) => i.status === 'received').length,
+                            0
+                          )}
+                          {' / '}
+                          {entry.requirements.reduce((acc, cat) => acc + cat.items.length, 0)}
+                          {' received'}
+                        </Typography>
+
+                        {entry.requirements.map((cat) => (
+                          <Box key={cat.name} sx={{ mb: 3 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                mb: 1.5,
+                              }}
+                            >
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily: '"Space Grotesk", sans-serif',
+                                  color: palette.text.primary,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {cat.name}
+                              </Typography>
+                              <Chip
+                                label={cat.priority.toUpperCase()}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  border: `1px solid ${requirementPriorityColor[cat.priority]}`,
+                                  color: requirementPriorityColor[cat.priority],
+                                  fontFamily: '"JetBrains Mono", monospace',
+                                  fontSize: '0.5rem',
+                                  letterSpacing: '0.1em',
+                                  borderRadius: 0,
+                                  height: 18,
+                                }}
+                              />
+                            </Box>
+
+                            {cat.items.map((req) => (
+                              <Box
+                                key={req.item}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: 1.5,
+                                  py: 1,
+                                  px: 2,
+                                  mb: 0.5,
+                                  border: `1px solid ${palette.border.subtle}`,
+                                  backgroundColor: palette.background.base,
+                                }}
+                              >
+                                <Chip
+                                  label={requirementStatusLabel[req.status]}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: 'transparent',
+                                    border: `1px solid ${requirementStatusColor[req.status]}`,
+                                    color: requirementStatusColor[req.status],
+                                    fontFamily: '"JetBrains Mono", monospace',
+                                    fontSize: '0.5rem',
+                                    letterSpacing: '0.08em',
+                                    borderRadius: 0,
+                                    height: 18,
+                                    minWidth: 80,
+                                    mt: 0.25,
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color: palette.text.primary,
+                                      fontSize: '0.85rem',
+                                      lineHeight: 1.4,
+                                    }}
+                                  >
+                                    {req.item}
+                                  </Typography>
+                                  {req.notes && (
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        color: palette.text.muted,
+                                        display: 'block',
+                                        mt: 0.25,
+                                        lineHeight: 1.4,
+                                      }}
+                                    >
+                                      {req.notes}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              </Box>
+                            ))}
+                          </Box>
+                        ))}
+                      </Box>
                     )}
                   </Box>
                 </DepthCard>
