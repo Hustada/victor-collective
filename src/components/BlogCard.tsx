@@ -28,6 +28,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
+      style={{ height: '100%' }}
     >
       <Box
         onClick={() => {
@@ -37,6 +38,9 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
         sx={{
           cursor: 'pointer',
           p: 3,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           background: palette.background.elevated,
           border: `1px solid ${palette.border.subtle}`,
           position: 'relative',
@@ -112,7 +116,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
         </Typography>
 
         {/* Tags */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, flexGrow: 1 }}>
           {post.tags.slice(0, 3).map((tag) => (
             <Chip
               key={tag}

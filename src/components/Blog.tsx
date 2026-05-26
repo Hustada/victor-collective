@@ -10,7 +10,7 @@ import { palette } from '../theme';
 const Blog: React.FC = () => {
   const navigate = useNavigate();
   const allPosts = getBlogPosts();
-  const featuredSlugs = ['intent-engineering', 'vectus-ai'];
+  const featuredSlugs = ['intent-engineering', 'vectus-ai', 'fallacy-bot'];
   const posts = allPosts.filter((post) => featuredSlugs.includes(post.slug));
 
   return (
@@ -29,9 +29,9 @@ const Blog: React.FC = () => {
           subtitle="Thoughts on AI systems, agent architecture, and production engineering"
         />
 
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
           {posts.map((post, index) => (
-            <Grid item xs={12} md={4} key={post.slug}>
+            <Grid item xs={12} md={4} key={post.slug} sx={{ display: 'flex' }}>
               <BlogCard post={post} index={index} />
             </Grid>
           ))}

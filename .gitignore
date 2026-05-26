@@ -26,3 +26,6 @@ yarn-error.log*
 
 # But track brand images
 !/src/assets/brand/**/*
+server/data/
+server/invoices/
+server/node_modules/

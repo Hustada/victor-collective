@@ -1,0 +1,32 @@
+{
+  "name": "victor-collective-api",
+  "version": "1.0.0",
+  "description": "Backend API for Victor Collective - invoices, proposals",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "seed": "tsx seed.ts",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "pdfkit": "^0.16.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.0.0",
+    "@types/pdfkit": "^0.13.9",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.1.4"
+  }
+}

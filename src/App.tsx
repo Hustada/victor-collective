@@ -34,6 +34,7 @@ const BlogTagPage = React.lazy(() => import('./pages/BlogTagPage'));
 const PrivacyHubPage = React.lazy(() => import('./pages/PrivacyHubPage'));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage'));
 const PortalPage = React.lazy(() => import('./pages/PortalPage'));
+const InvoicesPage = React.lazy(() => import('./pages/InvoicesPage'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -91,6 +92,7 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/blog/tag/:tag" element={<BlogTagPage />} />
               <Route path="/portal" element={<PortalPage />} />
+              <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/privacy" element={<PrivacyHubPage />} />
               <Route path="/privacy/:appName" element={<PrivacyPolicyPage />} />
             </Routes>
