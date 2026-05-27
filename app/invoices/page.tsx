@@ -17,7 +17,14 @@ import {
   Paper,
   Grid,
 } from '@mui/material';
-import { Plus, Receipt, Clock, CheckCircle, CurrencyDollar } from '@phosphor-icons/react';
+import {
+  Plus,
+  Receipt,
+  Clock,
+  CheckCircle,
+  CurrencyDollar,
+  PlugsConnected,
+} from '@phosphor-icons/react';
 import PortalGate from '../../src/components/PortalGate';
 import DepthCard from '../../src/components/ui/DepthCard';
 import InvoiceForm from '../../src/components/InvoiceForm';
@@ -75,27 +82,34 @@ function InvoicesContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [apiAvailable, setApiAvailable] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
   const fetchInvoices = useCallback(async () => {
+    if (!apiUrl) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${apiUrl}/api/invoices`);
-      if (!res.ok) throw new Error('Failed to fetch invoices');
+      if (!res.ok) throw new Error('API not available');
       const data = await res.json();
       setInvoices(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch invoices');
+      setApiAvailable(true);
+    } catch {
+      setApiAvailable(false);
     } finally {
       setLoading(false);
     }
   }, [apiUrl]);
 
   const fetchTemplates = useCallback(async () => {
+    if (!apiUrl) return;
     try {
       const res = await fetch(`${apiUrl}/api/invoices/templates/CompanyCam`);
       if (res.ok) {
@@ -185,23 +199,45 @@ function InvoicesContent() {
     );
   }
 
-  if (error) {
+  // API not configured or not running - show friendly message
+  if (!apiAvailable) {
     return (
       <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', py: 12 }}>
-          <Typography variant="h6" color="error" gutterBottom>
-            {error}
+        <Box sx={{ mb: 6 }}>
+          <Typography
+            variant="overline"
+            color="primary"
+            sx={{ letterSpacing: 2, display: 'block', mb: 1 }}
+          >
+            Portal
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Make sure the API server is running at{' '}
-            <code style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '2px 6px' }}>
-              {apiUrl}
-            </code>
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            Set NEXT_PUBLIC_API_URL in .env.local to change
+          <Typography variant="h3" component="h1" gutterBottom>
+            Invoices
           </Typography>
         </Box>
+
+        <DepthCard shadowOffset={6} hoverLift={0}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 10,
+              px: 4,
+              textAlign: 'center',
+            }}
+          >
+            <PlugsConnected size={64} color={palette.text.muted} style={{ marginBottom: 24 }} />
+            <Typography variant="h5" gutterBottom>
+              API Server Required
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400 }}>
+              Invoice management requires the API server to be running. Start the server to create
+              and manage invoices.
+            </Typography>
+          </Box>
+        </DepthCard>
       </Container>
     );
   }
