@@ -193,7 +193,13 @@ function InvoicesContent() {
             {error}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Make sure the API server is running at {apiUrl}
+            Make sure the API server is running at{' '}
+            <code style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '2px 6px' }}>
+              {apiUrl}
+            </code>
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            Set NEXT_PUBLIC_API_URL in .env.local to change
           </Typography>
         </Box>
       </Container>
