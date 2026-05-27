@@ -16,9 +16,15 @@ const nextConfig = {
     ],
   },
 
-  // Environment variables available to the browser
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  // Proxy API requests to backend server (works on any port)
+  async rewrites() {
+    const apiUrl = process.env.API_URL || 'http://localhost:3001';
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
+      },
+    ];
   },
 
   // Webpack configuration for handling markdown files

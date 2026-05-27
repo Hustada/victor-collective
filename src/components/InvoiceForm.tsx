@@ -49,7 +49,6 @@ interface Props {
   templates: InvoiceTemplate[];
   onClose: () => void;
   onSubmit: () => void;
-  apiUrl: string;
 }
 
 function formatCurrency(cents: number): string {
@@ -79,7 +78,7 @@ function getNextFriday(): string {
   return nextFriday.toISOString().split('T')[0];
 }
 
-const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit, apiUrl }) => {
+const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit }) => {
   const [clientName, setClientName] = useState(invoice?.clientName || 'CompanyCam');
   const [weekEnding, setWeekEnding] = useState(invoice?.weekEnding || getNextFriday());
   const [notes, setNotes] = useState(invoice?.notes || '');
@@ -143,7 +142,7 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit, a
     try {
       if (invoice) {
         // Update existing invoice
-        await fetch(`${apiUrl}/api/invoices/${invoice.id}`, {
+        await fetch(`/api/invoices/${invoice.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ weekEnding, notes }),
@@ -151,13 +150,13 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit, a
 
         // Sync line items - delete existing, add new
         for (const item of invoice.lineItems || []) {
-          await fetch(`${apiUrl}/api/invoices/${invoice.id}/line-items/${item.id}`, {
+          await fetch(`/api/invoices/${invoice.id}/line-items/${item.id}`, {
             method: 'DELETE',
           });
         }
 
         for (const item of lineItems) {
-          await fetch(`${apiUrl}/api/invoices/${invoice.id}/line-items`, {
+          await fetch(`/api/invoices/${invoice.id}/line-items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(item),
@@ -165,7 +164,7 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit, a
         }
       } else {
         // Create new invoice
-        const res = await fetch(`${apiUrl}/api/invoices`, {
+        const res = await fetch(`/api/invoices`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clientName, weekEnding, notes }),
@@ -176,7 +175,7 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit, a
 
           // Add line items
           for (const item of lineItems) {
-            await fetch(`${apiUrl}/api/invoices/${newInvoice.id}/line-items`, {
+            await fetch(`/api/invoices/${newInvoice.id}/line-items`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(item),

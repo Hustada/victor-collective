@@ -48,7 +48,6 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (status: Invoice['status']) => void;
-  apiUrl: string;
 }
 
 const statusColor: Record<Invoice['status'], string> = {
@@ -76,7 +75,6 @@ const InvoicePreview: React.FC<Props> = ({
   onEdit,
   onDelete,
   onStatusChange,
-  apiUrl,
 }) => {
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -86,7 +84,7 @@ const InvoicePreview: React.FC<Props> = ({
       // Generate first
       setGenerating(true);
       try {
-        await fetch(`${apiUrl}/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
+        await fetch(`/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
       } catch (err) {
         console.error('Failed to generate PDF:', err);
         setGenerating(false);
@@ -94,16 +92,16 @@ const InvoicePreview: React.FC<Props> = ({
       }
       setGenerating(false);
     }
-    window.open(`${apiUrl}/api/invoices/${invoice.id}/pdf`, '_blank');
+    window.open(`/api/invoices/${invoice.id}/pdf`, '_blank');
   };
 
   const handleCopyEmail = async () => {
     if (!invoice.emailBody) {
       // Generate first
       try {
-        await fetch(`${apiUrl}/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
+        await fetch(`/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
         // Refetch invoice to get email body
-        const res = await fetch(`${apiUrl}/api/invoices/${invoice.id}`);
+        const res = await fetch(`/api/invoices/${invoice.id}`);
         if (res.ok) {
           const data = await res.json();
           if (data.emailBody) {

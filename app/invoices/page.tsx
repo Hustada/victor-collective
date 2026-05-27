@@ -87,16 +87,9 @@ function InvoicesContent() {
   const [showForm, setShowForm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-
   const fetchInvoices = useCallback(async () => {
-    if (!apiUrl) {
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`${apiUrl}/api/invoices`);
+      const res = await fetch('/api/invoices');
       if (!res.ok) throw new Error('API not available');
       const data = await res.json();
       setInvoices(data);
@@ -106,12 +99,11 @@ function InvoicesContent() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl]);
+  }, []);
 
   const fetchTemplates = useCallback(async () => {
-    if (!apiUrl) return;
     try {
-      const res = await fetch(`${apiUrl}/api/invoices/templates/CompanyCam`);
+      const res = await fetch('/api/invoices/templates/CompanyCam');
       if (res.ok) {
         const data = await res.json();
         setTemplates(data);
@@ -119,7 +111,7 @@ function InvoicesContent() {
     } catch {
       // Templates are optional
     }
-  }, [apiUrl]);
+  }, []);
 
   useEffect(() => {
     fetchInvoices();
@@ -140,7 +132,7 @@ function InvoicesContent() {
 
   const handleRowClick = async (invoice: Invoice) => {
     try {
-      const res = await fetch(`${apiUrl}/api/invoices/${invoice.id}`);
+      const res = await fetch(`/api/invoices/${invoice.id}`);
       if (res.ok) {
         const fullInvoice = await res.json();
         setSelectedInvoice(fullInvoice);
@@ -176,7 +168,7 @@ function InvoicesContent() {
   const handleDelete = async () => {
     if (!selectedInvoice) return;
     try {
-      await fetch(`${apiUrl}/api/invoices/${selectedInvoice.id}`, { method: 'DELETE' });
+      await fetch(`/api/invoices/${selectedInvoice.id}`, { method: 'DELETE' });
       setShowPreview(false);
       setSelectedInvoice(null);
       fetchInvoices();
@@ -375,7 +367,6 @@ function InvoicesContent() {
           templates={templates}
           onClose={handleFormClose}
           onSubmit={handleFormSubmit}
-          apiUrl={apiUrl}
         />
       )}
 
@@ -387,7 +378,6 @@ function InvoicesContent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onStatusChange={handleStatusChange}
-          apiUrl={apiUrl}
         />
       )}
     </Container>
