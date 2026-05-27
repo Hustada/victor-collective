@@ -5,9 +5,11 @@
  * Deployed on Railway.
  */
 
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { invoiceRoutes } from './routes/invoices.js';
+import { inboxRoutes } from './routes/inbox.js';
 import { initDb } from './lib/db.js';
 import { logger } from './lib/logger.js';
 
@@ -45,6 +47,7 @@ app.get('/health', (_req, res) => {
 
 // API routes
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/inbox', inboxRoutes);
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

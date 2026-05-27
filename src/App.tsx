@@ -25,6 +25,7 @@ import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CursorGlow from './components/effects/CursorGlow';
+import CommandPalette from './components/CommandPalette';
 
 // Pages (lazy-loaded)
 import BlogPage from './pages/BlogPage';
@@ -35,6 +36,7 @@ const PrivacyHubPage = React.lazy(() => import('./pages/PrivacyHubPage'));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage'));
 const PortalPage = React.lazy(() => import('./pages/PortalPage'));
 const InvoicesPage = React.lazy(() => import('./pages/InvoicesPage'));
+const InboxPage = React.lazy(() => import('./pages/InboxPage'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -71,6 +73,7 @@ function App() {
         >
           <ScrollToTop />
           <CursorGlow />
+          <CommandPalette />
           <Navbar />
           <Suspense
             fallback={
@@ -93,6 +96,7 @@ function App() {
               <Route path="/blog/tag/:tag" element={<BlogTagPage />} />
               <Route path="/portal" element={<PortalPage />} />
               <Route path="/invoices" element={<InvoicesPage />} />
+              <Route path="/inbox" element={<InboxPage />} />
               <Route path="/privacy" element={<PrivacyHubPage />} />
               <Route path="/privacy/:appName" element={<PrivacyPolicyPage />} />
             </Routes>
