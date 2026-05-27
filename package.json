@@ -2,10 +2,22 @@
   "name": "portfolio-site",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "fmt": "prettier --write 'src/**/*.{ts,tsx,json,css}' 'app/**/*.{ts,tsx}'",
+    "fmt:check": "prettier --check 'src/**/*.{ts,tsx,json,css}' 'app/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run fmt:check && npm run lint && npm run typecheck",
+    "prepare": "husky"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
-    "@craco/craco": "^7.1.0",
     "@emailjs/browser": "^4.4.1",
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/inter": "^5.2.8",
@@ -15,100 +27,38 @@
     "@fontsource/space-grotesk": "^5.2.10",
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.18",
+    "@mui/material-nextjs": "^5.15.11",
     "@octokit/rest": "^21.1.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@types/jest": "^27.5.2",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "@types/react-router-dom": "^5.3.3",
-    "buffer": "^6.0.3",
     "date-fns": "^4.1.0",
-    "dotenv": "^16.4.7",
     "framer-motion": "^10.16.5",
     "gray-matter": "^4.0.3",
-    "path-browserify": "^1.0.1",
+    "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
-    "react-router-dom": "^7.1.1",
-    "react-scripts": "5.0.1",
-    "remark-gfm": "^4.0.0",
-    "typescript": "^5.9.3",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "craco start",
-    "build": "CI=false craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject",
-    "lint": "eslint src/ --ext .ts,.tsx --max-warnings 0",
-    "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
-    "fmt": "prettier --write 'src/**/*.{ts,tsx,json,css}'",
-    "fmt:check": "prettier --check 'src/**/*.{ts,tsx,json,css}'",
-    "typecheck": "tsc --noEmit",
-    "check": "npm run fmt:check && npm run lint && npm run typecheck",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "prettier --write",
-      "eslint --max-warnings 0"
-    ],
-    "src/**/*.{json,css}": [
-      "prettier --write"
-    ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest",
-      "prettier"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ],
-      "no-console": [
-        "warn",
-        {
-          "allow": [
-            "warn",
-            "error"
-          ]
-        }
-      ]
-    }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@mdx-js/loader": "^3.1.0",
-    "@mdx-js/react": "^3.1.0",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
     "@types/node": "^22.13.1",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.3.3",
     "prettier": "^3.8.1",
-    "raw-loader": "^4.0.2",
     "sharp": "^0.33.5",
-    "string-replace-loader": "^3.1.0",
-    "ts-node": "^10.9.2"
+    "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --max-warnings 0"
+    ],
+    "**/*.{json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

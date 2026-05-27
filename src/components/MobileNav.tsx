@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   Box,
@@ -11,7 +13,7 @@ import {
 } from '@mui/material';
 import { X } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { palette } from '../theme';
 
 interface MenuItem {
@@ -93,7 +95,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
           >
             <ListItem
               component={Link}
-              to={item.path}
+              href={item.path}
               onClick={() => {
                 if (isHomePage) scrollTo(item.id);
                 onClose();

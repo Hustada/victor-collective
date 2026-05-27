@@ -1,17 +1,19 @@
+'use client';
+
 import React from 'react';
 import { Box, Typography, Chip, Container } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { BlogPost as BlogPostType } from '../types/blog';
 import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 interface BlogPostProps {
   post: BlogPostType;
 }
 
 const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <Container maxWidth="md">
@@ -29,7 +31,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
             <Chip
               key={tag}
               label={tag}
-              onClick={() => navigate(`/blog/tag/${tag}`)}
+              onClick={() => router.push(`/blog/tag/${tag}`)}
               sx={{ mr: 1, mb: 1 }}
             />
           ))}

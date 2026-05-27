@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Box, Container, Typography, Link, Grid, IconButton } from '@mui/material';
 import { GithubLogo, LinkedinLogo } from '@phosphor-icons/react';

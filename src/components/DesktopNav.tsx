@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { alpha } from '@mui/material/styles';
 import { palette } from '../theme';
 
@@ -32,7 +34,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, path, isActive, onClick 
     >
       <Box
         component={Link}
-        to={path}
+        href={path}
         onClick={onClick}
         sx={{
           display: 'flex',

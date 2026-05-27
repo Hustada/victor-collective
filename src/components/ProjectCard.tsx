@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Box, CardContent, Chip, Stack, IconButton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -29,7 +31,7 @@ const ProjectCard: React.FC<{ project: ProjectData; index: number }> = ({ projec
           }}
         >
           <motion.img
-            src={project.image}
+            src={project.image.src}
             alt={project.title}
             loading="lazy"
             animate={{ scale: isHovered ? 1.05 : 1 }}

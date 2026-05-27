@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Container, Button, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
