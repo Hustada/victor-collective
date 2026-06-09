@@ -27,9 +27,12 @@ invoiceRoutes.get('/', (req, res) => {
 });
 
 // Get templates - must be before /:id to avoid matching "templates" as an id
-invoiceRoutes.get('/templates/:client', (req, res) => {
-  const { client } = req.params;
-  const templates = InvoiceService.getTemplates(client);
+invoiceRoutes.get('/templates/:clientId', (req, res) => {
+  const clientId = parseInt(req.params.clientId, 10);
+  if (Number.isNaN(clientId)) {
+    return res.status(400).json({ error: 'clientId must be a number' });
+  }
+  const templates = InvoiceService.getTemplates(clientId);
   res.json(templates);
 });
 
@@ -81,15 +84,15 @@ invoiceRoutes.post('/', (req, res) => {
 
 // Create template
 invoiceRoutes.post('/templates', (req, res) => {
-  const { clientName, description, unitPrice, isDefault } = req.body;
+  const { clientId, description, unitPrice, isDefault } = req.body;
 
-  if (!clientName || !description || unitPrice === undefined) {
-    return res.status(400).json({ error: 'clientName, description, and unitPrice are required' });
+  if (!clientId || !description || unitPrice === undefined) {
+    return res.status(400).json({ error: 'clientId, description, and unitPrice are required' });
   }
 
   try {
     const template = InvoiceService.createTemplate({
-      clientName,
+      clientId,
       description,
       unitPrice,
       isDefault,

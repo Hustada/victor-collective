@@ -59,14 +59,6 @@ interface Invoice {
   lineItems?: LineItem[];
 }
 
-interface InvoiceTemplate {
-  id: number;
-  clientName: string;
-  description: string;
-  unitPrice: number;
-  isDefault: boolean;
-}
-
 function formatCurrency(cents: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -82,7 +74,6 @@ const statusColors: Record<string, 'default' | 'warning' | 'success'> = {
 
 function InvoicesContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiAvailable, setApiAvailable] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -103,22 +94,9 @@ function InvoicesContent() {
     }
   }, []);
 
-  const fetchTemplates = useCallback(async () => {
-    try {
-      const res = await fetch('/api/invoices/templates/CompanyCam');
-      if (res.ok) {
-        const data = await res.json();
-        setTemplates(data);
-      }
-    } catch {
-      // Templates are optional
-    }
-  }, []);
-
   useEffect(() => {
     fetchInvoices();
-    fetchTemplates();
-  }, [fetchInvoices, fetchTemplates]);
+  }, [fetchInvoices]);
 
   const stats = {
     draft: invoices.filter((i) => i.status === 'draft').length,
@@ -384,7 +362,6 @@ function InvoicesContent() {
       {showForm && (
         <InvoiceForm
           invoice={selectedInvoice}
-          templates={templates}
           onClose={handleFormClose}
           onSubmit={handleFormSubmit}
         />

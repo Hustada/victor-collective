@@ -43,11 +43,12 @@ CREATE TABLE IF NOT EXISTS line_items (
 
 CREATE TABLE IF NOT EXISTS invoice_templates (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_name TEXT NOT NULL,
+  client_id INTEGER NOT NULL,             -- registry link
   description TEXT NOT NULL,
   unit_price INTEGER NOT NULL,            -- cents
   is_default BOOLEAN DEFAULT FALSE,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
 -- Indexes for common queries
@@ -55,7 +56,7 @@ CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_name);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_invoices_week_ending ON invoices(week_ending);
 CREATE INDEX IF NOT EXISTS idx_line_items_invoice ON line_items(invoice_id);
-CREATE INDEX IF NOT EXISTS idx_templates_client ON invoice_templates(client_name);
+CREATE INDEX IF NOT EXISTS idx_templates_client ON invoice_templates(client_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_client_id ON invoices(client_id);
 
 -- Trigger to update updated_at on invoice changes

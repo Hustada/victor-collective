@@ -81,6 +81,39 @@ function runMigrations(database: Database.Database): void {
   `);
 
   seedCompanyCamClient(database);
+  migrateTemplatesToClientId(database);
+}
+
+// CompanyCam's accounts-payable inbox; used as the seed/backfill default.
+const COMPANYCAM_BILLING_EMAIL = 'ap@companycam.com';
+
+/**
+ * Migrate invoice_templates from a client_name string to a client_id link.
+ * Backfills client_id by joining the clients registry on name, then drops the
+ * legacy column. Runs after seedCompanyCamClient so the registry row exists.
+ * Safe to run repeatedly: a no-op once client_name is gone.
+ */
+function migrateTemplatesToClientId(database: Database.Database): void {
+  const columns = database.prepare('PRAGMA table_info(invoice_templates)').all() as {
+    name: string;
+  }[];
+
+  if (!columns.some((c) => c.name === 'client_name')) return;
+
+  if (!columns.some((c) => c.name === 'client_id')) {
+    database.exec('ALTER TABLE invoice_templates ADD COLUMN client_id INTEGER');
+  }
+
+  database.exec(`
+    UPDATE invoice_templates
+    SET client_id = (SELECT id FROM clients WHERE clients.name = invoice_templates.client_name)
+    WHERE client_id IS NULL
+  `);
+
+  // Drop the legacy column (and its index) now that client_id is populated.
+  database.exec('DROP INDEX IF EXISTS idx_templates_client');
+  database.exec('ALTER TABLE invoice_templates DROP COLUMN client_name');
+  database.exec('CREATE INDEX IF NOT EXISTS idx_templates_client ON invoice_templates(client_id)');
 }
 
 /**
@@ -89,10 +122,19 @@ function runMigrations(database: Database.Database): void {
  * existing CompanyCam invoices to the new client row. Safe to run repeatedly.
  */
 function seedCompanyCamClient(database: Database.Database): void {
-  const existing = database.prepare('SELECT id FROM clients WHERE name = ?').get('CompanyCam') as
-    | { id: number }
-    | undefined;
-  if (existing) return;
+  const existing = database
+    .prepare('SELECT id, email FROM clients WHERE name = ?')
+    .get('CompanyCam') as { id: number; email: string | null } | undefined;
+
+  if (existing) {
+    // Backfill the billing email if the row was seeded blank.
+    if (!existing.email) {
+      database
+        .prepare('UPDATE clients SET email = ? WHERE id = ?')
+        .run(COMPANYCAM_BILLING_EMAIL, existing.id);
+    }
+    return;
+  }
 
   const lastEmail = database
     .prepare(
@@ -104,7 +146,7 @@ function seedCompanyCamClient(database: Database.Database): void {
 
   const result = database
     .prepare('INSERT INTO clients (name, email) VALUES (?, ?)')
-    .run('CompanyCam', lastEmail?.client_email ?? null);
+    .run('CompanyCam', lastEmail?.client_email ?? COMPANYCAM_BILLING_EMAIL);
 
   database
     .prepare('UPDATE invoices SET client_id = ? WHERE client_name = ? AND client_id IS NULL')

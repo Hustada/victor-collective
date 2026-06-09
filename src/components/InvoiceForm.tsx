@@ -46,7 +46,7 @@ interface Client {
 
 interface InvoiceTemplate {
   id: number;
-  clientName: string;
+  clientId: number;
   description: string;
   unitPrice: number;
   isDefault: boolean;
@@ -54,7 +54,6 @@ interface InvoiceTemplate {
 
 interface Props {
   invoice: Invoice | null;
-  templates: InvoiceTemplate[];
   onClose: () => void;
   onSubmit: () => void;
 }
@@ -86,7 +85,7 @@ function getNextFriday(): string {
   return nextFriday.toISOString().split('T')[0];
 }
 
-const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit }) => {
+const InvoiceForm: React.FC<Props> = ({ invoice, onClose, onSubmit }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState<number | ''>(invoice?.clientId ?? '');
   const [clientName, setClientName] = useState(invoice?.clientName || '');
@@ -94,6 +93,7 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
   const [weekEnding, setWeekEnding] = useState(invoice?.weekEnding || getNextFriday());
   const [notes, setNotes] = useState(invoice?.notes || '');
   const [lineItems, setLineItems] = useState<LineItem[]>(invoice?.lineItems || []);
+  const [templates, setTemplates] = useState<InvoiceTemplate[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -116,6 +116,18 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
       })
       .catch(() => {});
   }, [invoice]);
+
+  // Load the selected client's quick-add templates
+  useEffect(() => {
+    if (clientId === '') {
+      setTemplates([]);
+      return;
+    }
+    fetch(`/api/invoices/templates/${clientId}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: InvoiceTemplate[]) => setTemplates(data))
+      .catch(() => setTemplates([]));
+  }, [clientId]);
 
   const handleClientChange = (id: number) => {
     setClientId(id);

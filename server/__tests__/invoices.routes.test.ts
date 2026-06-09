@@ -123,13 +123,11 @@ describe('Invoice Routes', () => {
     });
 
     it('persists client email', async () => {
-      const res = await request(app)
-        .post('/api/invoices')
-        .send({
-          clientName: 'CompanyCam',
-          weekEnding: '2026-05-30',
-          clientEmail: 'ops@companycam.com',
-        });
+      const res = await request(app).post('/api/invoices').send({
+        clientName: 'CompanyCam',
+        weekEnding: '2026-05-30',
+        clientEmail: 'ops@companycam.com',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.clientEmail).toBe('ops@companycam.com');
@@ -361,25 +359,32 @@ describe('Invoice Routes', () => {
   });
 
   describe('Templates', () => {
-    describe('GET /api/invoices/templates/:client', () => {
+    describe('GET /api/invoices/templates/:clientId', () => {
       it('returns templates for client', async () => {
+        const client = ClientService.create({ name: 'CompanyCam' });
         InvoiceService.createTemplate({
-          clientName: 'CompanyCam',
+          clientId: client.id,
           description: 'Weekly fee',
           unitPrice: 380000,
           isDefault: true,
         });
 
-        const res = await request(app).get('/api/invoices/templates/CompanyCam');
+        const res = await request(app).get(`/api/invoices/templates/${client.id}`);
         expect(res.status).toBe(200);
         expect(res.body).toHaveLength(1);
+      });
+
+      it('returns 400 for a non-numeric clientId', async () => {
+        const res = await request(app).get('/api/invoices/templates/CompanyCam');
+        expect(res.status).toBe(400);
       });
     });
 
     describe('POST /api/invoices/templates', () => {
       it('creates template', async () => {
+        const client = ClientService.create({ name: 'CompanyCam' });
         const res = await request(app).post('/api/invoices/templates').send({
-          clientName: 'CompanyCam',
+          clientId: client.id,
           description: 'Weekly fee',
           unitPrice: 380000,
           isDefault: true,
@@ -390,9 +395,7 @@ describe('Invoice Routes', () => {
       });
 
       it('returns 400 without required fields', async () => {
-        const res = await request(app)
-          .post('/api/invoices/templates')
-          .send({ clientName: 'CompanyCam' });
+        const res = await request(app).post('/api/invoices/templates').send({ clientId: 1 });
 
         expect(res.status).toBe(400);
       });

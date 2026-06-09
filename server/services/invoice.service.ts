@@ -40,7 +40,7 @@ export interface LineItem {
 
 export interface InvoiceTemplate {
   id: number;
-  clientName: string;
+  clientId: number;
   description: string;
   unitPrice: number;
   isDefault: boolean;
@@ -64,7 +64,7 @@ interface CreateLineItemInput {
 }
 
 interface CreateTemplateInput {
-  clientName: string;
+  clientId: number;
   description: string;
   unitPrice: number;
   isDefault?: boolean;
@@ -115,7 +115,7 @@ interface LineItemRow {
 
 interface TemplateRow {
   id: number;
-  client_name: string;
+  client_id: number;
   description: string;
   unit_price: number;
   is_default: number;
@@ -160,7 +160,7 @@ function mapLineItem(row: LineItemRow): LineItem {
 function mapTemplate(row: TemplateRow): InvoiceTemplate {
   return {
     id: row.id,
-    clientName: row.client_name,
+    clientId: row.client_id,
     description: row.description,
     unitPrice: row.unit_price,
     isDefault: Boolean(row.is_default),
@@ -259,8 +259,8 @@ export const InvoiceService = {
       client: input.clientName,
     });
 
-    // Apply default templates
-    const templates = this.getTemplates(input.clientName, true);
+    // Apply default templates for the selected registry client
+    const templates = input.clientId ? this.getTemplates(input.clientId, true) : [];
     for (const template of templates) {
       this.addLineItem(invoiceId, {
         description: template.description,
@@ -505,12 +505,12 @@ export const InvoiceService = {
   createTemplate(input: CreateTemplateInput): InvoiceTemplate {
     const db = getDb();
     const stmt = db.prepare(`
-      INSERT INTO invoice_templates (client_name, description, unit_price, is_default)
+      INSERT INTO invoice_templates (client_id, description, unit_price, is_default)
       VALUES (?, ?, ?, ?)
     `);
 
     const result = stmt.run(
-      input.clientName,
+      input.clientId,
       input.description,
       input.unitPrice,
       input.isDefault ? 1 : 0
@@ -518,7 +518,7 @@ export const InvoiceService = {
 
     logger.info('Template created', {
       id: result.lastInsertRowid,
-      client: input.clientName,
+      clientId: input.clientId,
       description: input.description,
     });
 
@@ -532,10 +532,10 @@ export const InvoiceService = {
   /**
    * Get templates for a client
    */
-  getTemplates(clientName: string, defaultOnly = false): InvoiceTemplate[] {
+  getTemplates(clientId: number, defaultOnly = false): InvoiceTemplate[] {
     const db = getDb();
-    let query = 'SELECT * FROM invoice_templates WHERE client_name = ?';
-    const params: unknown[] = [clientName];
+    let query = 'SELECT * FROM invoice_templates WHERE client_id = ?';
+    const params: unknown[] = [clientId];
 
     if (defaultOnly) {
       query += ' AND is_default = 1';
