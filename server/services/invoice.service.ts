@@ -11,7 +11,9 @@ import { logger } from '../lib/logger.js';
 export interface Invoice {
   id: number;
   invoiceNumber: string;
+  clientId: number | null;
   clientName: string;
+  clientEmail: string | null;
   weekEnding: string;
   status: 'draft' | 'sent' | 'paid';
   subtotal: number;
@@ -46,7 +48,9 @@ export interface InvoiceTemplate {
 }
 
 interface CreateInvoiceInput {
+  clientId?: number;
   clientName: string;
+  clientEmail?: string;
   weekEnding: string;
   notes?: string;
 }
@@ -72,6 +76,7 @@ interface ListFilters {
 }
 
 interface UpdateInvoiceInput {
+  clientEmail?: string;
   weekEnding?: string;
   notes?: string;
   emailBody?: string;
@@ -81,7 +86,9 @@ interface UpdateInvoiceInput {
 interface InvoiceRow {
   id: number;
   invoice_number: string;
+  client_id: number | null;
   client_name: string;
+  client_email: string | null;
   week_ending: string;
   status: string;
   subtotal: number;
@@ -120,7 +127,9 @@ function mapInvoice(row: InvoiceRow): Invoice {
   return {
     id: row.id,
     invoiceNumber: row.invoice_number,
+    clientId: row.client_id,
     clientName: row.client_name,
+    clientEmail: row.client_email,
     weekEnding: row.week_ending,
     status: row.status as Invoice['status'],
     subtotal: row.subtotal,
@@ -159,11 +168,11 @@ function mapTemplate(row: TemplateRow): InvoiceTemplate {
   };
 }
 
-// Valid status transitions
+// Valid status transitions - allow any change
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  draft: ['sent'],
-  sent: ['paid', 'draft'],
-  paid: ['sent'], // Allow reverting if payment was incorrect
+  draft: ['sent', 'paid'],
+  sent: ['draft', 'paid'],
+  paid: ['draft', 'sent'],
 };
 
 export const InvoiceService = {
@@ -175,11 +184,13 @@ export const InvoiceService = {
     const year = new Date().getFullYear();
     const prefix = `TVC-${year}-`;
 
-    const lastInvoice = db.prepare(
-      `SELECT invoice_number FROM invoices
+    const lastInvoice = db
+      .prepare(
+        `SELECT invoice_number FROM invoices
        WHERE invoice_number LIKE ?
        ORDER BY invoice_number DESC LIMIT 1`
-    ).get(`${prefix}%`) as { invoice_number: string } | undefined;
+      )
+      .get(`${prefix}%`) as { invoice_number: string } | undefined;
 
     let nextNum = 1;
     if (lastInvoice) {
@@ -227,13 +238,15 @@ export const InvoiceService = {
     const invoiceNumber = this.generateInvoiceNumber();
 
     const stmt = db.prepare(`
-      INSERT INTO invoices (invoice_number, client_name, week_ending, status, subtotal, total, notes)
-      VALUES (?, ?, ?, 'draft', 0, 0, ?)
+      INSERT INTO invoices (invoice_number, client_id, client_name, client_email, week_ending, status, subtotal, total, notes)
+      VALUES (?, ?, ?, ?, ?, 'draft', 0, 0, ?)
     `);
 
     const result = stmt.run(
       invoiceNumber,
+      input.clientId ?? null,
       input.clientName,
+      input.clientEmail || null,
       input.weekEnding,
       input.notes || null
     );
@@ -306,6 +319,11 @@ export const InvoiceService = {
 
     const updates: string[] = [];
     const params: unknown[] = [];
+
+    if (input.clientEmail !== undefined) {
+      updates.push('client_email = ?');
+      params.push(input.clientEmail || null);
+    }
 
     if (input.weekEnding !== undefined) {
       updates.push('week_ending = ?');
@@ -423,9 +441,9 @@ export const InvoiceService = {
       amount,
     });
 
-    const row = db.prepare('SELECT * FROM line_items WHERE id = ?').get(
-      result.lastInsertRowid
-    ) as LineItemRow;
+    const row = db
+      .prepare('SELECT * FROM line_items WHERE id = ?')
+      .get(result.lastInsertRowid) as LineItemRow;
 
     return mapLineItem(row);
   },
@@ -446,9 +464,9 @@ export const InvoiceService = {
    */
   getLineItems(invoiceId: number): LineItem[] {
     const db = getDb();
-    const rows = db.prepare(
-      'SELECT * FROM line_items WHERE invoice_id = ? ORDER BY sort_order, id'
-    ).all(invoiceId) as LineItemRow[];
+    const rows = db
+      .prepare('SELECT * FROM line_items WHERE invoice_id = ? ORDER BY sort_order, id')
+      .all(invoiceId) as LineItemRow[];
 
     return rows.map(mapLineItem);
   },
@@ -458,9 +476,9 @@ export const InvoiceService = {
    */
   recalculateTotals(invoiceId: number): void {
     const db = getDb();
-    const result = db.prepare(
-      'SELECT COALESCE(SUM(amount), 0) as total FROM line_items WHERE invoice_id = ?'
-    ).get(invoiceId) as { total: number };
+    const result = db
+      .prepare('SELECT COALESCE(SUM(amount), 0) as total FROM line_items WHERE invoice_id = ?')
+      .get(invoiceId) as { total: number };
 
     const total = result.total;
 
@@ -504,9 +522,9 @@ export const InvoiceService = {
       description: input.description,
     });
 
-    const row = db.prepare('SELECT * FROM invoice_templates WHERE id = ?').get(
-      result.lastInsertRowid
-    ) as TemplateRow;
+    const row = db
+      .prepare('SELECT * FROM invoice_templates WHERE id = ?')
+      .get(result.lastInsertRowid) as TemplateRow;
 
     return mapTemplate(row);
   },

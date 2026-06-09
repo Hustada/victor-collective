@@ -27,13 +27,21 @@ interface LineItem {
 interface Invoice {
   id: number;
   invoiceNumber: string;
+  clientId: number | null;
   clientName: string;
+  clientEmail: string | null;
   weekEnding: string;
   status: 'draft' | 'sent' | 'paid';
   subtotal: number;
   total: number;
   notes: string | null;
   lineItems?: LineItem[];
+}
+
+interface Client {
+  id: number;
+  name: string;
+  email: string | null;
 }
 
 interface InvoiceTemplate {
@@ -79,7 +87,10 @@ function getNextFriday(): string {
 }
 
 const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit }) => {
-  const [clientName, setClientName] = useState(invoice?.clientName || 'CompanyCam');
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientId, setClientId] = useState<number | ''>(invoice?.clientId ?? '');
+  const [clientName, setClientName] = useState(invoice?.clientName || '');
+  const [clientEmail, setClientEmail] = useState(invoice?.clientEmail || '');
   const [weekEnding, setWeekEnding] = useState(invoice?.weekEnding || getNextFriday());
   const [notes, setNotes] = useState(invoice?.notes || '');
   const [lineItems, setLineItems] = useState<LineItem[]>(invoice?.lineItems || []);
@@ -90,6 +101,30 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
       setLineItems(invoice.lineItems);
     }
   }, [invoice]);
+
+  // Load the client registry; default a new invoice to the first client
+  useEffect(() => {
+    fetch('/api/clients')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: Client[]) => {
+        setClients(data);
+        if (!invoice && data.length > 0) {
+          setClientId(data[0].id);
+          setClientName(data[0].name);
+          setClientEmail(data[0].email || '');
+        }
+      })
+      .catch(() => {});
+  }, [invoice]);
+
+  const handleClientChange = (id: number) => {
+    setClientId(id);
+    const client = clients.find((c) => c.id === id);
+    if (client) {
+      setClientName(client.name);
+      setClientEmail(client.email || '');
+    }
+  };
 
   const handleAddFromTemplate = (template: InvoiceTemplate) => {
     const newItem: LineItem = {
@@ -145,7 +180,7 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
         await fetch(`/api/invoices/${invoice.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ weekEnding, notes }),
+          body: JSON.stringify({ weekEnding, notes, clientEmail }),
         });
 
         // Sync line items - delete existing, add new
@@ -167,7 +202,13 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
         const res = await fetch(`/api/invoices`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clientName, weekEnding, notes }),
+          body: JSON.stringify({
+            clientId: clientId || undefined,
+            clientName,
+            weekEnding,
+            notes,
+            clientEmail,
+          }),
         });
 
         if (res.ok) {
@@ -222,16 +263,31 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <TextField
-              select
-              fullWidth
-              label="Client"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              disabled={!!invoice}
-            >
-              <MenuItem value="CompanyCam">CompanyCam</MenuItem>
-            </TextField>
+            {invoice ? (
+              <TextField fullWidth label="Client" value={clientName} disabled />
+            ) : clients.length > 0 ? (
+              <TextField
+                select
+                fullWidth
+                label="Client"
+                value={clientId}
+                onChange={(e) => handleClientChange(Number(e.target.value))}
+              >
+                {clients.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : (
+              <TextField
+                fullWidth
+                label="Client Name"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                helperText="No clients yet — add them in the Clients page"
+              />
+            )}
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
@@ -241,6 +297,17 @@ const InvoiceForm: React.FC<Props> = ({ invoice, templates, onClose, onSubmit })
               value={weekEnding}
               onChange={(e) => setWeekEnding(e.target.value)}
               InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Client Email"
+              type="email"
+              placeholder="client@example.com"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              helperText="Used when sending the invoice"
             />
           </Grid>
 

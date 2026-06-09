@@ -6,8 +6,8 @@ let InvoiceService: typeof import('../services/invoice.service.js').InvoiceServi
 
 beforeAll(async () => {
   useTestDb();
-  const module = await import('../services/invoice.service.js');
-  InvoiceService = module.InvoiceService;
+  const invoiceModule = await import('../services/invoice.service.js');
+  InvoiceService = invoiceModule.InvoiceService;
 });
 
 beforeEach(() => {
@@ -242,14 +242,16 @@ describe('InvoiceService', () => {
       expect(updated.paidAt).toBeTruthy();
     });
 
-    it('rejects invalid transitions', () => {
+    it('allows direct draft to paid (transitions loosened)', () => {
       const invoice = InvoiceService.create({
         clientName: 'CompanyCam',
         weekEnding: '2026-05-30',
       });
 
-      // Can't go from draft to paid
-      expect(() => InvoiceService.updateStatus(invoice.id, 'paid')).toThrow();
+      const updated = InvoiceService.updateStatus(invoice.id, 'paid');
+
+      expect(updated.status).toBe('paid');
+      expect(updated.paidAt).toBeTruthy();
     });
 
     it('allows reverting sent to draft', () => {

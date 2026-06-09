@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Container, Box, Typography, Grid, Button } from '@mui/material';
-import { Envelope, FileText, BookOpen } from '@phosphor-icons/react';
+import { Envelope, FileText, BookOpen, UsersThree } from '@phosphor-icons/react';
 import Link from 'next/link';
 import PortalGate from '../../src/components/PortalGate';
 import DepthCard from '../../src/components/ui/DepthCard';
@@ -57,6 +57,23 @@ function PortalContent() {
               </Typography>
               <Button component={Link} href="/invoices" variant="outlined" sx={{ mt: 1 }}>
                 Manage Invoices
+              </Button>
+            </Box>
+          </DepthCard>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <DepthCard shadowOffset={8} hoverLift={6}>
+            <Box sx={{ p: 4 }}>
+              <UsersThree size={48} color={palette.primary.main} style={{ marginBottom: 16 }} />
+              <Typography variant="h5" gutterBottom>
+                Clients
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Manage your client registry for invoicing.
+              </Typography>
+              <Button component={Link} href="/clients" variant="outlined" sx={{ mt: 1 }}>
+                Manage Clients
               </Button>
             </Box>
           </DepthCard>

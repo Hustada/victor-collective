@@ -43,7 +43,9 @@ interface LineItem {
 interface Invoice {
   id: number;
   invoiceNumber: string;
+  clientId: number | null;
   clientName: string;
+  clientEmail: string | null;
   weekEnding: string;
   status: 'draft' | 'sent' | 'paid';
   subtotal: number;
@@ -177,8 +179,26 @@ function InvoicesContent() {
     }
   };
 
-  const handleStatusChange = () => {
+  const handleSent = () => {
+    setShowPreview(false);
+    setSelectedInvoice(null);
     fetchInvoices();
+  };
+
+  const handleStatusChange = async (status: Invoice['status']) => {
+    if (!selectedInvoice) return;
+    try {
+      await fetch(`/api/invoices/${selectedInvoice.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      setShowPreview(false);
+      setSelectedInvoice(null);
+      fetchInvoices();
+    } catch (err) {
+      console.error('Error updating status:', err);
+    }
   };
 
   if (loading) {
@@ -378,6 +398,7 @@ function InvoicesContent() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onStatusChange={handleStatusChange}
+          onSent={handleSent}
         />
       )}
     </Container>

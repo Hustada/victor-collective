@@ -13,6 +13,7 @@ import {
   deleteEmail,
   getFolders,
 } from '../services/email-inbox.service.js';
+import { sendEmail } from '../services/email-send.service.js';
 import { logger } from '../lib/logger.js';
 
 const router = Router();
@@ -101,6 +102,28 @@ router.delete('/:uid', async (req: Request, res: Response) => {
   } catch (err) {
     logger.error('Failed to delete email', { error: (err as Error).message });
     res.status(500).json({ error: 'Failed to delete email' });
+  }
+});
+
+// POST /api/inbox/send - Send email
+router.post('/send', async (req: Request, res: Response) => {
+  try {
+    const { to, subject, body, replyTo } = req.body;
+
+    if (!to || !subject || !body) {
+      return res.status(400).json({ error: 'Missing required fields: to, subject, body' });
+    }
+
+    const result = await sendEmail({ to, subject, body, replyTo });
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.error || 'Failed to send email' });
+    }
+
+    res.json({ success: true, id: result.id });
+  } catch (err) {
+    logger.error('Failed to send email', { error: (err as Error).message });
+    res.status(500).json({ error: 'Failed to send email' });
   }
 });
 
