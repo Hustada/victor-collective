@@ -5,6 +5,7 @@ import { Box, TextField, Button, Typography, Container } from '@mui/material';
 import { Lock, LockOpen } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { palette } from '../theme';
+import PortalNav from './PortalNav';
 
 const PORTAL_PASSWORD = process.env.NEXT_PUBLIC_PORTAL_PASSWORD || 'letmein';
 
@@ -327,7 +328,13 @@ const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
   }
 
   // Already authenticated - skip animation
-  if (authenticated) return <>{children}</>;
+  if (authenticated)
+    return (
+      <>
+        <PortalNav />
+        {children}
+      </>
+    );
 
   // Show unlock animation
   if (showAnimation && !animationComplete) {
@@ -338,6 +345,7 @@ const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
   if (animationComplete) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        <PortalNav />
         {children}
       </motion.div>
     );
