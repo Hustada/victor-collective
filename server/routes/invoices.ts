@@ -216,15 +216,20 @@ invoiceRoutes.post('/:id/send', async (req, res) => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 30);
 
+    const dateFormat: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+
+    // createdAt is SQLite's "YYYY-MM-DD HH:MM:SS" (UTC); normalize to ISO before parsing
+    const createdDate = new Date(invoice.createdAt.replace(' ', 'T') + 'Z');
+
     // DB stores cents; the template renders dollars
     const params: InvoiceParams = {
       invoiceNumber: invoice.invoiceNumber,
-      date: invoice.createdAt.split('T')[0],
-      dueDate: dueDate.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }),
+      date: createdDate.toLocaleDateString('en-US', dateFormat),
+      dueDate: dueDate.toLocaleDateString('en-US', dateFormat),
       clientName: invoice.clientName,
       clientEmail: to,
       items: lineItems.map((item) => ({
