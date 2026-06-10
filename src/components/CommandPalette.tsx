@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Typography, InputBase } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import {
   MagnifyingGlass,
   EnvelopeSimple,
@@ -28,7 +30,7 @@ const CommandPalette: React.FC = () => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const commands: CommandItem[] = [
     {
@@ -36,7 +38,7 @@ const CommandPalette: React.FC = () => {
       label: 'Home',
       description: 'Go to homepage',
       icon: <House size={18} />,
-      action: () => navigate('/'),
+      action: () => router.push('/'),
       keywords: ['main', 'landing'],
     },
     {
@@ -44,7 +46,7 @@ const CommandPalette: React.FC = () => {
       label: 'Blog',
       description: 'Read articles',
       icon: <Article size={18} />,
-      action: () => navigate('/blog'),
+      action: () => router.push('/blog'),
       keywords: ['posts', 'articles', 'writing'],
     },
     {
@@ -53,7 +55,7 @@ const CommandPalette: React.FC = () => {
       description: 'Jump to about section',
       icon: <User size={18} />,
       action: () => {
-        navigate('/');
+        router.push('/');
         setTimeout(() => {
           document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -65,7 +67,7 @@ const CommandPalette: React.FC = () => {
       label: 'Portal',
       description: 'Enter restricted area',
       icon: <Lock size={18} />,
-      action: () => navigate('/portal'),
+      action: () => router.push('/portal'),
       keywords: ['admin', 'dashboard', 'restricted'],
       restricted: true,
     },
@@ -74,7 +76,7 @@ const CommandPalette: React.FC = () => {
       label: 'Inbox',
       description: 'View messages',
       icon: <EnvelopeSimple size={18} />,
-      action: () => navigate('/inbox'),
+      action: () => router.push('/inbox'),
       keywords: ['email', 'messages', 'mail'],
       restricted: true,
     },
@@ -83,7 +85,7 @@ const CommandPalette: React.FC = () => {
       label: 'Invoices',
       description: 'Manage invoices',
       icon: <Invoice size={18} />,
-      action: () => navigate('/invoices'),
+      action: () => router.push('/invoices'),
       keywords: ['billing', 'payments', 'money'],
       restricted: true,
     },

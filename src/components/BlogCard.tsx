@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import { Typography, Box, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { ArrowRight } from '@phosphor-icons/react';
 import { alpha } from '@mui/material/styles';
 import { format } from 'date-fns';
@@ -20,7 +22,7 @@ interface BlogCardProps {
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <motion.div
@@ -33,7 +35,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
       <Box
         onClick={() => {
           window.scrollTo(0, 0);
-          navigate(`/blog/${post.slug}`);
+          router.push(`/blog/${post.slug}`);
         }}
         sx={{
           cursor: 'pointer',
@@ -124,7 +126,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index }) => {
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/blog/tag/${tag}`);
+                router.push(`/blog/tag/${tag}`);
               }}
               sx={{
                 mr: 1,

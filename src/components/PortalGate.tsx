@@ -1,10 +1,13 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Container } from '@mui/material';
 import { Lock, LockOpen } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { palette } from '../theme';
+import PortalNav from './PortalNav';
 
-const PORTAL_PASSWORD = process.env.REACT_APP_PORTAL_PASSWORD || 'letmein';
+const PORTAL_PASSWORD = process.env.NEXT_PUBLIC_PORTAL_PASSWORD || 'letmein';
 
 interface PortalGateProps {
   children: React.ReactNode;
@@ -279,11 +282,17 @@ const UnlockAnimation: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
 const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
-  const [authenticated, setAuthenticated] = useState(
-    () => sessionStorage.getItem('portal_auth') === 'true'
-  );
+  const [authenticated, setAuthenticated] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
+
+  // Check sessionStorage only after hydration (client-side)
+  useEffect(() => {
+    const stored = sessionStorage.getItem('portal_auth') === 'true';
+    setAuthenticated(stored);
+    setIsHydrated(true);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -303,8 +312,29 @@ const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
     }, 300);
   };
 
+  // Show loading state until hydrated
+  if (!isHydrated) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: palette.background.base,
+        }}
+      />
+    );
+  }
+
   // Already authenticated - skip animation
-  if (authenticated) return <>{children}</>;
+  if (authenticated)
+    return (
+      <>
+        <PortalNav />
+        {children}
+      </>
+    );
 
   // Show unlock animation
   if (showAnimation && !animationComplete) {
@@ -315,6 +345,7 @@ const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
   if (animationComplete) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        <PortalNav />
         {children}
       </motion.div>
     );

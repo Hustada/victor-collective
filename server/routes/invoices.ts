@@ -5,8 +5,11 @@
 import { Router } from 'express';
 import * as fs from 'fs';
 import { InvoiceService } from '../services/invoice.service.js';
+import { ClientService } from '../services/client.service.js';
 import { PdfService } from '../services/pdf.service.js';
 import { EmailService } from '../services/email.service.js';
+import { sendRawEmail } from '../services/email-send.service.js';
+import { generateInvoiceHtml, InvoiceParams } from '../services/invoice-template.service.js';
 import { logger } from '../lib/logger.js';
 
 export const invoiceRoutes = Router();
@@ -24,9 +27,12 @@ invoiceRoutes.get('/', (req, res) => {
 });
 
 // Get templates - must be before /:id to avoid matching "templates" as an id
-invoiceRoutes.get('/templates/:client', (req, res) => {
-  const { client } = req.params;
-  const templates = InvoiceService.getTemplates(client);
+invoiceRoutes.get('/templates/:clientId', (req, res) => {
+  const clientId = parseInt(req.params.clientId, 10);
+  if (Number.isNaN(clientId)) {
+    return res.status(400).json({ error: 'clientId must be a number' });
+  }
+  const templates = InvoiceService.getTemplates(clientId);
   res.json(templates);
 });
 
@@ -45,7 +51,19 @@ invoiceRoutes.get('/:id', (req, res) => {
 
 // Create invoice
 invoiceRoutes.post('/', (req, res) => {
-  const { clientName, weekEnding, notes } = req.body;
+  const { clientId, weekEnding, notes } = req.body;
+  let { clientName, clientEmail } = req.body;
+
+  // If a registry client is selected, snapshot its name onto the invoice.
+  // Email falls back to the client's, but an explicit override wins.
+  if (clientId) {
+    const client = ClientService.getById(clientId);
+    if (!client) {
+      return res.status(400).json({ error: 'Selected client not found' });
+    }
+    clientName = client.name;
+    clientEmail = clientEmail || client.email || undefined;
+  }
 
   if (!clientName) {
     return res.status(400).json({ error: 'clientName is required' });
@@ -56,7 +74,7 @@ invoiceRoutes.post('/', (req, res) => {
   }
 
   try {
-    const invoice = InvoiceService.create({ clientName, weekEnding, notes });
+    const invoice = InvoiceService.create({ clientId, clientName, clientEmail, weekEnding, notes });
     res.status(201).json(invoice);
   } catch (error) {
     logger.error('Failed to create invoice', { error });
@@ -66,15 +84,15 @@ invoiceRoutes.post('/', (req, res) => {
 
 // Create template
 invoiceRoutes.post('/templates', (req, res) => {
-  const { clientName, description, unitPrice, isDefault } = req.body;
+  const { clientId, description, unitPrice, isDefault } = req.body;
 
-  if (!clientName || !description || unitPrice === undefined) {
-    return res.status(400).json({ error: 'clientName, description, and unitPrice are required' });
+  if (!clientId || !description || unitPrice === undefined) {
+    return res.status(400).json({ error: 'clientId, description, and unitPrice are required' });
   }
 
   try {
     const template = InvoiceService.createTemplate({
-      clientName,
+      clientId,
       description,
       unitPrice,
       isDefault,
@@ -89,10 +107,10 @@ invoiceRoutes.post('/templates', (req, res) => {
 // Update invoice
 invoiceRoutes.put('/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const { weekEnding, notes, emailBody } = req.body;
+  const { clientEmail, weekEnding, notes, emailBody } = req.body;
 
   try {
-    const invoice = InvoiceService.update(id, { weekEnding, notes, emailBody });
+    const invoice = InvoiceService.update(id, { clientEmail, weekEnding, notes, emailBody });
     res.json(invoice);
   } catch (error) {
     if ((error as Error).message.includes('not found')) {
@@ -169,6 +187,91 @@ invoiceRoutes.patch('/:id/status', (req, res) => {
     }
     logger.error('Failed to update status', { id, status, error });
     res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
+// Send invoice to client: branded HTML body + PDF attachment, then mark sent
+invoiceRoutes.post('/:id/send', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  const invoice = InvoiceService.getById(id);
+  if (!invoice) {
+    return res.status(404).json({ error: 'Invoice not found' });
+  }
+
+  // Recipient: explicit override, otherwise the stored client email
+  const to = (req.body?.to as string | undefined)?.trim() || invoice.clientEmail;
+  if (!to) {
+    return res.status(400).json({ error: 'No recipient email. Add a client email first.' });
+  }
+
+  // Persist the recipient if it was supplied or changed, so it is remembered
+  if (to !== invoice.clientEmail) {
+    InvoiceService.update(id, { clientEmail: to });
+  }
+
+  try {
+    const lineItems = InvoiceService.getLineItems(id);
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    const dateFormat: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+
+    // createdAt is SQLite's "YYYY-MM-DD HH:MM:SS" (UTC); normalize to ISO before parsing
+    const createdDate = new Date(invoice.createdAt.replace(' ', 'T') + 'Z');
+
+    // DB stores cents; the template renders dollars
+    const params: InvoiceParams = {
+      invoiceNumber: invoice.invoiceNumber,
+      date: createdDate.toLocaleDateString('en-US', dateFormat),
+      dueDate: dueDate.toLocaleDateString('en-US', dateFormat),
+      clientName: invoice.clientName,
+      clientEmail: to,
+      items: lineItems.map((item) => ({
+        description: item.description,
+        amount: item.amount / 100,
+      })),
+      notes: invoice.notes || undefined,
+      paid: invoice.status === 'paid',
+    };
+
+    const html = generateInvoiceHtml(params);
+    const text = EmailService.generate(id);
+    const pdf = await PdfService.generate(id);
+
+    const result = await sendRawEmail({
+      to,
+      subject: `Invoice ${invoice.invoiceNumber} from The Victor Collective`,
+      html,
+      text,
+      attachments: [{ filename: `${invoice.invoiceNumber}.pdf`, content: pdf }],
+    });
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.error || 'Failed to send invoice' });
+    }
+
+    // Mark as sent only from draft; never downgrade a paid invoice
+    if (invoice.status === 'draft') {
+      InvoiceService.updateStatus(id, 'sent');
+    }
+
+    logger.info('Invoice sent', {
+      id,
+      number: invoice.invoiceNumber,
+      to,
+      emailId: result.id,
+    });
+
+    res.json({ success: true, id: result.id });
+  } catch (error) {
+    logger.error('Failed to send invoice', { id, error: (error as Error).message });
+    res.status(500).json({ error: 'Failed to send invoice' });
   }
 });
 

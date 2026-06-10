@@ -1,13 +1,16 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import { useTestDb, closeDb, resetTestDb } from '../lib/db.js';
 
-// Import service after db setup
+// Import services after db setup
 let InvoiceService: typeof import('../services/invoice.service.js').InvoiceService;
+let ClientService: typeof import('../services/client.service.js').ClientService;
 
 beforeAll(async () => {
   useTestDb();
-  const module = await import('../services/invoice.service.js');
-  InvoiceService = module.InvoiceService;
+  const invoiceModule = await import('../services/invoice.service.js');
+  InvoiceService = invoiceModule.InvoiceService;
+  const clientModule = await import('../services/client.service.js');
+  ClientService = clientModule.ClientService;
 });
 
 beforeEach(() => {
@@ -95,15 +98,17 @@ describe('InvoiceService', () => {
     });
 
     it('applies default templates for client', () => {
-      // Create templates first
+      // Create the registry client, then a default template for it
+      const client = ClientService.create({ name: 'CompanyCam' });
       InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: client.id,
         description: 'Weekly development fee',
         unitPrice: 380000, // $3800
         isDefault: true,
       });
 
       const invoice = InvoiceService.create({
+        clientId: client.id,
         clientName: 'CompanyCam',
         weekEnding: '2026-05-30',
       });
@@ -242,14 +247,16 @@ describe('InvoiceService', () => {
       expect(updated.paidAt).toBeTruthy();
     });
 
-    it('rejects invalid transitions', () => {
+    it('allows direct draft to paid (transitions loosened)', () => {
       const invoice = InvoiceService.create({
         clientName: 'CompanyCam',
         weekEnding: '2026-05-30',
       });
 
-      // Can't go from draft to paid
-      expect(() => InvoiceService.updateStatus(invoice.id, 'paid')).toThrow();
+      const updated = InvoiceService.updateStatus(invoice.id, 'paid');
+
+      expect(updated.status).toBe('paid');
+      expect(updated.paidAt).toBeTruthy();
     });
 
     it('allows reverting sent to draft', () => {
@@ -339,56 +346,62 @@ describe('InvoiceService', () => {
 
   describe('templates', () => {
     it('creates template', () => {
+      const client = ClientService.create({ name: 'CompanyCam' });
       const template = InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: client.id,
         description: 'Weekly development fee',
         unitPrice: 380000,
         isDefault: true,
       });
 
       expect(template.id).toBe(1);
+      expect(template.clientId).toBe(client.id);
       expect(template.isDefault).toBe(true);
     });
 
     it('gets templates for client', () => {
+      const companyCam = ClientService.create({ name: 'CompanyCam' });
+      const other = ClientService.create({ name: 'Other Client' });
+
       InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: companyCam.id,
         description: 'Weekly fee',
         unitPrice: 380000,
         isDefault: true,
       });
       InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: companyCam.id,
         description: 'Claude Code Max',
         unitPrice: 20000,
         isDefault: false,
       });
       InvoiceService.createTemplate({
-        clientName: 'Other Client',
+        clientId: other.id,
         description: 'Something else',
         unitPrice: 10000,
         isDefault: true,
       });
 
-      const templates = InvoiceService.getTemplates('CompanyCam');
+      const templates = InvoiceService.getTemplates(companyCam.id);
       expect(templates).toHaveLength(2);
     });
 
     it('gets only default templates', () => {
+      const client = ClientService.create({ name: 'CompanyCam' });
       InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: client.id,
         description: 'Weekly fee',
         unitPrice: 380000,
         isDefault: true,
       });
       InvoiceService.createTemplate({
-        clientName: 'CompanyCam',
+        clientId: client.id,
         description: 'Optional add-on',
         unitPrice: 20000,
         isDefault: false,
       });
 
-      const defaults = InvoiceService.getTemplates('CompanyCam', true);
+      const defaults = InvoiceService.getTemplates(client.id, true);
       expect(defaults).toHaveLength(1);
       expect(defaults[0].description).toBe('Weekly fee');
     });

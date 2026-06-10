@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Container, Typography, TextField, Button, Box, Grid, Alert } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -101,7 +103,7 @@ const Contact: React.FC = () => {
                 </Typography>
 
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  Thanks for reaching out. I'll get back to you as soon as possible.
+                  Thanks for reaching out. I&apos;ll get back to you as soon as possible.
                 </Typography>
 
                 <Button variant="outlined" onClick={handleReset} sx={{ mt: 2 }}>
@@ -133,8 +135,8 @@ const Contact: React.FC = () => {
                       lineHeight: 1.8,
                     }}
                   >
-                    I'm looking for people who see the inflection point and want to build at it —
-                    not talk about it. If you have an AI problem worth solving, let's talk.
+                    I&apos;m looking for people who see the inflection point and want to build at it
+                    — not talk about it. If you have an AI problem worth solving, let&apos;s talk.
                   </Typography>
 
                   <Button

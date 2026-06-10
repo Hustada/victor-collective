@@ -10,6 +10,7 @@ import express from 'express';
 import cors from 'cors';
 import { invoiceRoutes } from './routes/invoices.js';
 import { inboxRoutes } from './routes/inbox.js';
+import { clientRoutes } from './routes/clients.js';
 import { initDb } from './lib/db.js';
 import { logger } from './lib/logger.js';
 
@@ -23,17 +24,23 @@ const allowedOrigins = [
   'https://portfolio-site-tau-flax.vercel.app',
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed) || origin.includes('vercel.app'))) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.some(
+          (allowed) => origin.startsWith(allowed) || origin.includes('vercel.app')
+        )
+      ) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -48,6 +55,7 @@ app.get('/health', (_req, res) => {
 // API routes
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/inbox', inboxRoutes);
+app.use('/api/clients', clientRoutes);
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

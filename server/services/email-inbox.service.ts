@@ -72,10 +72,12 @@ export async function listEmails(
         flags: true,
         envelope: true,
         bodyStructure: true,
-        source: { start: 0, maxLength: 500 }, // Preview
+        // Enough to cover headers + the text body for a preview; caps huge
+        // attachment-laden messages. Text parts precede attachments in MIME
+        // order, so the decoded body is captured even when truncated.
+        source: { start: 0, maxLength: 65536 },
       })) {
         const from = message.envelope?.from?.[0];
-        const preview = message.source?.toString('utf-8')?.substring(0, 200) || '';
 
         emails.push({
           uid: message.uid,
@@ -87,7 +89,7 @@ export async function listEmails(
           date: message.envelope?.date?.toISOString() || '',
           seen: message.flags?.has('\\Seen') || false,
           hasAttachments: hasAttachments(message.bodyStructure),
-          preview: cleanPreview(preview),
+          preview: await bodyPreview(message.source),
         });
       }
 
@@ -111,12 +113,16 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
     const lock = await client.getMailboxLock(folder);
 
     try {
-      const message = await client.fetchOne(String(uid), {
-        uid: true,
-        flags: true,
-        envelope: true,
-        source: true,
-      }, { uid: true });
+      const message = await client.fetchOne(
+        String(uid),
+        {
+          uid: true,
+          flags: true,
+          envelope: true,
+          source: true,
+        },
+        { uid: true }
+      );
 
       if (!message || !message.source) {
         return null;
@@ -237,12 +243,14 @@ function hasAttachments(bodyStructure: any): boolean {
   return false;
 }
 
-// Helper: Clean preview text
-function cleanPreview(raw: string): string {
-  // Remove headers, get just body preview
-  const bodyStart = raw.indexOf('\r\n\r\n');
-  if (bodyStart > 0) {
-    raw = raw.substring(bodyStart + 4);
+// Helper: decode an email body into a short, clean preview snippet
+async function bodyPreview(source: Buffer | undefined): Promise<string> {
+  if (!source) return '';
+  try {
+    const parsed = await simpleParser(source);
+    const body = parsed.text || parsed.subject || '';
+    return body.replace(/\s+/g, ' ').trim().substring(0, 150);
+  } catch {
+    return '';
   }
-  return raw.replace(/\s+/g, ' ').trim().substring(0, 150);
 }

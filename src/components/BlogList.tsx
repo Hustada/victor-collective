@@ -1,8 +1,10 @@
+'use client';
+
 import React from 'react';
 import { Box, Card, CardContent, Typography, Chip, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
 import { BlogPostMeta } from '../types/blog';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
 interface BlogListProps {
@@ -10,7 +12,7 @@ interface BlogListProps {
 }
 
 const BlogList: React.FC<BlogListProps> = ({ posts }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <Grid container spacing={3} alignItems="stretch">
@@ -22,7 +24,7 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
             style={{ height: '100%' }}
           >
             <Card
-              onClick={() => navigate(`/blog/${post.slug}`)}
+              onClick={() => router.push(`/blog/${post.slug}`)}
               sx={{
                 cursor: 'pointer',
                 height: '100%',
@@ -87,7 +89,7 @@ const BlogList: React.FC<BlogListProps> = ({ posts }) => {
                       sx={{ mr: 1, mb: 1 }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/blog/tag/${tag}`);
+                        router.push(`/blog/tag/${tag}`);
                       }}
                     />
                   ))}

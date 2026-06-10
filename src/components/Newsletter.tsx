@@ -92,11 +92,11 @@ const Newsletter: React.FC = () => {
                     color: 'text.primary',
                   }}
                 >
-                  You're In
+                  You&apos;re In
                 </Typography>
 
                 <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 400 }}>
-                  Thanks for subscribing. You'll receive updates on new projects and insights.
+                  Thanks for subscribing. You&apos;ll receive updates on new projects and insights.
                 </Typography>
 
                 <Button variant="outlined" onClick={resetForm} sx={{ mt: 2 }}>

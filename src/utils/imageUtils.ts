@@ -1,3 +1,4 @@
+import { StaticImageData } from 'next/image';
 import AIApp1 from '../assets/brand/AIApp1.jpg';
 import AIApp2 from '../assets/brand/AIApp2.jpg';
 import AIApp3 from '../assets/brand/AIApp3.jpg';
@@ -20,7 +21,7 @@ export const categoryImages = {
 } as const;
 
 // Function to get random image for category
-export const getRandomImage = (category: ProjectCategory): string => {
+export const getRandomImage = (category: ProjectCategory): StaticImageData => {
   const images = categoryImages[category];
   const randomIndex = Math.floor(Math.random() * images.length);
   return images[randomIndex];

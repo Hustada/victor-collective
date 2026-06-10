@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import { Container, Grid, Button, Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react';
 import { getBlogPosts } from '../utils/blog';
 import SectionHeader from './ui/SectionHeader';
@@ -8,7 +10,6 @@ import BlogCard from './BlogCard';
 import { palette } from '../theme';
 
 const Blog: React.FC = () => {
-  const navigate = useNavigate();
   const allPosts = getBlogPosts();
   const featuredSlugs = ['intent-engineering', 'vectus-ai', 'fallacy-bot'];
   const posts = allPosts.filter((post) => featuredSlugs.includes(post.slug));
@@ -39,9 +40,10 @@ const Blog: React.FC = () => {
 
         <Box sx={{ textAlign: 'center', mt: 8 }}>
           <Button
+            component={Link}
+            href="/blog"
             variant="outlined"
             size="large"
-            onClick={() => navigate('/blog')}
             endIcon={<ArrowRight size={20} weight="bold" />}
             sx={{
               px: 4,

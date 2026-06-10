@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { IconButton, useMediaQuery, useTheme } from '@mui/material';
 import {
@@ -9,7 +11,7 @@ import {
   List as ListIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 import { alpha } from '@mui/material/styles';
 import DesktopNav from './DesktopNav';
 import MobileNav from './MobileNav';
@@ -42,8 +44,8 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   const scrollTo = (elementId: string) => {
     if (isHomePage) {
@@ -54,7 +56,7 @@ const Navbar: React.FC = () => {
   };
 
   const getActiveItem = () => {
-    if (location.pathname.startsWith('/blog')) return 'blog';
+    if (pathname?.startsWith('/blog')) return 'blog';
     return 'hero';
   };
 

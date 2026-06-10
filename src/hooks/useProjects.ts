@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { StaticImageData } from 'next/image';
 import { projectsConfig } from '../config/projectsConfig';
 import { manualProjects } from '../config/manualProjects';
 import { fetchGithubRepos, ProjectCategory } from '../services/github';
@@ -9,7 +10,7 @@ export interface ProjectData {
   title: string;
   description: string;
   category: ProjectCategory;
-  image: string;
+  image: StaticImageData;
   githubUrl: string;
   technologies: string[];
   featured: boolean;

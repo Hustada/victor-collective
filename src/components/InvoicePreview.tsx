@@ -1,5 +1,18 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Box, Typography, Grid, Button, IconButton, Chip } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Grid,
+  Button,
+  IconButton,
+  Chip,
+  Select,
+  MenuItem,
+  TextField,
+  CircularProgress,
+} from '@mui/material';
 import { motion } from 'framer-motion';
 import {
   X,
@@ -27,6 +40,7 @@ interface Invoice {
   id: number;
   invoiceNumber: string;
   clientName: string;
+  clientEmail: string | null;
   weekEnding: string;
   status: 'draft' | 'sent' | 'paid';
   subtotal: number;
@@ -46,7 +60,7 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (status: Invoice['status']) => void;
-  apiUrl: string;
+  onSent: () => void;
 }
 
 const statusColor: Record<Invoice['status'], string> = {
@@ -74,17 +88,48 @@ const InvoicePreview: React.FC<Props> = ({
   onEdit,
   onDelete,
   onStatusChange,
-  apiUrl,
+  onSent,
 }) => {
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [showSend, setShowSend] = useState(false);
+  const [sendTo, setSendTo] = useState(invoice.clientEmail || '');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendSuccess, setSendSuccess] = useState(false);
+
+  const handleSendInvoice = async () => {
+    if (!sendTo.trim()) {
+      setSendError('Enter a recipient email');
+      return;
+    }
+    setSending(true);
+    setSendError(null);
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: sendTo.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send invoice');
+      }
+      setSendSuccess(true);
+      setTimeout(() => onSent(), 1200);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to send invoice');
+    } finally {
+      setSending(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     if (!invoice.pdfPath) {
       // Generate first
       setGenerating(true);
       try {
-        await fetch(`${apiUrl}/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
+        await fetch(`/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
       } catch (err) {
         console.error('Failed to generate PDF:', err);
         setGenerating(false);
@@ -92,16 +137,16 @@ const InvoicePreview: React.FC<Props> = ({
       }
       setGenerating(false);
     }
-    window.open(`${apiUrl}/api/invoices/${invoice.id}/pdf`, '_blank');
+    window.open(`/api/invoices/${invoice.id}/pdf`, '_blank');
   };
 
   const handleCopyEmail = async () => {
     if (!invoice.emailBody) {
       // Generate first
       try {
-        await fetch(`${apiUrl}/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
+        await fetch(`/api/invoices/${invoice.id}/generate-pdf`, { method: 'POST' });
         // Refetch invoice to get email body
-        const res = await fetch(`${apiUrl}/api/invoices/${invoice.id}`);
+        const res = await fetch(`/api/invoices/${invoice.id}`);
         if (res.ok) {
           const data = await res.json();
           if (data.emailBody) {
@@ -429,6 +474,73 @@ const InvoicePreview: React.FC<Props> = ({
                 </Box>
               </Box>
             )}
+
+            {/* Send panel */}
+            {showSend && (
+              <Box
+                sx={{
+                  mb: 3,
+                  p: 2,
+                  border: `1px solid ${palette.border.subtle}`,
+                  backgroundColor: palette.background.base,
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: palette.primary.main,
+                    fontSize: '0.65rem',
+                    letterSpacing: '0.15em',
+                    display: 'block',
+                    mb: 1.5,
+                  }}
+                >
+                  {'// SEND INVOICE'}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: palette.text.muted, display: 'block', mb: 1.5 }}
+                >
+                  Branded invoice in the email body, PDF attached. Marks the invoice as sent.
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="email"
+                    label="To"
+                    placeholder="client@example.com"
+                    value={sendTo}
+                    onChange={(e) => setSendTo(e.target.value)}
+                    disabled={sending || sendSuccess}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleSendInvoice}
+                    disabled={sending || sendSuccess}
+                    startIcon={
+                      sending ? <CircularProgress size={16} /> : <PaperPlaneTilt size={16} />
+                    }
+                    sx={{ flexShrink: 0, px: 3, py: 1 }}
+                  >
+                    {sending ? 'Sending...' : 'Send'}
+                  </Button>
+                </Box>
+                {sendError && (
+                  <Typography variant="caption" sx={{ color: '#ff4444', display: 'block', mt: 1 }}>
+                    {sendError}
+                  </Typography>
+                )}
+                {sendSuccess && (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: palette.success, display: 'block', mt: 1 }}
+                  >
+                    Invoice sent.
+                  </Typography>
+                )}
+              </Box>
+            )}
           </Box>
 
           {/* Footer actions */}
@@ -477,6 +589,22 @@ const InvoicePreview: React.FC<Props> = ({
               >
                 {copied ? 'Copied!' : 'Copy Email'}
               </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<PaperPlaneTilt size={16} />}
+                onClick={() => setShowSend((v) => !v)}
+                sx={{
+                  borderColor: showSend ? palette.primary.main : palette.border.default,
+                  color: showSend ? palette.primary.light : palette.text.secondary,
+                  '&:hover': {
+                    borderColor: palette.primary.main,
+                    color: palette.primary.light,
+                  },
+                }}
+              >
+                Send
+              </Button>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -513,41 +641,23 @@ const InvoicePreview: React.FC<Props> = ({
                 Edit
               </Button>
 
-              {invoice.status === 'draft' && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<PaperPlaneTilt size={16} />}
-                  onClick={() => onStatusChange('sent')}
-                  sx={{
-                    backgroundColor: palette.secondary.main,
-                    color: '#000',
-                    '&:hover': {
-                      backgroundColor: palette.secondary.light,
-                    },
-                  }}
-                >
-                  Mark Sent
-                </Button>
-              )}
-
-              {invoice.status === 'sent' && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<CheckCircle size={16} />}
-                  onClick={() => onStatusChange('paid')}
-                  sx={{
-                    backgroundColor: palette.success,
-                    color: '#000',
-                    '&:hover': {
-                      backgroundColor: '#00dd77',
-                    },
-                  }}
-                >
-                  Mark Paid
-                </Button>
-              )}
+              <Select
+                size="small"
+                value={invoice.status}
+                onChange={(e) => onStatusChange(e.target.value as Invoice['status'])}
+                sx={{
+                  minWidth: 120,
+                  backgroundColor: palette.background.base,
+                  color: statusColor[invoice.status],
+                  border: `1px solid ${statusColor[invoice.status]}`,
+                  '& .MuiSelect-icon': { color: statusColor[invoice.status] },
+                  '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                }}
+              >
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="sent">Sent</MenuItem>
+                <MenuItem value="paid">Paid</MenuItem>
+              </Select>
             </Box>
           </Box>
         </Box>
