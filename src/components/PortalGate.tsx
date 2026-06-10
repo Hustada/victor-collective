@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { palette } from '../theme';
 import PortalNav from './PortalNav';
 
-const PORTAL_PASSWORD = process.env.NEXT_PUBLIC_PORTAL_PASSWORD || 'letmein';
-
 interface PortalGateProps {
   children: React.ReactNode;
 }
@@ -281,27 +279,40 @@ const UnlockAnimation: React.FC<{ onComplete: () => void }> = ({ onComplete }) =
 
 const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
   const [input, setInput] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
 
-  // Check sessionStorage only after hydration (client-side)
+  // Ask the server whether the session cookie is still valid
   useEffect(() => {
-    const stored = sessionStorage.getItem('portal_auth') === 'true';
-    setAuthenticated(stored);
-    setIsHydrated(true);
+    fetch('/api/auth/me')
+      .then((res) => setAuthenticated(res.ok))
+      .catch(() => setAuthenticated(false))
+      .finally(() => setIsHydrated(true));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input === PORTAL_PASSWORD) {
-      sessionStorage.setItem('portal_auth', 'true');
-      setShowAnimation(true);
-    } else {
-      setError(true);
-      setInput('');
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: input }),
+      });
+      if (res.ok) {
+        setShowAnimation(true);
+      } else {
+        setError(res.status === 401 ? 'Wrong password' : 'Login unavailable');
+        setInput('');
+      }
+    } catch {
+      setError('Login unavailable');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -412,14 +423,20 @@ const PortalGate: React.FC<PortalGateProps> = ({ children }) => {
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
-                setError(false);
+                setError(null);
               }}
-              error={error}
-              helperText={error ? 'Wrong password' : ''}
+              error={error !== null}
+              helperText={error ?? ''}
               autoFocus
             />
 
-            <Button type="submit" variant="contained" fullWidth sx={{ py: 1.5 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={submitting}
+              sx={{ py: 1.5 }}
+            >
               Enter
             </Button>
           </Box>

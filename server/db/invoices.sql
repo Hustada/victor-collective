@@ -61,6 +61,13 @@ CREATE TABLE IF NOT EXISTS email_intelligence (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Portal auth sessions (httpOnly cookie tokens)
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL,            -- epoch ms
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_name);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);

@@ -93,6 +93,15 @@ function runMigrations(database: Database.Database): void {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Portal auth sessions (no-op if the schema already created it)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      expires_at INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
 }
 
 // CompanyCam's accounts-payable inbox; used as the seed/backfill default.
@@ -189,6 +198,7 @@ export function resetTestDb(): void {
     db.exec('DELETE FROM invoice_templates');
     db.exec('DELETE FROM clients');
     db.exec('DELETE FROM email_intelligence');
+    db.exec('DELETE FROM sessions');
     db.exec(
       "DELETE FROM sqlite_sequence WHERE name IN ('invoices', 'line_items', 'invoice_templates', 'clients')"
     );

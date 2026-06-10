@@ -11,6 +11,8 @@ import cors from 'cors';
 import { invoiceRoutes } from './routes/invoices.js';
 import { inboxRoutes } from './routes/inbox.js';
 import { clientRoutes } from './routes/clients.js';
+import { authRoutes } from './routes/auth.js';
+import { requireAuth } from './middleware/require-auth.js';
 import { initDb } from './lib/db.js';
 import { logger } from './lib/logger.js';
 
@@ -52,10 +54,11 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/inbox', inboxRoutes);
-app.use('/api/clients', clientRoutes);
+// API routes — everything except auth itself sits behind the session gate
+app.use('/api/auth', authRoutes);
+app.use('/api/invoices', requireAuth, invoiceRoutes);
+app.use('/api/inbox', requireAuth, inboxRoutes);
+app.use('/api/clients', requireAuth, clientRoutes);
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
