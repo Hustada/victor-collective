@@ -8,6 +8,8 @@
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
     "seed": "tsx seed.ts",
+    "eval:pull": "tsx eval/pull.ts",
+    "eval:run": "tsx eval/run.ts",
     "test": "vitest",
     "test:run": "vitest run"
   },
