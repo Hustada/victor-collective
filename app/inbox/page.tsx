@@ -93,6 +93,10 @@ function InboxContent() {
   const [selectedUid, setSelectedUid] = useState<number | null>(null);
   const [full, setFull] = useState<FullEmail | null>(null);
   const [loadingFull, setLoadingFull] = useState(false);
+  const [composer, setComposer] = useState<{ to: string; subject: string; body: string } | null>(
+    null
+  );
+  const [sentNote, setSentNote] = useState(false);
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -158,6 +162,12 @@ function InboxContent() {
     [visible, selectedUid, select]
   );
 
+  const openReply = useCallback(() => {
+    if (!selected) return;
+    const subject = /^re:/i.test(selected.subject) ? selected.subject : `Re: ${selected.subject}`;
+    setComposer({ to: selected.from.address, subject, body: '' });
+  }, [selected]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
@@ -169,13 +179,16 @@ function InboxContent() {
         move(-1);
       } else if (e.key === 'e') {
         archive();
+      } else if (e.key === 'r') {
+        e.preventDefault();
+        openReply();
       } else if (e.key === 'Escape' && isMobile) {
         setSelectedUid(null);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [move, archive, isMobile]);
+  }, [move, archive, openReply, isMobile]);
 
   const briefing = `${counts.reply || 0} need you · ${counts.money || 0} money · ${counts.waiting || 0} waiting`;
 
@@ -317,6 +330,7 @@ function InboxContent() {
                       full={full}
                       loading={loadingFull}
                       onArchive={archive}
+                      onReply={openReply}
                       onBack={isMobile ? () => setSelectedUid(null) : undefined}
                     />
                   </motion.div>
@@ -339,6 +353,48 @@ function InboxContent() {
             </div>
           )}
         </div>
+
+        <AnimatePresence>
+          {composer && (
+            <Composer
+              initial={composer}
+              onClose={(sent) => {
+                setComposer(null);
+                if (sent) {
+                  setSentNote(true);
+                  window.setTimeout(() => setSentNote(false), 2500);
+                }
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {sentNote && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              style={{
+                position: 'absolute',
+                bottom: 20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 1400,
+                padding: '10px 18px',
+                borderRadius: 8,
+                background: palette.background.elevated,
+                border: `1px solid ${palette.primary.main}55`,
+                color: palette.primary.main,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '0.7rem',
+                letterSpacing: '0.1em',
+              }}
+            >
+              ✓ SENT
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MotionConfig>
   );
@@ -446,12 +502,14 @@ function ReadingPane({
   full,
   loading,
   onArchive,
+  onReply,
   onBack,
 }: {
   summary: Email;
   full: FullEmail | null;
   loading: boolean;
   onArchive: () => void;
+  onReply: () => void;
   onBack?: () => void;
 }) {
   const m = INTENT_META[summary.intent];
@@ -572,7 +630,7 @@ function ReadingPane({
       <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
         <PaneButton label="Archive" hint="E" color={palette.primary.main} onClick={onArchive} />
         <PaneButton label="Snooze" hint="S" color={palette.text.secondary} onClick={() => {}} />
-        <PaneButton label="Reply" hint="R" color={m.color} onClick={() => {}} />
+        <PaneButton label="Reply" hint="R" color={m.color} onClick={onReply} />
       </div>
     </div>
   );
@@ -669,6 +727,171 @@ function EmptyState({ text }: { text: string }) {
     >
       {text}
     </div>
+  );
+}
+
+function Composer({
+  initial,
+  onClose,
+}: {
+  initial: { to: string; subject: string; body: string };
+  onClose: (sent: boolean) => void;
+}) {
+  const [to, setTo] = useState(initial.to);
+  const [subject, setSubject] = useState(initial.subject);
+  const [body, setBody] = useState(initial.body);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%',
+    boxSizing: 'border-box',
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: `1px solid ${palette.border.default}`,
+    background: palette.background.base,
+    color: palette.text.primary,
+    fontFamily: '"Space Grotesk", sans-serif',
+    fontSize: '0.9rem',
+    outline: 'none',
+  };
+
+  const send = async () => {
+    if (!to || !subject || !body) {
+      setError('To, subject, and body are all required.');
+      return;
+    }
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/inbox/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, subject, body }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || 'Failed to send');
+      }
+      onClose(true);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => onClose(false)}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 1300,
+        background: 'rgba(6,5,4,0.72)',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 20,
+      }}
+    >
+      <motion.div
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 14 }}
+        transition={SPRING}
+        style={{
+          width: 'min(620px, 94vw)',
+          borderRadius: 14,
+          border: `1px solid ${palette.border.default}`,
+          background: palette.background.elevated,
+          padding: 22,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '0.62rem',
+            letterSpacing: '0.2em',
+            color: palette.primary.main,
+          }}
+        >
+          REPLY
+        </div>
+        <input
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          placeholder="To"
+          style={fieldStyle}
+        />
+        <input
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="Subject"
+          style={fieldStyle}
+        />
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Write your reply…"
+          rows={9}
+          autoFocus
+          style={{ ...fieldStyle, resize: 'vertical', lineHeight: 1.5 }}
+        />
+        {error && <div style={{ color: '#FF6B6B', fontSize: '0.78rem' }}>{error}</div>}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
+          <span
+            style={{
+              flex: 1,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.58rem',
+              color: palette.text.muted,
+            }}
+          >
+            sends for real via Resend
+          </span>
+          <button
+            onClick={() => onClose(false)}
+            style={{
+              cursor: 'pointer',
+              padding: '9px 16px',
+              borderRadius: 8,
+              border: `1px solid ${palette.border.default}`,
+              background: 'transparent',
+              color: palette.text.secondary,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.7rem',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={send}
+            disabled={sending}
+            style={{
+              cursor: sending ? 'default' : 'pointer',
+              padding: '9px 18px',
+              borderRadius: 8,
+              border: 'none',
+              background: palette.primary.main,
+              color: '#0d0b09',
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              opacity: sending ? 0.6 : 1,
+            }}
+          >
+            {sending ? 'Sending…' : 'Send'}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
