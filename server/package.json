@@ -12,6 +12,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@types/mailparser": "^3.4.6",
     "better-sqlite3": "^12.6.2",
     "cors": "^2.8.5",
