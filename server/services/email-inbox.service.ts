@@ -8,6 +8,13 @@
 import { ImapFlow } from 'imapflow';
 import { simpleParser, ParsedMail } from 'mailparser';
 import { logger } from '../lib/logger.js';
+import {
+  type Intent,
+  type ClassifiableEmail,
+  classifyBatch,
+  sortByIntent,
+  getCachedClassification,
+} from './email-classifier.service.js';
 
 interface EmailSummary {
   uid: number;
@@ -17,6 +24,8 @@ interface EmailSummary {
   seen: boolean;
   hasAttachments: boolean;
   preview: string;
+  intent: Intent;
+  confidence: number;
 }
 
 interface EmailFull extends EmailSummary {
@@ -65,39 +74,57 @@ export async function listEmails(
       const start = Math.max(1, total - offset - limit + 1);
       const end = Math.max(1, total - offset);
 
-      const emails: EmailSummary[] = [];
+      const raw: {
+        summary: Omit<EmailSummary, 'intent' | 'confidence'>;
+        classify: ClassifiableEmail;
+      }[] = [];
 
       for await (const message of client.fetch(`${start}:${end}`, {
         uid: true,
         flags: true,
         envelope: true,
         bodyStructure: true,
-        // Enough to cover headers + the text body for a preview; caps huge
-        // attachment-laden messages. Text parts precede attachments in MIME
-        // order, so the decoded body is captured even when truncated.
+        // Enough to cover headers + the text body for preview and classification;
+        // caps huge attachment-laden messages. Text parts precede attachments in
+        // MIME order, so the decoded body is captured even when truncated.
         source: { start: 0, maxLength: 65536 },
       })) {
         const from = message.envelope?.from?.[0];
+        const parsed = message.source ? await simpleParser(message.source) : null;
+        const text = (parsed?.text || '').replace(/\s+/g, ' ').trim();
+        const messageId = message.envelope?.messageId || `uid:${message.uid}`;
 
-        emails.push({
-          uid: message.uid,
-          subject: message.envelope?.subject || '(No subject)',
-          from: {
-            name: from?.name || '',
-            address: from?.address || '',
+        raw.push({
+          summary: {
+            uid: message.uid,
+            subject: message.envelope?.subject || '(No subject)',
+            from: { name: from?.name || '', address: from?.address || '' },
+            date: message.envelope?.date?.toISOString() || '',
+            seen: message.flags?.has('\\Seen') || false,
+            hasAttachments: hasAttachments(message.bodyStructure),
+            preview: text.slice(0, 150),
           },
-          date: message.envelope?.date?.toISOString() || '',
-          seen: message.flags?.has('\\Seen') || false,
-          hasAttachments: hasAttachments(message.bodyStructure),
-          preview: await bodyPreview(message.source),
+          classify: {
+            messageId,
+            subject: message.envelope?.subject || '',
+            from: `${from?.name || ''} <${from?.address || ''}>`.trim(),
+            body: text,
+          },
         });
       }
 
-      // Reverse to show newest first
-      emails.reverse();
+      // Classify each email (cache-first) and order by triage priority.
+      const verdicts = await classifyBatch(raw.map((r) => r.classify));
+      const emails: EmailSummary[] = raw.map((r) => {
+        const v = verdicts.get(r.classify.messageId) ?? {
+          intent: 'noise' as Intent,
+          confidence: 0,
+        };
+        return { ...r.summary, intent: v.intent, confidence: v.confidence };
+      });
 
       logger.info('Emails fetched', { folder, count: emails.length, total });
-      return { emails, total };
+      return { emails: sortByIntent(emails), total };
     } finally {
       lock.release();
     }
@@ -130,6 +157,11 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
 
       const parsed: ParsedMail = await simpleParser(message.source);
       const from = message.envelope?.from?.[0];
+      const messageId = message.envelope?.messageId || `uid:${uid}`;
+      const verdict = getCachedClassification(messageId) ?? {
+        intent: 'noise' as Intent,
+        confidence: 0,
+      };
 
       // Mark as seen
       await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true });
@@ -150,6 +182,8 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
         date: message.envelope?.date?.toISOString() || '',
         seen: true,
         hasAttachments: (parsed.attachments?.length || 0) > 0,
+        intent: verdict.intent,
+        confidence: verdict.confidence,
         preview: parsed.text?.substring(0, 200) || '',
         html: parsed.html || null,
         text: parsed.text || null,
@@ -241,16 +275,4 @@ function hasAttachments(bodyStructure: any): boolean {
     return bodyStructure.childNodes.some(hasAttachments);
   }
   return false;
-}
-
-// Helper: decode an email body into a short, clean preview snippet
-async function bodyPreview(source: Buffer | undefined): Promise<string> {
-  if (!source) return '';
-  try {
-    const parsed = await simpleParser(source);
-    const body = parsed.text || parsed.subject || '';
-    return body.replace(/\s+/g, ' ').trim().substring(0, 150);
-  } catch {
-    return '';
-  }
 }

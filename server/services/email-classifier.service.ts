@@ -151,3 +151,44 @@ export async function getOrClassify(
   });
   return result;
 }
+
+// Triage priority: needs-a-reply and money first, noise last.
+export const INTENT_RANK: Record<Intent, number> = { reply: 0, money: 1, waiting: 2, noise: 3 };
+
+/** Sort by triage priority, then newest first within each band. */
+export function sortByIntent<T extends { intent: Intent; date: string }>(items: T[]): T[] {
+  return [...items].sort(
+    (a, b) =>
+      INTENT_RANK[a.intent] - INTENT_RANK[b.intent] ||
+      (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
+  );
+}
+
+export interface ClassifiableEmail extends EmailToClassify {
+  messageId: string;
+}
+
+/**
+ * Classify a batch of emails (cache-first, in parallel), returning a map from
+ * Message-ID to its classification. A failure on any single email — e.g. a
+ * missing API key — degrades to "noise" rather than failing the whole inbox.
+ */
+export async function classifyBatch(
+  items: ClassifiableEmail[],
+  classify: (email: EmailToClassify) => Promise<Classification> = classifyWithClaude
+): Promise<Map<string, Classification>> {
+  const entries = await Promise.all(
+    items.map(async (item): Promise<[string, Classification]> => {
+      try {
+        return [item.messageId, await getOrClassify(item.messageId, item, classify)];
+      } catch (err) {
+        logger.warn('Intent classification failed; defaulting to noise', {
+          messageId: item.messageId,
+          error: (err as Error).message,
+        });
+        return [item.messageId, { intent: 'noise', confidence: 0 }];
+      }
+    })
+  );
+  return new Map(entries);
+}

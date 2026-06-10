@@ -79,3 +79,51 @@ describe('classification cache', () => {
     expect(svc.getCachedClassification('mid-2')).toEqual({ intent: 'waiting', confidence: 0.7 });
   });
 });
+
+describe('sortByIntent', () => {
+  it('orders by intent priority, then newest first within a band', () => {
+    const items = [
+      { id: 'noise-old', intent: 'noise' as const, date: '2026-06-01T00:00:00Z' },
+      { id: 'reply-old', intent: 'reply' as const, date: '2026-06-01T00:00:00Z' },
+      { id: 'reply-new', intent: 'reply' as const, date: '2026-06-09T00:00:00Z' },
+      { id: 'money', intent: 'money' as const, date: '2026-06-05T00:00:00Z' },
+    ];
+    expect(svc.sortByIntent(items).map((i) => i.id)).toEqual([
+      'reply-new',
+      'reply-old',
+      'money',
+      'noise-old',
+    ]);
+  });
+});
+
+describe('classifyBatch', () => {
+  const items = [
+    { messageId: 'a', subject: 'invoice', from: 'billing@x.com', body: 'you owe $100' },
+    { messageId: 'b', subject: 'hi', from: 'chris@x.com', body: 'can we meet?' },
+  ];
+
+  it('returns a verdict per message and caches them', async () => {
+    const classify = vi.fn(async (e: EmailToClassify) => ({
+      intent: (e.subject === 'invoice' ? 'money' : 'reply') as 'money' | 'reply',
+      confidence: 0.8,
+    }));
+
+    const map = await svc.classifyBatch(items, classify);
+    expect(map.get('a')).toEqual({ intent: 'money', confidence: 0.8 });
+    expect(map.get('b')).toEqual({ intent: 'reply', confidence: 0.8 });
+    expect(classify).toHaveBeenCalledTimes(2);
+
+    // Second run is fully cached — no further model calls
+    await svc.classifyBatch(items, classify);
+    expect(classify).toHaveBeenCalledTimes(2);
+  });
+
+  it('degrades a failing classification to noise without failing the batch', async () => {
+    const classify = vi.fn(async () => {
+      throw new Error('no API key');
+    });
+    const map = await svc.classifyBatch([items[0]], classify);
+    expect(map.get('a')).toEqual({ intent: 'noise', confidence: 0 });
+  });
+});
