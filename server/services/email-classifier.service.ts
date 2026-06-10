@@ -43,13 +43,15 @@ export interface ClassifierClient {
   };
 }
 
-const SYSTEM_PROMPT = `You triage an operator's inbox. You will receive several numbered emails. For EACH email, return its number, one intent, a confidence, and a one-line summary.
+const OPERATOR = process.env.IMAP_USER || 'the operator';
+
+const SYSTEM_PROMPT = `You triage the inbox of the operator (${OPERATOR}). You will receive several numbered emails. For EACH email, return its number, one intent, a confidence, and a one-line summary.
 
 Intents:
-- "reply": a person is asking something or expects a personal response from the operator. Action is owed.
-- "money": invoices, payments, payouts, billing, receipts — anything financial.
+- "reply": a human is asking something or personally expects a response from the operator — action is owed. Also: urgent security incidents affecting the operator's accounts or software. Automated "verify your email" / "set your password" prompts are NOT reply.
+- "money": money actually moving to or from the operator — invoices, payments, payouts, receipts, balance problems. Fee-schedule announcements and pricing news are noise.
 - "waiting": the sender is getting back to the operator or says they'll follow up; no action owed right now.
-- "noise": newsletters, product notifications, automated alerts, marketing — ignorable.
+- "noise": newsletters, product notifications, automated alerts, marketing, verification/2FA codes — ignorable. Mail FROM the operator's own address (tests, self-sends) is ALWAYS noise, even when it looks like an invoice or a question.
 
 Summaries: at most 12 words, concrete, lead with what the sender wants or what happened ("Wants to meet this week + training", "Invoice #42 due Friday — $1,200"). Never start with "Email about" or restate the subject verbatim.`;
 
