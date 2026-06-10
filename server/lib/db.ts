@@ -94,6 +94,14 @@ function runMigrations(database: Database.Database): void {
     );
   `);
 
+  // AI one-line summaries (NULL on legacy rows -> re-classified on next load)
+  const intelColumns = database.prepare('PRAGMA table_info(email_intelligence)').all() as {
+    name: string;
+  }[];
+  if (!intelColumns.some((c) => c.name === 'summary')) {
+    database.exec('ALTER TABLE email_intelligence ADD COLUMN summary TEXT');
+  }
+
   // Portal auth sessions (no-op if the schema already created it)
   database.exec(`
     CREATE TABLE IF NOT EXISTS sessions (

@@ -113,14 +113,21 @@ export async function listEmails(
         });
       }
 
-      // Classify each email (cache-first) and order by triage priority.
+      // Classify + summarize each email (cache-first) and order by triage
+      // priority. The AI one-liner replaces the raw snippet when available.
       const verdicts = await classifyBatch(raw.map((r) => r.classify));
       const emails: EmailSummary[] = raw.map((r) => {
         const v = verdicts.get(r.classify.messageId) ?? {
           intent: 'noise' as Intent,
           confidence: 0,
+          summary: '',
         };
-        return { ...r.summary, intent: v.intent, confidence: v.confidence };
+        return {
+          ...r.summary,
+          preview: v.summary || r.summary.preview,
+          intent: v.intent,
+          confidence: v.confidence,
+        };
       });
 
       logger.info('Emails fetched', { folder, count: emails.length, total });

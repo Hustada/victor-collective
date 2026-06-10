@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS email_intelligence (
   message_id TEXT PRIMARY KEY,
   intent TEXT NOT NULL,                   -- reply | money | waiting | noise
   confidence REAL NOT NULL,               -- 0..1
+  summary TEXT,                           -- one-line AI summary; NULL = pre-summaries row
   model TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
