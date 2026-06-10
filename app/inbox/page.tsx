@@ -34,7 +34,6 @@ interface Email {
 
 interface FullEmail extends Email {
   to: EmailAddress[];
-  html: string | null;
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
 }

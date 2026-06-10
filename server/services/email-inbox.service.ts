@@ -30,7 +30,7 @@ interface EmailSummary {
 
 interface EmailFull extends EmailSummary {
   to: { name: string; address: string }[];
-  html: string | null;
+  // Raw email HTML stays server-side: it is attacker-controlled markup (Issue #4).
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
 }
@@ -185,7 +185,6 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
         intent: verdict.intent,
         confidence: verdict.confidence,
         preview: parsed.text?.substring(0, 200) || '',
-        html: parsed.html || null,
         text: parsed.text || null,
         attachments: (parsed.attachments || []).map((a) => ({
           filename: a.filename || 'attachment',
