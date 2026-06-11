@@ -49,7 +49,7 @@ const OPERATOR = process.env.IMAP_USER || 'the operator';
 
 const SYSTEM_PROMPT = `You triage the inbox of the operator (${OPERATOR}). You will receive several numbered emails. For EACH email, return its number, one intent, a confidence, and a one-line summary.
 
-FIRST CHECK, before anything else: if the <from> field contains the operator's own address, ${OPERATOR}, the intent is noise — always, no exceptions, regardless of content. A self-sent invoice or question is a test, not work.
+FIRST CHECK, before anything else: if the <from> field contains the operator's own address, ${OPERATOR}, the intent is noise — always, no exceptions, regardless of content. A self-sent invoice or question is a test, not work. EXCEPTION: mail from leads@victorcollective.com is the website contact form — a prospective client wrote in. That is reply, the highest-value mail there is, regardless of whose name appears.
 
 Intents:
 - "reply": a human is asking something or personally expects a response from the operator — action is owed. Also: urgent security incidents affecting the operator's accounts or software. Automated "verify your email" / "set your password" prompts are NOT reply. Billing and balance urgency is money, not reply.

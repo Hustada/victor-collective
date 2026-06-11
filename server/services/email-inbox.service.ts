@@ -134,6 +134,8 @@ export async function listEmails(
 
       // Classify + summarize each email (cache-first) and order by triage
       // priority. The AI one-liner replaces the raw snippet when available.
+      // Mail from a channel we built is not left to inference: contact-form
+      // leads are reply by definition, whatever the model guessed.
       const verdicts = await classifyBatch(raw.map((r) => r.classify));
       const emails: EmailSummary[] = raw.map((r) => {
         const v = verdicts.get(r.classify.messageId) ?? {
@@ -144,8 +146,8 @@ export async function listEmails(
         return {
           ...r.summary,
           preview: v.summary || r.summary.preview,
-          intent: v.intent,
-          confidence: v.confidence,
+          intent: r.summary.lead ? 'reply' : v.intent,
+          confidence: r.summary.lead ? 1 : v.confidence,
           hasDraft: getDraft(r.classify.messageId) !== null,
         };
       });
@@ -154,7 +156,9 @@ export async function listEmails(
       // on the drafting model. Fresh drafts show up on the next interaction.
       const draftable = raw.map((r) => ({
         ...r.classify,
-        intent: verdicts.get(r.classify.messageId)?.intent ?? ('noise' as Intent),
+        intent: r.summary.lead
+          ? ('reply' as Intent)
+          : (verdicts.get(r.classify.messageId)?.intent ?? ('noise' as Intent)),
       }));
       void runDraftAhead(draftable);
 
@@ -209,10 +213,13 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
       const parsed: ParsedMail = await simpleParser(message.source);
       const from = message.envelope?.from?.[0];
       const messageId = message.envelope?.messageId || `uid:${uid}`;
-      const verdict = getCachedClassification(messageId) ?? {
+      const isLead = from?.address === LEADS_ADDRESS;
+      const cached = getCachedClassification(messageId) ?? {
         intent: 'noise' as Intent,
         confidence: 0,
       };
+      // Contact-form mail is reply by definition — never left to the model.
+      const verdict = isLead ? { intent: 'reply' as Intent, confidence: 1 } : cached;
 
       // Mark as seen
       await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true });
@@ -247,7 +254,7 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
         })),
         draft,
         hasDraft: draft !== null,
-        lead: from?.address === LEADS_ADDRESS,
+        lead: isLead,
         replyTo: parsed.replyTo?.value?.[0]?.address || null,
       };
     } finally {
