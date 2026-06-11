@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
-    "@emailjs/browser": "^4.4.1",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

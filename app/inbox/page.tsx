@@ -32,6 +32,7 @@ interface Email {
   intent: Intent;
   confidence: number;
   hasDraft: boolean;
+  lead: boolean;
 }
 
 interface Draft {
@@ -47,6 +48,7 @@ interface FullEmail extends Email {
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
   draft: Draft | null;
+  replyTo: string | null;
 }
 
 interface Activity {
@@ -247,7 +249,8 @@ function InboxContent() {
     // The pre-written draft, when the open email's full payload carries one.
     const loaded = full && full.uid === selected.uid ? full : null;
     setComposer({
-      to: selected.from.address,
+      // Reply-To beats From — contact-form leads carry the human's address there.
+      to: loaded?.replyTo || selected.from.address,
       subject,
       body: loaded?.draft?.body ?? '',
       uid: selected.uid,
@@ -696,6 +699,22 @@ function ListRow({
             {senderName(email.from)}
           </span>
           <span style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {email.lead && (
+              <span
+                title="Came in through the contact form"
+                style={{
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: '0.5rem',
+                  letterSpacing: '0.14em',
+                  color: palette.primary.main,
+                  border: `1px solid ${palette.primary.main}55`,
+                  borderRadius: 4,
+                  padding: '1px 5px',
+                }}
+              >
+                LEAD
+              </span>
+            )}
             {email.hasDraft && (
               <motion.span
                 {...popIn}

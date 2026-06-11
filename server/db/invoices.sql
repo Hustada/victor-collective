@@ -84,6 +84,17 @@ CREATE TABLE IF NOT EXISTS briefings (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Email capture from the site and other content surfaces.
+-- source/context/tags are the raw material for AI curation of the list.
+CREATE TABLE IF NOT EXISTS subscribers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  source TEXT NOT NULL DEFAULT 'site',    -- which surface captured it (site, blog, x, yt…)
+  context TEXT,                           -- what they were reading / said at capture
+  tags TEXT,                              -- JSON array; AI curation fills this
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Portal auth sessions (httpOnly cookie tokens)
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,

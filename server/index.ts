@@ -12,6 +12,8 @@ import { invoiceRoutes } from './routes/invoices.js';
 import { inboxRoutes } from './routes/inbox.js';
 import { clientRoutes } from './routes/clients.js';
 import { authRoutes } from './routes/auth.js';
+import { contactRoutes } from './routes/contact.js';
+import { subscribeRoutes, subscribersRoutes } from './routes/subscribe.js';
 import { requireAuth } from './middleware/require-auth.js';
 import { initDb } from './lib/db.js';
 import { logger } from './lib/logger.js';
@@ -63,6 +65,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/invoices', requireAuth, invoiceRoutes);
 app.use('/api/inbox', requireAuth, inboxRoutes);
 app.use('/api/clients', requireAuth, clientRoutes);
+// Public intake: the contact form and email capture (throttled + honeypotted).
+app.use('/api/contact', contactRoutes);
+app.use('/api/subscribe', subscribeRoutes);
+app.use('/api/subscribers', requireAuth, subscribersRoutes);
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -25,6 +25,8 @@ interface SendEmailParams {
   subject: string;
   body: string;
   replyTo?: string;
+  /** Override sender — must be on the verified domain. Defaults to the operator. */
+  from?: string;
 }
 
 interface SendEmailResult {
@@ -125,14 +127,14 @@ function escapeHtml(text: string): string {
  * Send a branded email via Resend
  */
 export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
-  const { to, subject, body, replyTo } = params;
+  const { to, subject, body, replyTo, from } = params;
 
   try {
     const html = generateEmailHtml(body);
     const text = generateEmailText(body);
 
     const result = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: from || FROM_EMAIL,
       to,
       subject,
       html,

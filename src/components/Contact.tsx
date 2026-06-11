@@ -13,7 +13,6 @@ import {
 } from '@phosphor-icons/react';
 import SectionHeader from './ui/SectionHeader';
 import ContactLink from './ContactLink';
-import { useEmailJS } from '../hooks/useEmailJS';
 import { palette } from '../theme';
 
 const Contact: React.FC = () => {
@@ -21,11 +20,11 @@ const Contact: React.FC = () => {
     from_name: '',
     from_email: '',
     message: '',
+    company: '', // honeypot — humans never see it, bots fill it
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { send } = useEmailJS();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -38,11 +37,22 @@ const Contact: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await send(process.env.REACT_APP_EMAILJS_CONTACT_TEMPLATE_ID || '', formData);
+      // Relayed by our own server (Resend) straight into the classified inbox.
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.from_name,
+          email: formData.from_email,
+          message: formData.message,
+          company: formData.company,
+        }),
+      });
+      if (!res.ok) throw new Error(`relay returned ${res.status}`);
       setIsSubmitted(true);
     } catch (err) {
-      console.error('Error sending email:', err);
-      setError('Failed to send message. Please try again.');
+      console.error('Error sending message:', err);
+      setError('Failed to send message. Please try again or email directly.');
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +60,7 @@ const Contact: React.FC = () => {
 
   const handleReset = () => {
     setIsSubmitted(false);
-    setFormData({ from_name: '', from_email: '', message: '' });
+    setFormData({ from_name: '', from_email: '', message: '', company: '' });
   };
 
   return (
@@ -107,7 +117,7 @@ const Contact: React.FC = () => {
                 </Typography>
 
                 <Button variant="outlined" onClick={handleReset} sx={{ mt: 2 }}>
-                  Send Another Message
+                  Close
                 </Button>
               </Box>
             </motion.div>
@@ -142,7 +152,7 @@ const Contact: React.FC = () => {
                   <Button
                     variant="contained"
                     size="large"
-                    href="#"
+                    href="mailto:victorhustad@victorcollective.com?subject=Call%20request&body=A%20few%20times%20that%20work%20for%20me%3A%20"
                     startIcon={<CalendarBlank size={20} weight="bold" />}
                     sx={{ mb: 4, px: 4, py: 1.5 }}
                   >
@@ -233,6 +243,18 @@ const Contact: React.FC = () => {
                         onChange={handleChange}
                         variant="outlined"
                         required
+                      />
+
+                      {/* Honeypot: visually hidden, off the tab order; bots fill it. */}
+                      <input
+                        type="text"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleChange}
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        style={{ position: 'absolute', left: '-9999px', height: 0, width: 0 }}
                       />
 
                       <Button
