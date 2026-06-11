@@ -102,6 +102,11 @@ function runMigrations(database: Database.Database): void {
     database.exec('ALTER TABLE email_intelligence ADD COLUMN summary TEXT');
   }
 
+  // Classifier prompt versioning (NULL on legacy rows -> re-classified on next load)
+  if (!intelColumns.some((c) => c.name === 'prompt_version')) {
+    database.exec('ALTER TABLE email_intelligence ADD COLUMN prompt_version TEXT');
+  }
+
   // Portal auth sessions (no-op if the schema already created it)
   database.exec(`
     CREATE TABLE IF NOT EXISTS sessions (
@@ -129,10 +134,17 @@ function runMigrations(database: Database.Database): void {
       original_body TEXT NOT NULL,
       model TEXT NOT NULL,
       state TEXT NOT NULL DEFAULT 'generated',
+      prompt_version TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Draft prompt provenance (NULL on legacy rows; drafts are never auto-invalidated)
+  const draftColumns = database.prepare('PRAGMA table_info(drafts)').all() as { name: string }[];
+  if (!draftColumns.some((c) => c.name === 'prompt_version')) {
+    database.exec('ALTER TABLE drafts ADD COLUMN prompt_version TEXT');
+  }
 }
 
 // CompanyCam's accounts-payable inbox; used as the seed/backfill default.

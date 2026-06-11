@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { useTestDb, closeDb, resetTestDb } from '../lib/db.js';
+import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
 import type { ClassifierClient } from '../services/email-classifier.service.js';
 import type { DraftableEmail, SentExample } from '../services/draft.service.js';
 
@@ -92,6 +92,18 @@ describe('draft persistence', () => {
   it('ignores markDraftSent for an unknown message', () => {
     expect(() => svc.markDraftSent('missing', 'whatever')).not.toThrow();
     expect(svc.getDraft('missing')).toBeNull();
+  });
+
+  it('stamps a saved draft with the prompt version, for provenance only', () => {
+    svc.saveDraft('mid-3', 'Body text', 'test-model');
+    const row = getDb()
+      .prepare('SELECT prompt_version FROM drafts WHERE message_id = ?')
+      .get('mid-3') as { prompt_version: string };
+    expect(row.prompt_version).toBe(svc.PROMPT_VERSION);
+    expect(svc.PROMPT_VERSION).toMatch(/^[0-9a-f]{16}$/);
+    // Provenance only: an old-prompt draft is still served (Opus drafts are
+    // expensive and user-visible; Regenerate is the explicit refresh path).
+    expect(svc.getDraft('mid-3')).not.toBeNull();
   });
 });
 

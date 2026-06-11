@@ -27,6 +27,10 @@ const CLEAR_TEXT = 'Inbox clear — nothing needs you.';
 
 const SYSTEM_PROMPT = `You write a one-line stand-up brief of an operator's inbox from triaged email summaries. Lead with what needs the operator most, name the people, fold related items together, and keep money items explicit. Hard limit: 25 words. Telegraphic style is good ("Chris needs DNS access + training; Marc ready to pair on SPF"). Plain text, no preamble, no counts recap.`;
 
+// Folded into the cache key: a prompt change makes every old key unreachable,
+// so tuned briefings regenerate without any manual cache clearing.
+const PROMPT_VERSION = createHash('sha256').update(SYSTEM_PROMPT).digest('hex').slice(0, 16);
+
 let defaultClient: ClassifierClient | null = null;
 
 function getClient(): ClassifierClient {
@@ -39,13 +43,13 @@ function getClient(): ClassifierClient {
   return defaultClient;
 }
 
-/** Stable fingerprint of the inbox state the briefing was written for. */
+/** Stable fingerprint of the inbox state AND the prompt the briefing was written under. */
 export function briefingKey(items: BriefingItem[]): string {
   const canonical = items
     .map((i) => `${i.messageId}|${i.intent}|${i.summary}`)
     .sort()
     .join('\n');
-  return createHash('sha256').update(canonical).digest('hex');
+  return createHash('sha256').update(`${PROMPT_VERSION}\n${canonical}`).digest('hex');
 }
 
 export async function generateBriefingWithClaude(

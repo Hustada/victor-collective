@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS email_intelligence (
   confidence REAL NOT NULL,               -- 0..1
   summary TEXT,                           -- one-line AI summary; NULL = pre-summaries row
   model TEXT NOT NULL,
+  prompt_version TEXT,                    -- classifier prompt hash; mismatch/NULL = cache miss
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS drafts (
   original_body TEXT NOT NULL,
   model TEXT NOT NULL,
   state TEXT NOT NULL DEFAULT 'generated',  -- generated | edited | sent
+  prompt_version TEXT,                      -- provenance only; old-prompt drafts are still served
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

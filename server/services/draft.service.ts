@@ -10,6 +10,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { createHash } from 'crypto';
 import { getDb } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
 import type { Intent, ClassifierClient } from './email-classifier.service.js';
@@ -74,6 +75,15 @@ ${rendered || '(no examples available — keep it short, plain, and direct)'}
 Return ONLY the reply body. No subject line, no quoted thread, and never any commentary about the draft itself. If the email is automated (a no-reply address with no human to answer), draft the message Mark would send to the responsible party instead (e.g. their support team) — still body only.`;
 }
 
+// Hash of the stable prompt template (voice examples vary per run and are
+// deliberately excluded). Stored on each draft as PROVENANCE ONLY — unlike
+// classifier verdicts, old-prompt drafts are still served: they're expensive
+// (Opus), user-visible, and Regenerate is the explicit refresh path.
+export const PROMPT_VERSION = createHash('sha256')
+  .update(buildSystemPrompt([]))
+  .digest('hex')
+  .slice(0, 16);
+
 /**
  * Draft a reply to one email in the operator's voice. Network-bound; the
  * persistence wrappers below are what the app should use. Throws on an
@@ -114,16 +124,17 @@ export function getDraft(messageId: string): Draft | null {
 export function saveDraft(messageId: string, body: string, model: string = MODEL): Draft {
   getDb()
     .prepare(
-      `INSERT INTO drafts (message_id, body, original_body, model, state)
-       VALUES (?, ?, ?, ?, 'generated')
+      `INSERT INTO drafts (message_id, body, original_body, model, state, prompt_version)
+       VALUES (?, ?, ?, ?, 'generated', ?)
        ON CONFLICT(message_id) DO UPDATE SET
          body = excluded.body,
          original_body = excluded.original_body,
          model = excluded.model,
          state = 'generated',
+         prompt_version = excluded.prompt_version,
          updated_at = CURRENT_TIMESTAMP`
     )
-    .run(messageId, body, body, model);
+    .run(messageId, body, body, model, PROMPT_VERSION);
   return { body, originalBody: body, model, state: 'generated' };
 }
 

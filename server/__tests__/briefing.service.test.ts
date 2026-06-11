@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import { useTestDb, closeDb, resetTestDb } from '../lib/db.js';
+import { createHash } from 'crypto';
+import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
 import type { ClassifierClient } from '../services/email-classifier.service.js';
 import type { BriefingItem } from '../services/briefing.service.js';
 
@@ -65,6 +66,22 @@ describe('getOrGenerateBriefing', () => {
     await svc.getOrGenerateBriefing(items, generate);
     await svc.getOrGenerateBriefing([items[0]], generate);
     expect(generate).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not serve a briefing cached under a different prompt', async () => {
+    // A row keyed the pre-versioning way: items only, no prompt in the hash.
+    const canonical = items
+      .map((i) => `${i.messageId}|${i.intent}|${i.summary}`)
+      .sort()
+      .join('\n');
+    const itemsOnlyKey = createHash('sha256').update(canonical).digest('hex');
+    getDb()
+      .prepare('INSERT INTO briefings (key, text, model) VALUES (?, ?, ?)')
+      .run(itemsOnlyKey, 'stale brief from an old prompt', 'claude-haiku-4-5');
+
+    const generate = vi.fn(async () => 'fresh brief');
+    expect(await svc.getOrGenerateBriefing(items, generate)).toBe('fresh brief');
+    expect(generate).toHaveBeenCalledTimes(1);
   });
 
   it('returns a static line for a clear inbox without calling the model', async () => {

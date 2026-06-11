@@ -9,6 +9,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { createHash } from 'crypto';
 import { getDb } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
 
@@ -54,6 +55,11 @@ Intents:
 - "noise": newsletters, product notifications, automated alerts, marketing, verification/2FA codes — ignorable. Mail FROM the operator's own address (tests, self-sends) is ALWAYS noise, even when it looks like an invoice or a question.
 
 Summaries: at most 12 words, concrete, lead with what the sender wants or what happened ("Wants to meet this week + training", "Invoice #42 due Friday — $1,200"). Never start with "Email about" or restate the subject verbatim.`;
+
+// Verdicts are only as good as the prompt that produced them: cached rows from
+// an older prompt are treated as misses, so tuning the prompt never serves
+// stale verdicts (and never needs a manual cache clear again).
+export const PROMPT_VERSION = createHash('sha256').update(SYSTEM_PROMPT).digest('hex').slice(0, 16);
 
 const SCHEMA = {
   type: 'object',
@@ -148,10 +154,15 @@ export async function classifyChunkWithClaude(
 
 export function getCachedClassification(messageId: string): Classification | null {
   const row = getDb()
-    .prepare('SELECT intent, confidence, summary FROM email_intelligence WHERE message_id = ?')
-    .get(messageId) as { intent: string; confidence: number; summary: string | null } | undefined;
-  // A NULL summary marks a pre-summaries row — treat as a miss so it upgrades.
-  if (!row || row.summary === null) return null;
+    .prepare(
+      'SELECT intent, confidence, summary, prompt_version FROM email_intelligence WHERE message_id = ?'
+    )
+    .get(messageId) as
+    | { intent: string; confidence: number; summary: string | null; prompt_version: string | null }
+    | undefined;
+  // Misses that self-upgrade: a NULL summary marks a pre-summaries row, and a
+  // missing/stale prompt_version marks a verdict from an older prompt.
+  if (!row || row.summary === null || row.prompt_version !== PROMPT_VERSION) return null;
   return { intent: row.intent as Intent, confidence: row.confidence, summary: row.summary };
 }
 
@@ -162,20 +173,22 @@ export function cacheClassification(
 ): void {
   getDb()
     .prepare(
-      `INSERT INTO email_intelligence (message_id, intent, confidence, summary, model)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO email_intelligence (message_id, intent, confidence, summary, model, prompt_version)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(message_id) DO UPDATE SET
          intent = excluded.intent,
          confidence = excluded.confidence,
          summary = excluded.summary,
-         model = excluded.model`
+         model = excluded.model,
+         prompt_version = excluded.prompt_version`
     )
     .run(
       messageId,
       classification.intent,
       classification.confidence,
       classification.summary,
-      model
+      model,
+      PROMPT_VERSION
     );
 }
 
