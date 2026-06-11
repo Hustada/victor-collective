@@ -12,6 +12,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'crypto';
 import { getDb } from '../lib/db.js';
+import { beginDrafting, draftedOne, endDrafting } from '../lib/ai-activity.js';
 import { logger } from '../lib/logger.js';
 import { tagSafe } from './email-classifier.service.js';
 import type { Intent, ClassifierClient } from './email-classifier.service.js';
@@ -166,18 +167,24 @@ export async function draftAhead(
     (e) => DRAFT_INTENTS.includes(e.intent) && getDraft(e.messageId) === null
   );
 
+  if (pending.length > 0) beginDrafting(pending.length);
   let generated = 0;
-  for (const email of pending) {
-    try {
-      saveDraft(email.messageId, await generate(email));
-      generated++;
-      logger.info('Draft generated', { messageId: email.messageId, subject: email.subject });
-    } catch (err) {
-      logger.warn('Draft generation failed; will retry next load', {
-        messageId: email.messageId,
-        error: (err as Error).message,
-      });
+  try {
+    for (const email of pending) {
+      try {
+        saveDraft(email.messageId, await generate(email));
+        generated++;
+        draftedOne(email.subject);
+        logger.info('Draft generated', { messageId: email.messageId, subject: email.subject });
+      } catch (err) {
+        logger.warn('Draft generation failed; will retry next load', {
+          messageId: email.messageId,
+          error: (err as Error).message,
+        });
+      }
     }
+  } finally {
+    endDrafting();
   }
   return generated;
 }

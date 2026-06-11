@@ -16,6 +16,7 @@ import {
 } from '../services/email-inbox.service.js';
 import { sendEmail } from '../services/email-send.service.js';
 import { regenerateDraft, markDraftSent } from '../services/draft.service.js';
+import { getActivity } from '../lib/ai-activity.js';
 import { logger } from '../lib/logger.js';
 
 const router = Router();
@@ -44,6 +45,12 @@ router.get('/folders', async (_req: Request, res: Response) => {
     logger.error('Failed to list folders', { error: (err as Error).message });
     res.status(500).json({ error: 'Failed to fetch folders' });
   }
+});
+
+// GET /api/inbox/activity - Live AI activity (ticker + agent console).
+// Registered before /:uid so the param route doesn't swallow it.
+router.get('/activity', (_req: Request, res: Response) => {
+  res.json(getActivity());
 });
 
 // GET /api/inbox/:uid - Get single email

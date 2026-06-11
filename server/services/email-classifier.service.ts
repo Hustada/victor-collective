@@ -11,6 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'crypto';
 import { getDb } from '../lib/db.js';
+import { beginClassifying, classifiedChunk, endClassifying } from '../lib/ai-activity.js';
 import { logger } from '../lib/logger.js';
 
 export type Intent = 'reply' | 'money' | 'waiting' | 'noise';
@@ -246,25 +247,31 @@ export async function classifyBatch(
     else misses.push(item);
   }
 
-  await Promise.all(
-    chunk(misses, CHUNK_SIZE).map(async (group) => {
-      try {
-        const results = await classifyChunk(group);
-        group.forEach((item, i) => {
-          const verdict = results[i] ?? NOISE;
-          cacheClassification(item.messageId, verdict);
-          verdicts.set(item.messageId, verdict);
-        });
-        logger.info('Email chunk classified', { count: group.length });
-      } catch (err) {
-        logger.warn('Chunk classification failed; degrading to noise', {
-          count: group.length,
-          error: (err as Error).message,
-        });
-        group.forEach((item) => verdicts.set(item.messageId, NOISE));
-      }
-    })
-  );
+  if (misses.length > 0) beginClassifying(misses.length);
+  try {
+    await Promise.all(
+      chunk(misses, CHUNK_SIZE).map(async (group) => {
+        try {
+          const results = await classifyChunk(group);
+          group.forEach((item, i) => {
+            const verdict = results[i] ?? NOISE;
+            cacheClassification(item.messageId, verdict);
+            verdicts.set(item.messageId, verdict);
+          });
+          classifiedChunk(group.length);
+          logger.info('Email chunk classified', { count: group.length });
+        } catch (err) {
+          logger.warn('Chunk classification failed; degrading to noise', {
+            count: group.length,
+            error: (err as Error).message,
+          });
+          group.forEach((item) => verdicts.set(item.messageId, NOISE));
+        }
+      })
+    );
+  } finally {
+    endClassifying();
+  }
 
   return verdicts;
 }

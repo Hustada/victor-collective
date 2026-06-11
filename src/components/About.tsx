@@ -101,7 +101,7 @@ const About: React.FC = () => {
                   }}
                 >
                   <img
-                    src={process.env.PUBLIC_URL + '/assets/brand/victorcol1.jpg'}
+                    src="/assets/brand/victorcol1.jpg"
                     alt="Viktor Ash — Founder, The Victor Collective"
                     loading="lazy"
                     style={{
