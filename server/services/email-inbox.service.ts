@@ -15,6 +15,14 @@ import {
   sortByIntent,
   getCachedClassification,
 } from './email-classifier.service.js';
+import {
+  type Draft,
+  type SentExample,
+  draftAhead,
+  getDraft,
+  setVoiceExamples,
+} from './draft.service.js';
+import { getOrGenerateBriefing } from './briefing.service.js';
 
 interface EmailSummary {
   uid: number;
@@ -26,13 +34,16 @@ interface EmailSummary {
   preview: string;
   intent: Intent;
   confidence: number;
+  hasDraft: boolean;
 }
 
 interface EmailFull extends EmailSummary {
+  messageId: string;
   to: { name: string; address: string }[];
   // Raw email HTML stays server-side: it is attacker-controlled markup (Issue #4).
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
+  draft: Draft | null;
 }
 
 const IMAP_CONFIG = {
@@ -56,7 +67,7 @@ export async function listEmails(
   folder = 'INBOX',
   limit = 50,
   offset = 0
-): Promise<{ emails: EmailSummary[]; total: number }> {
+): Promise<{ emails: EmailSummary[]; total: number; briefing: string }> {
   const client = await getClient();
 
   try {
@@ -67,7 +78,7 @@ export async function listEmails(
       const total = mailbox?.exists || 0;
 
       if (total === 0) {
-        return { emails: [], total: 0 };
+        return { emails: [], total: 0, briefing: await getOrGenerateBriefing([]) };
       }
 
       // Calculate range (IMAP uses 1-based sequence numbers, newest first)
@@ -127,11 +138,36 @@ export async function listEmails(
           preview: v.summary || r.summary.preview,
           intent: v.intent,
           confidence: v.confidence,
+          hasDraft: getDraft(r.classify.messageId) !== null,
         };
       });
 
+      // Pre-draft replies in the background — the list response never waits
+      // on the drafting model. Fresh drafts show up on the next interaction.
+      const draftable = raw.map((r) => ({
+        ...r.classify,
+        intent: verdicts.get(r.classify.messageId)?.intent ?? ('noise' as Intent),
+      }));
+      void runDraftAhead(draftable);
+
+      // Synthesized stand-up from the non-noise summaries; cached by inbox
+      // state, so this is a model call only when the inbox changed.
+      const briefing = await getOrGenerateBriefing(
+        emails
+          .filter((e) => e.intent !== 'noise')
+          .map((e) => {
+            const r = raw.find((x) => x.summary.uid === e.uid);
+            return {
+              messageId: r?.classify.messageId ?? `uid:${e.uid}`,
+              intent: e.intent,
+              from: e.from.name || e.from.address,
+              summary: e.preview,
+            };
+          })
+      );
+
       logger.info('Emails fetched', { folder, count: emails.length, total });
-      return { emails: sortByIntent(emails), total };
+      return { emails: sortByIntent(emails), total, briefing };
     } finally {
       lock.release();
     }
@@ -175,8 +211,11 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
 
       logger.info('Email fetched', { uid, subject: parsed.subject });
 
+      const draft = getDraft(messageId);
+
       return {
         uid: message.uid,
+        messageId,
         subject: parsed.subject || '(No subject)',
         from: {
           name: from?.name || '',
@@ -198,12 +237,87 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
           contentType: a.contentType,
           size: a.size,
         })),
+        draft,
+        hasDraft: draft !== null,
       };
     } finally {
       lock.release();
     }
   } finally {
     await client.logout();
+  }
+}
+
+// Voice examples are stable within a session — fetch the Sent folder once
+// per process, not per draft run.
+let voiceExamplesCache: SentExample[] | null = null;
+
+/** Recent emails the operator actually wrote, used as few-shot voice reference. */
+export async function listSentExamples(limit = 3): Promise<SentExample[]> {
+  if (voiceExamplesCache) return voiceExamplesCache;
+
+  const client = await getClient();
+  try {
+    const mailboxes = await client.list();
+    const sent =
+      mailboxes.find((m) => m.specialUse === '\\Sent')?.path ??
+      mailboxes.find((m) => /sent/i.test(m.path))?.path;
+    if (!sent) {
+      logger.warn('No Sent folder found; drafting without voice examples');
+      return (voiceExamplesCache = []);
+    }
+
+    const lock = await client.getMailboxLock(sent);
+    try {
+      const total =
+        client.mailbox && typeof client.mailbox !== 'boolean' ? client.mailbox.exists : 0;
+      if (total === 0) return (voiceExamplesCache = []);
+
+      const examples: SentExample[] = [];
+      const start = Math.max(1, total - 9);
+      for await (const message of client.fetch(`${start}:*`, {
+        envelope: true,
+        source: { start: 0, maxLength: 32768 },
+      })) {
+        const parsed = message.source ? await simpleParser(message.source) : null;
+        const text = (parsed?.text || '').trim();
+        if (!text) continue;
+        const to = message.envelope?.to?.[0];
+        examples.push({
+          to: to?.address || '',
+          subject: message.envelope?.subject || '',
+          body: text,
+        });
+      }
+
+      voiceExamplesCache = examples.slice(-limit).reverse();
+      logger.info('Voice examples loaded from Sent folder', {
+        folder: sent,
+        count: voiceExamplesCache.length,
+      });
+      return voiceExamplesCache;
+    } finally {
+      lock.release();
+    }
+  } finally {
+    await client.logout();
+  }
+}
+
+// One background draft run at a time; overlapping loads just skip.
+let draftRunInFlight = false;
+
+async function runDraftAhead(emails: (ClassifiableEmail & { intent: Intent })[]): Promise<void> {
+  if (draftRunInFlight) return;
+  draftRunInFlight = true;
+  try {
+    setVoiceExamples(await listSentExamples());
+    const generated = await draftAhead(emails);
+    if (generated > 0) logger.info('Draft-ahead run complete', { generated });
+  } catch (err) {
+    logger.warn('Draft-ahead run failed', { error: (err as Error).message });
+  } finally {
+    draftRunInFlight = false;
   }
 }
 

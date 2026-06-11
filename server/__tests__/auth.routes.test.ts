@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
+import { isLoginLocked, recordLoginFailure, resetLoginThrottle } from '../lib/login-throttle.js';
 
 const TEST_PASSWORD = 'correct-horse-battery';
 
@@ -23,6 +24,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   resetTestDb();
+  resetLoginThrottle();
 });
 
 afterAll(() => {
@@ -65,6 +67,48 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(503);
 
     process.env.PORTAL_PASSWORD = saved;
+  });
+});
+
+describe('login rate limiting', () => {
+  it('locks out after repeated failures, even for the correct password', async () => {
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/api/auth/login').send({ password: 'wrong' });
+    }
+
+    const res = await request(app).post('/api/auth/login').send({ password: TEST_PASSWORD });
+    expect(res.status).toBe(429);
+    expect(res.headers['set-cookie']).toBeUndefined();
+  });
+
+  it('clears the failure count on a successful login', async () => {
+    for (let i = 0; i < 4; i++) {
+      await request(app).post('/api/auth/login').send({ password: 'wrong' });
+    }
+    const ok = await request(app).post('/api/auth/login').send({ password: TEST_PASSWORD });
+    expect(ok.status).toBe(200);
+
+    // The slate is clean: four more failures still don't lock the door.
+    for (let i = 0; i < 4; i++) {
+      await request(app).post('/api/auth/login').send({ password: 'wrong' });
+    }
+    const again = await request(app).post('/api/auth/login').send({ password: TEST_PASSWORD });
+    expect(again.status).toBe(200);
+  });
+
+  it('unlocks after the lockout window passes', () => {
+    const t0 = 1_000_000;
+    for (let i = 0; i < 5; i++) recordLoginFailure('1.2.3.4', t0);
+
+    expect(isLoginLocked('1.2.3.4', t0)).toBe(true);
+    expect(isLoginLocked('1.2.3.4', t0 + 14 * 60 * 1000)).toBe(true);
+    expect(isLoginLocked('1.2.3.4', t0 + 15 * 60 * 1000 + 1)).toBe(false);
+  });
+
+  it('throttles per source, not globally', () => {
+    for (let i = 0; i < 5; i++) recordLoginFailure('attacker', 0);
+    expect(isLoginLocked('attacker', 0)).toBe(true);
+    expect(isLoginLocked('operator', 0)).toBe(false);
   });
 });
 

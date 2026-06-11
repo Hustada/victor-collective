@@ -30,12 +30,22 @@ interface Email {
   preview: string;
   intent: Intent;
   confidence: number;
+  hasDraft: boolean;
+}
+
+interface Draft {
+  body: string;
+  originalBody: string;
+  model: string;
+  state: 'generated' | 'edited' | 'sent';
 }
 
 interface FullEmail extends Email {
+  messageId: string;
   to: EmailAddress[];
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
+  draft: Draft | null;
 }
 
 const INTENT_ORDER: Intent[] = ['reply', 'money', 'waiting', 'noise'];
@@ -92,18 +102,24 @@ function InboxContent() {
   const [selectedUid, setSelectedUid] = useState<number | null>(null);
   const [full, setFull] = useState<FullEmail | null>(null);
   const [loadingFull, setLoadingFull] = useState(false);
-  const [composer, setComposer] = useState<{ to: string; subject: string; body: string } | null>(
-    null
-  );
+  const [composer, setComposer] = useState<{
+    to: string;
+    subject: string;
+    body: string;
+    uid?: number;
+    messageId?: string;
+  } | null>(null);
   const [sentNote, setSentNote] = useState(false);
+  const [aiBriefing, setAiBriefing] = useState('');
 
   const fetchList = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/inbox');
       if (!res.ok) throw new Error('API not available');
-      const data = (await res.json()) as { emails: Email[] };
+      const data = (await res.json()) as { emails: Email[]; briefing?: string };
       setEmails(data.emails);
+      setAiBriefing(data.briefing || '');
       setApiDown(false);
       if (!isMobile && data.emails.length > 0) setSelectedUid(data.emails[0].uid);
     } catch {
@@ -164,11 +180,21 @@ function InboxContent() {
   const openReply = useCallback(() => {
     if (!selected) return;
     const subject = /^re:/i.test(selected.subject) ? selected.subject : `Re: ${selected.subject}`;
-    setComposer({ to: selected.from.address, subject, body: '' });
-  }, [selected]);
+    // The pre-written draft, when the open email's full payload carries one.
+    const loaded = full && full.uid === selected.uid ? full : null;
+    setComposer({
+      to: selected.from.address,
+      subject,
+      body: loaded?.draft?.body ?? '',
+      uid: selected.uid,
+      messageId: loaded?.messageId,
+    });
+  }, [selected, full]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Bare keys only — Cmd+R is the browser's refresh, not our reply.
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault();
@@ -189,7 +215,10 @@ function InboxContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [move, archive, openReply, isMobile]);
 
-  const briefing = `${counts.reply || 0} need you · ${counts.money || 0} money · ${counts.waiting || 0} waiting`;
+  // Synthesized stand-up when the server has one; counts as the fallback.
+  const briefing =
+    aiBriefing ||
+    `${counts.reply || 0} need you · ${counts.money || 0} money · ${counts.waiting || 0} waiting`;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -451,6 +480,11 @@ function ListRow({
             {senderName(email.from)}
           </span>
           <span style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {email.hasDraft && (
+              <span title="Draft ready" style={{ color: palette.primary.main, fontSize: '0.7rem' }}>
+                ⚡
+              </span>
+            )}
             {email.hasAttachments && (
               <span style={{ color: palette.text.muted, fontSize: '0.7rem' }}>📎</span>
             )}
@@ -608,23 +642,58 @@ function ReadingPane({
         </div>
       )}
 
-      {/* Draft-ahead placeholder — arrives in the draft-ahead slice */}
-      <div
-        style={{
-          marginTop: 26,
-          padding: 14,
-          borderRadius: 10,
-          border: `1px dashed ${palette.border.default}`,
-          color: palette.text.muted,
-          fontSize: '0.8rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
-      >
-        <span style={{ color: palette.primary.main }}>⚡</span> Draft reply in your voice — arrives
-        with draft-ahead
-      </div>
+      {full?.draft ? (
+        <button
+          onClick={onReply}
+          style={{
+            marginTop: 26,
+            padding: 14,
+            borderRadius: 10,
+            border: `1px solid ${palette.primary.main}44`,
+            background: `${palette.primary.main}0d`,
+            color: palette.text.secondary,
+            fontSize: '0.84rem',
+            lineHeight: 1.55,
+            textAlign: 'left',
+            width: '100%',
+            cursor: 'pointer',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          <span
+            style={{
+              display: 'block',
+              marginBottom: 8,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.58rem',
+              letterSpacing: '0.18em',
+              color: palette.primary.main,
+            }}
+          >
+            ⚡ DRAFT READY — R TO REVIEW
+          </span>
+          {full.draft.body}
+        </button>
+      ) : (
+        (summary.intent === 'reply' || summary.intent === 'money') && (
+          <div
+            style={{
+              marginTop: 26,
+              padding: 14,
+              borderRadius: 10,
+              border: `1px dashed ${palette.border.default}`,
+              color: palette.text.muted,
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <span style={{ color: palette.primary.main }}>⚡</span>{' '}
+            {summary.hasDraft ? 'Loading your draft…' : 'Drafting a reply in your voice…'}
+          </div>
+        )
+      )}
 
       <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
         <PaneButton label="Archive" hint="E" color={palette.primary.main} onClick={onArchive} />
@@ -733,14 +802,31 @@ function Composer({
   initial,
   onClose,
 }: {
-  initial: { to: string; subject: string; body: string };
+  initial: { to: string; subject: string; body: string; uid?: number; messageId?: string };
   onClose: (sent: boolean) => void;
 }) {
   const [to, setTo] = useState(initial.to);
   const [subject, setSubject] = useState(initial.subject);
   const [body, setBody] = useState(initial.body);
   const [sending, setSending] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const regenerate = async () => {
+    if (initial.uid === undefined) return;
+    setRegenerating(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/inbox/${initial.uid}/draft`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to generate draft');
+      const data = (await res.json()) as { draft: { body: string } };
+      setBody(data.draft.body);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   const fieldStyle: React.CSSProperties = {
     width: '100%',
@@ -766,7 +852,7 @@ function Composer({
       const res = await fetch('/api/inbox/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, body }),
+        body: JSON.stringify({ to, subject, body, messageId: initial.messageId }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -855,6 +941,25 @@ function Composer({
           >
             sends for real via Resend
           </span>
+          {initial.uid !== undefined && (
+            <button
+              onClick={regenerate}
+              disabled={regenerating || sending}
+              style={{
+                cursor: regenerating ? 'default' : 'pointer',
+                padding: '9px 16px',
+                borderRadius: 8,
+                border: `1px solid ${palette.primary.main}66`,
+                background: 'transparent',
+                color: palette.primary.main,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '0.7rem',
+                opacity: regenerating ? 0.6 : 1,
+              }}
+            >
+              {regenerating ? 'Drafting…' : body ? '⚡ Regenerate' : '⚡ Draft'}
+            </button>
+          )}
           <button
             onClick={() => onClose(false)}
             style={{

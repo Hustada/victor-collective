@@ -18,6 +18,10 @@ import { logger } from './lib/logger.js';
 
 const app = express();
 
+// Railway terminates TLS at a proxy; without this req.ip is the proxy's
+// address and the login throttle would lump every client into one bucket.
+app.set('trust proxy', 1);
+
 // CORS - allow Vercel frontend
 const allowedOrigins = [
   'http://localhost:3000',
