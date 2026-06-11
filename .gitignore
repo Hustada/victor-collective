@@ -39,3 +39,6 @@ server/eval/eval-set.json
 
 # Playwright MCP session artifacts
 .playwright-mcp/
+
+# Vercel CLI project link
+.vercel
