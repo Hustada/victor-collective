@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
+import { getActivity, resetActivity } from '../lib/ai-activity.js';
 import type { ClassifierClient } from '../services/email-classifier.service.js';
 import type { DraftableEmail, SentExample } from '../services/draft.service.js';
 
@@ -12,6 +13,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   resetTestDb();
+  resetActivity();
 });
 
 afterAll(() => {
@@ -179,6 +181,15 @@ describe('draftAhead', () => {
     expect(count).toBe(1);
     expect(svc.getDraft('mid-reply')).toBeNull(); // failed: not cached, retries next load
     expect(svc.getDraft('mid-ok')?.body).toBe('Draft for mid-ok');
+  });
+
+  it('publishes live progress to the activity tracker', async () => {
+    const generate = vi.fn(async (e: DraftableEmail) => `Draft for ${e.messageId}`);
+
+    await svc.draftAhead([replyEmail], generate);
+
+    expect(getActivity().drafting).toBeNull(); // finished
+    expect(getActivity().log.map((e) => e.line)).toContain('draft → Re: this week');
   });
 });
 

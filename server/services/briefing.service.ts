@@ -9,6 +9,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'crypto';
 import { getDb } from '../lib/db.js';
+import { noteEvent } from '../lib/ai-activity.js';
 import { logger } from '../lib/logger.js';
 import type { Intent, ClassifierClient } from './email-classifier.service.js';
 
@@ -93,6 +94,7 @@ export async function getOrGenerateBriefing(
       `INSERT INTO briefings (key, text, model) VALUES (?, ?, ?)
        ON CONFLICT(key) DO UPDATE SET text = excluded.text, model = excluded.model`
     ).run(key, text, MODEL);
+    noteEvent('briefing synthesized');
     logger.info('Briefing generated', { items: items.length });
     return text;
   } catch (err) {

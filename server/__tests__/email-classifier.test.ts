@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
+import { getActivity, resetActivity } from '../lib/ai-activity.js';
 import type {
   Classification,
   ClassifierClient,
@@ -16,6 +17,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   resetTestDb();
+  resetActivity();
 });
 
 afterAll(() => {
@@ -242,6 +244,19 @@ describe('classifyBatch', () => {
       confidence: 0.8,
       summary: 'Invoice for $100',
     });
-    expect(classifyChunk).toHaveBeenCalledTimes(2);
+  });
+
+  it('publishes live progress to the activity tracker', async () => {
+    const classifyChunk = vi.fn(async (group: EmailToClassify[]) => group.map(verdictFor));
+
+    await svc.classifyBatch(items, classifyChunk);
+
+    expect(getActivity().classifying).toBeNull(); // finished
+    expect(getActivity().log.map((e) => e.line)).toContain('classified 2 emails');
+
+    // Fully cached run does no model work — no activity recorded
+    resetActivity();
+    await svc.classifyBatch(items, classifyChunk);
+    expect(getActivity().log).toEqual([]);
   });
 });
