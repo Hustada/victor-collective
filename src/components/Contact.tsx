@@ -117,7 +117,7 @@ const Contact: React.FC = () => {
                 </Typography>
 
                 <Button variant="outlined" onClick={handleReset} sx={{ mt: 2 }}>
-                  Send Another Message
+                  Close
                 </Button>
               </Box>
             </motion.div>
