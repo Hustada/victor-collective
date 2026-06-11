@@ -35,6 +35,8 @@ interface EmailSummary {
   intent: Intent;
   confidence: number;
   hasDraft: boolean;
+  /** Came in through the contact form (sent from the leads@ relay). */
+  lead: boolean;
 }
 
 interface EmailFull extends EmailSummary {
@@ -44,7 +46,12 @@ interface EmailFull extends EmailSummary {
   text: string | null;
   attachments: { filename: string; contentType: string; size: number }[];
   draft: Draft | null;
+  /** Reply-To header when present — replies belong there, not to From. */
+  replyTo: string | null;
 }
+
+// Contact-form relays arrive from this address; the inbox tags them as leads.
+const LEADS_ADDRESS = 'leads@victorcollective.com';
 
 const IMAP_CONFIG = {
   host: process.env.IMAP_HOST || 'mail.privateemail.com',
@@ -114,6 +121,7 @@ export async function listEmails(
             seen: message.flags?.has('\\Seen') || false,
             hasAttachments: hasAttachments(message.bodyStructure),
             preview: text.slice(0, 150),
+            lead: from?.address === LEADS_ADDRESS,
           },
           classify: {
             messageId,
@@ -239,6 +247,8 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
         })),
         draft,
         hasDraft: draft !== null,
+        lead: from?.address === LEADS_ADDRESS,
+        replyTo: parsed.replyTo?.value?.[0]?.address || null,
       };
     } finally {
       lock.release();
