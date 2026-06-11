@@ -7,11 +7,12 @@
  * reading pane. AI summaries and draft-ahead arrive in later slices.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import Link from 'next/link';
 import PortalGate from '../../src/components/PortalGate';
 import { palette } from '../../src/theme';
+import { SPRING, fadeUp, popIn, emberPulse, slideUp, consoleLine } from '../../src/lib/motion';
 
 type Intent = 'reply' | 'money' | 'waiting' | 'noise';
 
@@ -48,6 +49,12 @@ interface FullEmail extends Email {
   draft: Draft | null;
 }
 
+interface Activity {
+  classifying: { done: number; total: number } | null;
+  drafting: { done: number; total: number } | null;
+  log: { at: string; line: string }[];
+}
+
 const INTENT_ORDER: Intent[] = ['reply', 'money', 'waiting', 'noise'];
 const INTENT_META: Record<Intent, { label: string; color: string }> = {
   reply: { label: 'NEEDS REPLY', color: '#FF7A3D' },
@@ -56,7 +63,6 @@ const INTENT_META: Record<Intent, { label: string; color: string }> = {
   noise: { label: 'NOISE', color: '#6B6B6B' },
 };
 const FILTERS: ('all' | Intent)[] = ['all', 'reply', 'money', 'waiting', 'noise'];
-const SPRING = { type: 'spring' as const, stiffness: 260, damping: 30 };
 
 function senderName(from: EmailAddress): string {
   return from.name || from.address || '(unknown)';
@@ -111,6 +117,64 @@ function InboxContent() {
   } | null>(null);
   const [sentNote, setSentNote] = useState(false);
   const [aiBriefing, setAiBriefing] = useState('');
+  const [activity, setActivity] = useState<Activity | null>(null);
+  const [consoleOpen, setConsoleOpen] = useState(false);
+
+  // Quiet refreshes — no skeleton, no selection steal. Used when a background
+  // draft run finishes so the ⚡ bolts (and the open email's draft) land in place.
+  const selectedUidRef = useRef<number | null>(null);
+  useEffect(() => {
+    selectedUidRef.current = selectedUid;
+  }, [selectedUid]);
+
+  const refreshSilently = useCallback(async () => {
+    try {
+      const res = await fetch('/api/inbox');
+      if (!res.ok) return;
+      const data = (await res.json()) as { emails: Email[]; briefing?: string };
+      setEmails(data.emails);
+      setAiBriefing(data.briefing || '');
+    } catch {
+      // next poll catches up
+    }
+    const uid = selectedUidRef.current;
+    if (uid === null) return;
+    try {
+      const res = await fetch(`/api/inbox/${uid}`);
+      // Guard: only apply if this email is still the one on screen.
+      if (res.ok && selectedUidRef.current === uid) {
+        setFull((await res.json()) as FullEmail);
+      }
+    } catch {
+      // pane keeps what it has
+    }
+  }, []);
+
+  // Live AI activity: poll while the page is open; one quiet refetch when a
+  // draft run completes (refetching during the run would re-hit IMAP per poll).
+  useEffect(() => {
+    let drafting = false;
+    let alive = true;
+    const tick = async () => {
+      try {
+        const res = await fetch('/api/inbox/activity');
+        if (!res.ok || !alive) return;
+        const a = (await res.json()) as Activity;
+        setActivity(a);
+        const draftingNow = a.drafting !== null;
+        if (drafting && !draftingNow) refreshSilently();
+        drafting = draftingNow;
+      } catch {
+        // API down — the main fetch path already surfaces that
+      }
+    };
+    tick();
+    const id = setInterval(tick, 3000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [refreshSilently]);
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -284,6 +348,42 @@ function InboxContent() {
             >
               ⚡ {briefing}
             </span>
+            <AnimatePresence>
+              {(activity?.classifying || activity?.drafting) && (
+                <motion.span
+                  {...fadeUp}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 7,
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: '0.6rem',
+                    letterSpacing: '0.14em',
+                    color: palette.primary.main,
+                  }}
+                >
+                  <motion.span
+                    animate={emberPulse.animate}
+                    transition={emberPulse.transition}
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: palette.primary.main,
+                      boxShadow: `0 0 8px ${palette.primary.main}`,
+                    }}
+                  />
+                  {[
+                    activity.classifying &&
+                      `classifying ${activity.classifying.done}/${activity.classifying.total}`,
+                    activity.drafting &&
+                      `drafting ${activity.drafting.done}/${activity.drafting.total}`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {FILTERS.map((f) => {
@@ -423,8 +523,124 @@ function InboxContent() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <AgentConsole
+          activity={activity}
+          open={consoleOpen}
+          onToggle={() => setConsoleOpen((o) => !o)}
+        />
       </div>
     </MotionConfig>
+  );
+}
+
+/**
+ * Agent console: the operator-room view of everything the machine does —
+ * classify chunks, drafts, briefings — as a timestamped mono-font feed.
+ */
+function AgentConsole({
+  activity,
+  open,
+  onToggle,
+}: {
+  activity: Activity | null;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const working = Boolean(activity?.classifying || activity?.drafting);
+  const log = activity?.log ?? [];
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [log.length, open]);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        right: 18,
+        bottom: 16,
+        zIndex: 40,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: 8,
+      }}
+    >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            {...slideUp}
+            ref={scrollRef}
+            style={{
+              width: 'min(420px, 92vw)',
+              maxHeight: 240,
+              overflowY: 'auto',
+              background: palette.background.elevated,
+              border: `1px solid ${palette.border.default}`,
+              borderRadius: 10,
+              padding: '10px 14px',
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: '0.64rem',
+              lineHeight: 1.9,
+              color: palette.text.secondary,
+              boxShadow: '0 12px 40px rgba(0,0,0,0.45)',
+            }}
+          >
+            {log.length === 0 ? (
+              <span style={{ color: palette.text.muted }}>{`// quiet. nothing in flight.`}</span>
+            ) : (
+              log.slice(-30).map((e) => (
+                <motion.div key={`${e.at}-${e.line}`} {...consoleLine}>
+                  <span style={{ color: palette.text.muted }}>
+                    {new Date(e.at).toLocaleTimeString([], { hour12: false })}
+                  </span>{' '}
+                  {e.line}
+                </motion.div>
+              ))
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        onClick={onToggle}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          padding: '7px 13px',
+          borderRadius: 20,
+          border: `1px solid ${working ? `${palette.primary.main}66` : palette.border.default}`,
+          background: palette.background.elevated,
+          color: working ? palette.primary.main : palette.text.muted,
+          fontFamily: '"JetBrains Mono", monospace',
+          fontSize: '0.6rem',
+          letterSpacing: '0.16em',
+        }}
+      >
+        {working ? (
+          <motion.span
+            animate={emberPulse.animate}
+            transition={emberPulse.transition}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: palette.primary.main,
+              boxShadow: `0 0 8px ${palette.primary.main}`,
+            }}
+          />
+        ) : (
+          <span
+            style={{ width: 6, height: 6, borderRadius: '50%', background: palette.text.muted }}
+          />
+        )}
+        {'// AGENT'}
+      </button>
+    </div>
   );
 }
 
@@ -481,9 +697,13 @@ function ListRow({
           </span>
           <span style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 6 }}>
             {email.hasDraft && (
-              <span title="Draft ready" style={{ color: palette.primary.main, fontSize: '0.7rem' }}>
+              <motion.span
+                {...popIn}
+                title="Draft ready"
+                style={{ color: palette.primary.main, fontSize: '0.7rem' }}
+              >
                 ⚡
-              </span>
+              </motion.span>
             )}
             {email.hasAttachments && (
               <span style={{ color: palette.text.muted, fontSize: '0.7rem' }}>📎</span>
