@@ -689,7 +689,8 @@ function ReadingPane({
               gap: 10,
             }}
           >
-            <span style={{ color: palette.primary.main }}>⚡</span> Drafting a reply in your voice…
+            <span style={{ color: palette.primary.main }}>⚡</span>{' '}
+            {summary.hasDraft ? 'Loading your draft…' : 'Drafting a reply in your voice…'}
           </div>
         )
       )}
