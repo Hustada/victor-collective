@@ -12,8 +12,10 @@ import {
   markAsUnread,
   deleteEmail,
   getFolders,
+  listSentExamples,
 } from '../services/email-inbox.service.js';
 import { sendEmail } from '../services/email-send.service.js';
+import { regenerateDraft, markDraftSent } from '../services/draft.service.js';
 import { logger } from '../lib/logger.js';
 
 const router = Router();
@@ -63,6 +65,36 @@ router.get('/:uid', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/inbox/:uid/draft - Regenerate the draft reply (explicit re-call)
+router.post('/:uid/draft', async (req: Request, res: Response) => {
+  try {
+    const uid = parseInt(req.params.uid);
+    const folder = (req.query.folder as string) || 'INBOX';
+
+    const email = await getEmail(uid, folder);
+    if (!email) {
+      return res.status(404).json({ error: 'Email not found' });
+    }
+
+    const draft = await regenerateDraft(
+      {
+        messageId: email.messageId,
+        subject: email.subject,
+        from: `${email.from.name} <${email.from.address}>`.trim(),
+        body: email.text || email.preview,
+        intent: email.intent,
+      },
+      await listSentExamples()
+    );
+
+    logger.info('Draft regenerated', { uid, messageId: email.messageId });
+    res.json({ draft });
+  } catch (err) {
+    logger.error('Failed to regenerate draft', { error: (err as Error).message });
+    res.status(500).json({ error: 'Failed to regenerate draft' });
+  }
+});
+
 // PATCH /api/inbox/:uid/read - Mark as read
 router.patch('/:uid/read', async (req: Request, res: Response) => {
   try {
@@ -108,7 +140,7 @@ router.delete('/:uid', async (req: Request, res: Response) => {
 // POST /api/inbox/send - Send email
 router.post('/send', async (req: Request, res: Response) => {
   try {
-    const { to, subject, body, replyTo } = req.body;
+    const { to, subject, body, replyTo, messageId } = req.body;
 
     if (!to || !subject || !body) {
       return res.status(400).json({ error: 'Missing required fields: to, subject, body' });
@@ -118,6 +150,11 @@ router.post('/send', async (req: Request, res: Response) => {
 
     if (!result.success) {
       return res.status(500).json({ error: result.error || 'Failed to send email' });
+    }
+
+    // Close the draft loop: final body (with any edits) is voice-tuning signal.
+    if (typeof messageId === 'string' && messageId) {
+      markDraftSent(messageId, body);
     }
 
     res.json({ success: true, id: result.id });

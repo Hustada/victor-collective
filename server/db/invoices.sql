@@ -62,6 +62,18 @@ CREATE TABLE IF NOT EXISTS email_intelligence (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Draft-ahead: pre-written replies, generated once and persisted.
+-- original_body keeps the as-generated text; body carries any user edits.
+CREATE TABLE IF NOT EXISTS drafts (
+  message_id TEXT PRIMARY KEY,
+  body TEXT NOT NULL,
+  original_body TEXT NOT NULL,
+  model TEXT NOT NULL,
+  state TEXT NOT NULL DEFAULT 'generated',  -- generated | edited | sent
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Portal auth sessions (httpOnly cookie tokens)
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
