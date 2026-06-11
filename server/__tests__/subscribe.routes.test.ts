@@ -81,3 +81,19 @@ describe('GET /api/subscribers', () => {
     ]);
   });
 });
+
+describe('DELETE /api/subscribers/:id', () => {
+  it('prunes a subscriber from the list', async () => {
+    await request(app).post('/api/subscribe').send({ email: 'probe@example.com' });
+    const [row] = (await request(app).get('/api/subscribers')).body as { id: number }[];
+
+    const res = await request(app).delete(`/api/subscribers/${row.id}`);
+    expect(res.status).toBe(200);
+    expect((await request(app).get('/api/subscribers')).body).toEqual([]);
+  });
+
+  it('404s for an unknown id', async () => {
+    const res = await request(app).delete('/api/subscribers/9999');
+    expect(res.status).toBe(404);
+  });
+});

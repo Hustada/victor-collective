@@ -11,6 +11,7 @@
 import { Router, Request, Response } from 'express';
 import { sendEmail } from '../services/email-send.service.js';
 import { allowContact } from '../lib/contact-throttle.js';
+import { getDb } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
 
 const LEADS_FROM = 'leads@victorcollective.com';
@@ -65,6 +66,16 @@ contactRoutes.post('/', async (req: Request, res: Response) => {
     logger.error('Contact relay failed', { error: result.error });
     return res.status(502).json({ error: 'Could not send right now — email us directly' });
   }
+
+  // A lead is a known member of the audience, not just an email in the inbox:
+  // captured with source + their message as context, tagged for curation.
+  getDb()
+    .prepare(
+      `INSERT INTO subscribers (email, source, context, tags)
+       VALUES (?, 'contact', ?, '["lead"]')
+       ON CONFLICT(email) DO NOTHING`
+    )
+    .run(email.trim().toLowerCase(), message.trim().slice(0, 500));
 
   logger.info('Contact form relayed to inbox', { source });
   res.json({ ok: true });

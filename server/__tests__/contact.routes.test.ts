@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 
@@ -9,10 +9,12 @@ vi.mock('../services/email-send.service.js', () => ({
 
 import { sendEmail } from '../services/email-send.service.js';
 import { resetContactThrottle } from '../lib/contact-throttle.js';
+import { useTestDb, closeDb, resetTestDb, getDb } from '../lib/db.js';
 
 let app: express.Express;
 
 beforeAll(async () => {
+  useTestDb();
   const { contactRoutes } = await import('../routes/contact.js');
   app = express();
   app.use(express.json());
@@ -22,6 +24,11 @@ beforeAll(async () => {
 beforeEach(() => {
   vi.mocked(sendEmail).mockClear();
   resetContactThrottle();
+  resetTestDb();
+});
+
+afterAll(() => {
+  closeDb();
 });
 
 const valid = {
@@ -60,6 +67,22 @@ describe('POST /api/contact', () => {
     const res = await request(app).post('/api/contact').send(body);
     expect(res.status).toBe(400);
     expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it('captures the lead into the audience list, tagged and attributed', async () => {
+    await request(app).post('/api/contact').send(valid);
+
+    const row = getDb()
+      .prepare('SELECT email, source, context, tags FROM subscribers WHERE email = ?')
+      .get('chris@imageinflators.com') as {
+      email: string;
+      source: string;
+      context: string;
+      tags: string;
+    };
+    expect(row.source).toBe('contact');
+    expect(JSON.parse(row.tags)).toContain('lead');
+    expect(row.context).toContain('Interested in the lead intake tool');
   });
 
   it('silently drops honeypot submissions (bots see success, nothing sends)', async () => {
