@@ -193,6 +193,8 @@ function InboxContent() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Bare keys only — Cmd+R is the browser's refresh, not our reply.
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault();
