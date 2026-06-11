@@ -41,6 +41,19 @@ Server (`server/.env` / Railway):
 - SQLite holds invoices, sessions, and all AI caches. Railway needs a persistent volume mounted and `INVOICE_DB_PATH` pointed at it, or every redeploy wipes the data.
 - The portal API is cookie-authenticated and same-origin via the Next rewrite proxy; direct hits on the Railway URL get 401.
 
+## Backups
+
+`GET /api/backup` (authed) streams a consistent snapshot of the whole database — invoices, subscribers, and the draft-edit voice dataset. Pull one off-box on a schedule:
+
+```bash
+TOKEN=$(curl -s -X POST https://www.victorcollective.com/api/auth/login \
+  -H 'content-type: application/json' -d '{"password":"<portal password>"}' \
+  -c - | awk '/portal_session/ {print $7}')
+curl -s -b "portal_session=$TOKEN" -o "vc-$(date +%F).db" https://www.victorcollective.com/api/backup
+```
+
+Drop that in a local cron/launchd job; keep `server/eval/eval-set.json` (the hand-labeled classifier baseline) backed up alongside — it exists only on the operator's machine.
+
 ## License
 
 MIT
