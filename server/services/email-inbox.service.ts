@@ -22,6 +22,7 @@ import {
   getDraft,
   setVoiceExamples,
 } from './draft.service.js';
+import { getOrGenerateBriefing } from './briefing.service.js';
 
 interface EmailSummary {
   uid: number;
@@ -66,7 +67,7 @@ export async function listEmails(
   folder = 'INBOX',
   limit = 50,
   offset = 0
-): Promise<{ emails: EmailSummary[]; total: number }> {
+): Promise<{ emails: EmailSummary[]; total: number; briefing: string }> {
   const client = await getClient();
 
   try {
@@ -77,7 +78,7 @@ export async function listEmails(
       const total = mailbox?.exists || 0;
 
       if (total === 0) {
-        return { emails: [], total: 0 };
+        return { emails: [], total: 0, briefing: await getOrGenerateBriefing([]) };
       }
 
       // Calculate range (IMAP uses 1-based sequence numbers, newest first)
@@ -149,8 +150,24 @@ export async function listEmails(
       }));
       void runDraftAhead(draftable);
 
+      // Synthesized stand-up from the non-noise summaries; cached by inbox
+      // state, so this is a model call only when the inbox changed.
+      const briefing = await getOrGenerateBriefing(
+        emails
+          .filter((e) => e.intent !== 'noise')
+          .map((e) => {
+            const r = raw.find((x) => x.summary.uid === e.uid);
+            return {
+              messageId: r?.classify.messageId ?? `uid:${e.uid}`,
+              intent: e.intent,
+              from: e.from.name || e.from.address,
+              summary: e.preview,
+            };
+          })
+      );
+
       logger.info('Emails fetched', { folder, count: emails.length, total });
-      return { emails: sortByIntent(emails), total };
+      return { emails: sortByIntent(emails), total, briefing };
     } finally {
       lock.release();
     }

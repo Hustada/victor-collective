@@ -111,6 +111,16 @@ function runMigrations(database: Database.Database): void {
     );
   `);
 
+  // Briefing cache (no-op if the schema already created it)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS briefings (
+      key TEXT PRIMARY KEY,
+      text TEXT NOT NULL,
+      model TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   // Draft-ahead replies (no-op if the schema already created it)
   database.exec(`
     CREATE TABLE IF NOT EXISTS drafts (
@@ -221,6 +231,7 @@ export function resetTestDb(): void {
     db.exec('DELETE FROM email_intelligence');
     db.exec('DELETE FROM sessions');
     db.exec('DELETE FROM drafts');
+    db.exec('DELETE FROM briefings');
     db.exec(
       "DELETE FROM sqlite_sequence WHERE name IN ('invoices', 'line_items', 'invoice_templates', 'clients')"
     );

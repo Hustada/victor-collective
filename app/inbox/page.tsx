@@ -110,14 +110,16 @@ function InboxContent() {
     messageId?: string;
   } | null>(null);
   const [sentNote, setSentNote] = useState(false);
+  const [aiBriefing, setAiBriefing] = useState('');
 
   const fetchList = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/inbox');
       if (!res.ok) throw new Error('API not available');
-      const data = (await res.json()) as { emails: Email[] };
+      const data = (await res.json()) as { emails: Email[]; briefing?: string };
       setEmails(data.emails);
+      setAiBriefing(data.briefing || '');
       setApiDown(false);
       if (!isMobile && data.emails.length > 0) setSelectedUid(data.emails[0].uid);
     } catch {
@@ -211,7 +213,10 @@ function InboxContent() {
     return () => window.removeEventListener('keydown', onKey);
   }, [move, archive, openReply, isMobile]);
 
-  const briefing = `${counts.reply || 0} need you · ${counts.money || 0} money · ${counts.waiting || 0} waiting`;
+  // Synthesized stand-up when the server has one; counts as the fallback.
+  const briefing =
+    aiBriefing ||
+    `${counts.reply || 0} need you · ${counts.money || 0} money · ${counts.waiting || 0} waiting`;
 
   return (
     <MotionConfig reducedMotion="user">

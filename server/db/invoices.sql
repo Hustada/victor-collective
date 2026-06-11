@@ -74,6 +74,14 @@ CREATE TABLE IF NOT EXISTS drafts (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Inbox briefing cache, keyed by a hash of the non-noise inbox state.
+CREATE TABLE IF NOT EXISTS briefings (
+  key TEXT PRIMARY KEY,
+  text TEXT NOT NULL,
+  model TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Portal auth sessions (httpOnly cookie tokens)
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
