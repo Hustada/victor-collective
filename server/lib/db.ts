@@ -82,6 +82,34 @@ function runMigrations(database: Database.Database): void {
 
   seedCompanyCamClient(database);
   migrateTemplatesToClientId(database);
+
+  // Intent-classification cache (no-op if the schema already created it)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS email_intelligence (
+      message_id TEXT PRIMARY KEY,
+      intent TEXT NOT NULL,
+      confidence REAL NOT NULL,
+      model TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // AI one-line summaries (NULL on legacy rows -> re-classified on next load)
+  const intelColumns = database.prepare('PRAGMA table_info(email_intelligence)').all() as {
+    name: string;
+  }[];
+  if (!intelColumns.some((c) => c.name === 'summary')) {
+    database.exec('ALTER TABLE email_intelligence ADD COLUMN summary TEXT');
+  }
+
+  // Portal auth sessions (no-op if the schema already created it)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      expires_at INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
 }
 
 // CompanyCam's accounts-payable inbox; used as the seed/backfill default.
@@ -177,6 +205,8 @@ export function resetTestDb(): void {
     db.exec('DELETE FROM invoices');
     db.exec('DELETE FROM invoice_templates');
     db.exec('DELETE FROM clients');
+    db.exec('DELETE FROM email_intelligence');
+    db.exec('DELETE FROM sessions');
     db.exec(
       "DELETE FROM sqlite_sequence WHERE name IN ('invoices', 'line_items', 'invoice_templates', 'clients')"
     );

@@ -51,6 +51,24 @@ CREATE TABLE IF NOT EXISTS invoice_templates (
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
+-- Cached intent classification per email, keyed by the stable Message-ID.
+-- Classify once, never re-hit the LLM on inbox load.
+CREATE TABLE IF NOT EXISTS email_intelligence (
+  message_id TEXT PRIMARY KEY,
+  intent TEXT NOT NULL,                   -- reply | money | waiting | noise
+  confidence REAL NOT NULL,               -- 0..1
+  summary TEXT,                           -- one-line AI summary; NULL = pre-summaries row
+  model TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Portal auth sessions (httpOnly cookie tokens)
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL,            -- epoch ms
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_invoices_client ON invoices(client_name);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
