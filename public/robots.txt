@@ -1,10 +1,12 @@
-# Allow all web crawlers
+# Allow all web crawlers on the public site
 User-agent: *
 Allow: /
 
+# Keep the password-gated portal out of search indexes
+Disallow: /portal
+Disallow: /inbox
+Disallow: /invoices
+Disallow: /clients
+
 # Sitemap location
 Sitemap: https://victorcollective.com/sitemap.xml
-
-# Prevent crawling of certain directories if needed
-# Disallow: /private/
-# Disallow: /admin/
