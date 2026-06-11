@@ -36,3 +36,6 @@ server/invoices/
 server/node_modules/
 server/.env
 server/eval/eval-set.json
+
+# Playwright MCP session artifacts
+.playwright-mcp/
