@@ -145,6 +145,18 @@ function runMigrations(database: Database.Database): void {
   if (!draftColumns.some((c) => c.name === 'prompt_version')) {
     database.exec('ALTER TABLE drafts ADD COLUMN prompt_version TEXT');
   }
+
+  // Email capture (no-op if the schema already created it)
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS subscribers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      source TEXT NOT NULL DEFAULT 'site',
+      context TEXT,
+      tags TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
 }
 
 // CompanyCam's accounts-payable inbox; used as the seed/backfill default.
@@ -244,6 +256,7 @@ export function resetTestDb(): void {
     db.exec('DELETE FROM sessions');
     db.exec('DELETE FROM drafts');
     db.exec('DELETE FROM briefings');
+    db.exec('DELETE FROM subscribers');
     db.exec(
       "DELETE FROM sqlite_sequence WHERE name IN ('invoices', 'line_items', 'invoice_templates', 'clients')"
     );
