@@ -11,6 +11,7 @@ const LINKS = [
   { href: '/invoices', label: 'Invoices' },
   { href: '/clients', label: 'Clients' },
   { href: '/inbox', label: 'Inbox' },
+  { href: '/audience', label: 'Audience' },
   { href: '/portal/standards', label: 'Standards' },
 ];
 

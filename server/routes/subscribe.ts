@@ -58,3 +58,14 @@ subscribersRoutes.get('/', (_req: Request, res: Response) => {
     .all();
   res.json(rows);
 });
+
+subscribersRoutes.delete('/:id', (req: Request, res: Response) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'invalid id' });
+
+  const result = getDb().prepare('DELETE FROM subscribers WHERE id = ?').run(id);
+  if (result.changes === 0) return res.status(404).json({ error: 'not found' });
+
+  logger.info('Subscriber pruned', { id });
+  res.json({ ok: true });
+});
