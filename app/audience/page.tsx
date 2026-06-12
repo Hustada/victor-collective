@@ -59,24 +59,42 @@ function relativeAge(iso: string): string {
 }
 
 function Stat({ label, value }: { label: string; value: string | number }) {
+  const isNumeric = typeof value === 'number';
   return (
-    <DepthCard sx={{ p: 3, flex: '1 1 140px' }}>
+    <Box
+      sx={{
+        p: 2.5,
+        flex: '1 1 150px',
+        background: palette.background.elevated,
+        border: `1px solid ${palette.border.subtle}`,
+        borderRadius: 2,
+      }}
+    >
       <Typography
         sx={{
           fontFamily: '"JetBrains Mono", monospace',
-          fontSize: '0.6rem',
+          fontSize: '0.58rem',
           letterSpacing: '0.18em',
           color: palette.text.muted,
           textTransform: 'uppercase',
-          mb: 1,
+          mb: 0.8,
         }}
       >
         {label}
       </Typography>
-      <Typography sx={{ fontSize: '1.8rem', fontWeight: 700, color: palette.text.primary }}>
+      <Typography
+        sx={{
+          fontSize: isNumeric ? '1.7rem' : '0.8rem',
+          fontWeight: isNumeric ? 700 : 500,
+          fontFamily: isNumeric ? 'inherit' : '"JetBrains Mono", monospace',
+          letterSpacing: isNumeric ? 'normal' : '0.08em',
+          color: palette.text.primary,
+          lineHeight: isNumeric ? 1.2 : 2.1,
+        }}
+      >
         {value}
       </Typography>
-    </DepthCard>
+    </Box>
   );
 }
 
