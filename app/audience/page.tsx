@@ -155,21 +155,24 @@ function AudienceContent() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 12 }}>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
       <motion.div {...fadeUp}>
-        <Typography
-          variant="overline"
-          sx={{ color: palette.primary.main, letterSpacing: '0.2em', fontSize: '0.7rem' }}
-        >
-          {'// AUDIENCE'}
-        </Typography>
-        <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-          Email List
-        </Typography>
-        <Typography sx={{ color: palette.text.secondary, mb: 5 }}>
-          Everyone who handed over their email — leads from the contact form, signups from
-          everywhere else. Attributed by source.
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="overline"
+            color="primary"
+            sx={{ letterSpacing: 2, display: 'block', mb: 1 }}
+          >
+            Portal
+          </Typography>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Audience
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Everyone who handed over their email — leads from the contact form, signups from
+            everywhere else. Attributed by source.
+          </Typography>
+        </Box>
       </motion.div>
 
       {!apiAvailable ? (
