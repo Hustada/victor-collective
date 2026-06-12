@@ -80,7 +80,7 @@ function StandardsContent() {
       <Grid container spacing={3}>
         {/* Philosophy */}
         <Grid item xs={12}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<Lightbulb size={28} weight="duotone" />}
@@ -130,7 +130,7 @@ function StandardsContent() {
 
         {/* Tech Stack */}
         <Grid item xs={12} md={6}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<Stack size={28} weight="duotone" />}
@@ -221,7 +221,7 @@ function StandardsContent() {
 
         {/* Code Standards */}
         <Grid item xs={12} md={6}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<Code size={28} weight="duotone" />}
@@ -253,7 +253,7 @@ function StandardsContent() {
 
         {/* Formatting */}
         <Grid item xs={12} md={6}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<TextT size={28} weight="duotone" />}
@@ -288,7 +288,7 @@ docs: update API documentation`}
 
         {/* Communication */}
         <Grid item xs={12} md={6}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<ChatCircle size={28} weight="duotone" />}
@@ -318,7 +318,7 @@ docs: update API documentation`}
 
         {/* Workflow */}
         <Grid item xs={12}>
-          <DepthCard shadowOffset={6} hoverLift={0}>
+          <DepthCard shadowOffset={6} hoverLift={0} sx={{ height: '100%' }}>
             <Box sx={{ p: 4 }}>
               <SectionHeader
                 icon={<GitBranch size={28} weight="duotone" />}
