@@ -8,11 +8,15 @@
 import { getDb } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
 
+export type ClientStatus = 'prospect' | 'active';
+export const CLIENT_STATUSES: ClientStatus[] = ['prospect', 'active'];
+
 export interface Client {
   id: number;
   name: string;
   email: string | null;
   notes: string | null;
+  status: ClientStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +31,7 @@ interface UpdateClientInput {
   name?: string;
   email?: string;
   notes?: string;
+  status?: ClientStatus;
 }
 
 interface ClientRow {
@@ -34,6 +39,7 @@ interface ClientRow {
   name: string;
   email: string | null;
   notes: string | null;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +50,9 @@ function mapClient(row: ClientRow): Client {
     name: row.name,
     email: row.email,
     notes: row.notes,
+    status: (CLIENT_STATUSES.includes(row.status as ClientStatus)
+      ? row.status
+      : 'active') as ClientStatus,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -96,6 +105,10 @@ export const ClientService = {
       updates.push('notes = ?');
       params.push(input.notes || null);
     }
+    if (input.status !== undefined) {
+      updates.push('status = ?');
+      params.push(input.status);
+    }
 
     if (updates.length > 0) {
       params.push(id);
@@ -113,5 +126,24 @@ export const ClientService = {
       db.prepare('DELETE FROM clients WHERE id = ?').run(id);
       logger.info('Client deleted', { id, name: client.name });
     }
+  },
+
+  /**
+   * Auto-file a lead into the registry as a prospect. Idempotent by email
+   * (case-insensitive): an existing client — prospect or active — is returned
+   * untouched, never duplicated or downgraded.
+   */
+  fileProspect(input: { name: string; email: string; note?: string }): Client {
+    const db = getDb();
+    const existing = db
+      .prepare('SELECT * FROM clients WHERE LOWER(email) = LOWER(?)')
+      .get(input.email) as ClientRow | undefined;
+    if (existing) return mapClient(existing);
+
+    const result = db
+      .prepare("INSERT INTO clients (name, email, notes, status) VALUES (?, ?, ?, 'prospect')")
+      .run(input.name, input.email, input.note || null);
+    logger.info('Prospect auto-filed', { id: result.lastInsertRowid, name: input.name });
+    return this.getById(result.lastInsertRowid as number)!;
   },
 };

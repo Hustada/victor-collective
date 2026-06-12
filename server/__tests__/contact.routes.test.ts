@@ -85,6 +85,36 @@ describe('POST /api/contact', () => {
     expect(row.context).toContain('Interested in the lead intake tool');
   });
 
+  it('auto-files the lead as a prospect in the client registry', async () => {
+    await request(app).post('/api/contact').send(valid);
+
+    const client = getDb()
+      .prepare('SELECT name, email, status, notes FROM clients WHERE email = ?')
+      .get('chris@imageinflators.com') as {
+      name: string;
+      email: string;
+      status: string;
+      notes: string;
+    };
+    expect(client.name).toBe('Chris Johnson');
+    expect(client.status).toBe('prospect');
+    expect(client.notes).toContain('contact form');
+  });
+
+  it('does not duplicate or downgrade an existing client', async () => {
+    getDb()
+      .prepare("INSERT INTO clients (name, email, status) VALUES (?, ?, 'active')")
+      .run('Chris Johnson', 'chris@imageinflators.com');
+
+    await request(app).post('/api/contact').send(valid);
+    await request(app).post('/api/contact').send(valid);
+
+    const rows = getDb()
+      .prepare('SELECT status FROM clients WHERE email = ?')
+      .all('chris@imageinflators.com') as { status: string }[];
+    expect(rows).toEqual([{ status: 'active' }]); // one row, still active
+  });
+
   it('silently drops honeypot submissions (bots see success, nothing sends)', async () => {
     const res = await request(app)
       .post('/api/contact')

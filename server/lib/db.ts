@@ -69,6 +69,7 @@ function runMigrations(database: Database.Database): void {
       name TEXT NOT NULL,
       email TEXT,
       notes TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -79,6 +80,14 @@ function runMigrations(database: Database.Database): void {
         UPDATE clients SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
       END;
   `);
+
+  // Client status (existing rows are real clients -> default 'active' is right)
+  const clientColumns = database.prepare('PRAGMA table_info(clients)').all() as {
+    name: string;
+  }[];
+  if (!clientColumns.some((c) => c.name === 'status')) {
+    database.exec("ALTER TABLE clients ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+  }
 
   seedCompanyCamClient(database);
   migrateTemplatesToClientId(database);

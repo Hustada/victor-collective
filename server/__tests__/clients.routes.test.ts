@@ -28,7 +28,7 @@ describe('Client Routes', () => {
     expect(res.body).toEqual([]);
   });
 
-  it('creates a client', async () => {
+  it('creates a client, active by default', async () => {
     const res = await request(app)
       .post('/api/clients')
       .send({ name: 'CompanyCam', email: 'ops@companycam.com', notes: 'Active contract' });
@@ -37,6 +37,31 @@ describe('Client Routes', () => {
     expect(res.body.name).toBe('CompanyCam');
     expect(res.body.email).toBe('ops@companycam.com');
     expect(res.body.notes).toBe('Active contract');
+    expect(res.body.status).toBe('active');
+  });
+
+  it('updates a client status (prospect promoted to active)', async () => {
+    const created = await request(app)
+      .post('/api/clients')
+      .send({ name: 'Jane Doe', email: 'jane@co.com' });
+
+    const res = await request(app)
+      .put(`/api/clients/${created.body.id}`)
+      .send({ status: 'prospect' });
+    expect(res.body.status).toBe('prospect');
+
+    const promoted = await request(app)
+      .put(`/api/clients/${created.body.id}`)
+      .send({ status: 'active' });
+    expect(promoted.body.status).toBe('active');
+  });
+
+  it('rejects an unknown status', async () => {
+    const created = await request(app).post('/api/clients').send({ name: 'Jane' });
+    const res = await request(app)
+      .put(`/api/clients/${created.body.id}`)
+      .send({ status: 'banana' });
+    expect(res.status).toBe(400);
   });
 
   it('returns 400 without a name', async () => {
