@@ -28,6 +28,7 @@ interface Client {
   name: string;
   email: string | null;
   notes: string | null;
+  status: 'prospect' | 'active';
   createdAt: string;
   updatedAt: string;
 }
@@ -83,6 +84,21 @@ function ClientsContent() {
   const closeForm = () => {
     setShowForm(false);
     setEditing(null);
+  };
+
+  // One click promotes a prospect; one click demotes if you misclicked.
+  const toggleStatus = async (client: Client) => {
+    const next = client.status === 'prospect' ? 'active' : 'prospect';
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      });
+      if (res.ok) fetchClients();
+    } catch {
+      // list stays; next refresh reconciles
+    }
   };
 
   const handleSave = async () => {
@@ -199,6 +215,7 @@ function ClientsContent() {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Notes</TableCell>
               <TableCell align="right" sx={{ width: 80 }}>
@@ -209,7 +226,7 @@ function ClientsContent() {
           <TableBody>
             {clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                   <UsersThree
                     size={48}
                     color={palette.text.secondary}
@@ -227,6 +244,39 @@ function ClientsContent() {
               clients.map((client) => (
                 <TableRow key={client.id} hover sx={{ cursor: 'pointer' }}>
                   <TableCell onClick={() => openEdit(client)}>{client.name}</TableCell>
+                  <TableCell>
+                    <Typography
+                      component="button"
+                      onClick={() => toggleStatus(client)}
+                      title={
+                        client.status === 'prospect'
+                          ? 'Click to promote to active'
+                          : 'Active client'
+                      }
+                      sx={{
+                        fontFamily: '"JetBrains Mono", monospace',
+                        fontSize: '0.58rem',
+                        letterSpacing: '0.14em',
+                        textTransform: 'uppercase',
+                        color:
+                          client.status === 'prospect'
+                            ? palette.primary.main
+                            : palette.text.secondary,
+                        border: `1px solid ${
+                          client.status === 'prospect'
+                            ? `${palette.primary.main}55`
+                            : palette.border.default
+                        }`,
+                        borderRadius: '4px',
+                        px: 0.9,
+                        py: 0.3,
+                        background: 'transparent',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {client.status}
+                    </Typography>
+                  </TableCell>
                   <TableCell onClick={() => openEdit(client)}>
                     {client.email || <span style={{ color: palette.text.muted }}>—</span>}
                   </TableCell>

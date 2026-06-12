@@ -10,6 +10,7 @@
 
 import { Router, Request, Response } from 'express';
 import { sendEmail } from '../services/email-send.service.js';
+import { ClientService } from '../services/client.service.js';
 import { allowContact } from '../lib/contact-throttle.js';
 import { getDb } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
@@ -76,6 +77,14 @@ contactRoutes.post('/', async (req: Request, res: Response) => {
        ON CONFLICT(email) DO NOTHING`
     )
     .run(email.trim().toLowerCase(), message.trim().slice(0, 500));
+
+  // …and a prospect in the client registry (idempotent; existing clients
+  // are never duplicated or downgraded). The agent does the filing.
+  ClientService.fileProspect({
+    name: cleanName,
+    email: email.trim().toLowerCase(),
+    note: `Auto-filed from the contact form.\nFirst message: ${message.trim().slice(0, 300)}`,
+  });
 
   logger.info('Contact form relayed to inbox', { source });
   res.json({ ok: true });

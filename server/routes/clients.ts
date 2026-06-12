@@ -3,7 +3,7 @@
  */
 
 import { Router } from 'express';
-import { ClientService } from '../services/client.service.js';
+import { ClientService, CLIENT_STATUSES, type ClientStatus } from '../services/client.service.js';
 import { logger } from '../lib/logger.js';
 
 export const clientRoutes = Router();
@@ -43,10 +43,14 @@ clientRoutes.post('/', (req, res) => {
 // Update client
 clientRoutes.put('/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const { name, email, notes } = req.body;
+  const { name, email, notes, status } = req.body;
+
+  if (status !== undefined && !CLIENT_STATUSES.includes(status as ClientStatus)) {
+    return res.status(400).json({ error: `status must be one of: ${CLIENT_STATUSES.join(', ')}` });
+  }
 
   try {
-    const client = ClientService.update(id, { name, email, notes });
+    const client = ClientService.update(id, { name, email, notes, status });
     res.json(client);
   } catch (error) {
     if ((error as Error).message.includes('not found')) {

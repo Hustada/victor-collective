@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS clients (
   name TEXT NOT NULL,
   email TEXT,
   notes TEXT,
+  status TEXT NOT NULL DEFAULT 'active', -- prospect | active
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
