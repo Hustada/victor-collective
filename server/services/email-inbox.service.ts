@@ -23,6 +23,7 @@ import {
   setVoiceExamples,
 } from './draft.service.js';
 import { getOrGenerateBriefing } from './briefing.service.js';
+import { lookupEntity, type Entity } from './entity.service.js';
 
 interface EmailSummary {
   uid: number;
@@ -48,6 +49,8 @@ interface EmailFull extends EmailSummary {
   draft: Draft | null;
   /** Reply-To header when present — replies belong there, not to From. */
   replyTo: string | null;
+  /** What the registry/billing/audience know about this sender. */
+  entity: Entity | null;
 }
 
 // Contact-form relays arrive from this address; the inbox tags them as leads.
@@ -256,6 +259,8 @@ export async function getEmail(uid: number, folder = 'INBOX'): Promise<EmailFull
         hasDraft: draft !== null,
         lead: isLead,
         replyTo: parsed.replyTo?.value?.[0]?.address || null,
+        // The human behind the email: Reply-To beats From (lead relays).
+        entity: lookupEntity(parsed.replyTo?.value?.[0]?.address || from?.address || ''),
       };
     } finally {
       lock.release();

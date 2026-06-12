@@ -49,6 +49,17 @@ interface FullEmail extends Email {
   attachments: { filename: string; contentType: string; size: number }[];
   draft: Draft | null;
   replyTo: string | null;
+  entity: Entity | null;
+}
+
+interface Entity {
+  client: { id: number; name: string; status: 'prospect' | 'active' } | null;
+  billing: {
+    invoiceCount: number;
+    totalBilled: number;
+    lastInvoice: { number: string; status: string; total: number } | null;
+  } | null;
+  audience: { source: string; tags: string[]; createdAt: string } | null;
 }
 
 interface Activity {
@@ -836,6 +847,55 @@ function ReadingPane({
       </div>
 
       <h1 style={{ margin: '0 0 18px', fontSize: '1.5rem', fontWeight: 600 }}>{summary.subject}</h1>
+
+      {full?.entity && (
+        <motion.div
+          {...fadeUp}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: 12,
+            margin: '0 0 20px',
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: `1px solid ${palette.border.default}`,
+            background: palette.background.elevated,
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '0.62rem',
+            letterSpacing: '0.08em',
+            color: palette.text.secondary,
+          }}
+        >
+          <span style={{ color: palette.primary.main, letterSpacing: '0.18em' }}>{`// KNOWN`}</span>
+          {full.entity.client && (
+            <span
+              style={{
+                color:
+                  full.entity.client.status === 'prospect'
+                    ? palette.primary.main
+                    : palette.text.primary,
+              }}
+            >
+              {full.entity.client.status.toUpperCase()} · {full.entity.client.name}
+            </span>
+          )}
+          {full.entity.billing && full.entity.billing.invoiceCount > 0 && (
+            <span>
+              ${(full.entity.billing.totalBilled / 100).toLocaleString()} billed
+              {full.entity.billing.lastInvoice &&
+                ` · last ${full.entity.billing.lastInvoice.number} (${full.entity.billing.lastInvoice.status})`}
+            </span>
+          )}
+          {full.entity.audience && (
+            <span>
+              captured via {full.entity.audience.source}
+              {full.entity.audience.tags.length > 0 &&
+                ` · ${full.entity.audience.tags.join(' · ')}`}
+            </span>
+          )}
+        </motion.div>
+      )}
 
       {loading && !full ? (
         <div
